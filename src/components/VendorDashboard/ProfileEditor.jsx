@@ -217,34 +217,21 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 longitude: formData.longitude || null
             };
 
-            console.log('Sending updates:', updates);
+            // Critical Fix v3: Use UPSERT to handle both new and existing records gracefully
+            const validId = user?.id || vendor?.id || updates.user_id;
 
-            let error;
-            if (vendor) {
-                const { error: updateError } = await supabase
-                    .from('vendors')
-                    .update(updates)
-                    .eq('id', vendor.id);
-                error = updateError;
-            } else {
-                // Critical Fix: Ensure ID is provided for new vendors
-                const validId = user?.id || updates.user_id;
-
-                if (!validId) {
-                    throw new Error("Kullanıcı kimliği (ID) bulunamadı. Lütfen sayfayı yenileyip tekrar giriş yapın (Code: MISSING_AUTH_ID).");
-                }
-
-                console.log('Inserting new vendor with ID:', validId);
-
-                const { error: insertError } = await supabase
-                    .from('vendors')
-                    .insert([{ ...updates, id: validId }]);
-                error = insertError;
+            if (!validId) {
+                throw new Error("Kullanıcı kimliği (ID) bulunamadı. Lütfen sayfayı yenileyip tekrar giriş yapın (Code: MISSING_AUTH_ID).");
             }
 
-            if (error) throw error;
+            console.log('Upserting vendor with ID:', validId);
 
-            // Refresh context to update the UI immediately
+            const { error: saveError } = await supabase
+                .from('vendors')
+                .upsert({ ...updates, id: validId });
+
+            if (saveError) throw saveError;
+
             if (refreshVendors) {
                 await refreshVendors();
             }
@@ -566,7 +553,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 </div>
 
                 <button type="submit" className="btn btn-primary mt-3" disabled={loading}>
-                    {loading ? t('vendorDashboard.alerts.saved') : `${t('dashboard.profile.save')} (v2)`}
+                    {loading ? t('vendorDashboard.alerts.saved') : `${t('dashboard.profile.save')} (v3)`}
                 </button>
             </form>
         </div>
