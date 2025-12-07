@@ -227,9 +227,18 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                     .eq('id', vendor.id);
                 error = updateError;
             } else {
+                // Critical Fix: Ensure ID is provided for new vendors
+                const validId = user?.id || updates.user_id;
+
+                if (!validId) {
+                    throw new Error("Kullanıcı kimliği (ID) bulunamadı. Lütfen sayfayı yenileyip tekrar giriş yapın (Code: MISSING_AUTH_ID).");
+                }
+
+                console.log('Inserting new vendor with ID:', validId);
+
                 const { error: insertError } = await supabase
                     .from('vendors')
-                    .insert([updates]);
+                    .insert([{ ...updates, id: validId }]);
                 error = insertError;
             }
 
@@ -557,7 +566,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 </div>
 
                 <button type="submit" className="btn btn-primary mt-3" disabled={loading}>
-                    {loading ? t('vendorDashboard.alerts.saved') : t('dashboard.profile.save')}
+                    {loading ? t('vendorDashboard.alerts.saved') : `${t('dashboard.profile.save')} (v2)`}
                 </button>
             </form>
         </div>
