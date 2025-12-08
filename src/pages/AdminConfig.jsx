@@ -11,7 +11,8 @@ const AdminConfig = () => {
     const [siteSettings, setSiteSettings] = useState({
         hero_title: { en: '', de: '', tr: '' },
         hero_subtitle: { en: '', de: '', tr: '' },
-        hero_image_url: ''
+        hero_image_url: '',
+        social_media: { facebook: '', instagram: '', youtube: '', tiktok: '', twitter: '', linkedin: '' }
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -52,7 +53,8 @@ const AdminConfig = () => {
             setSiteSettings({
                 hero_title: settingsData.hero_title || { en: '', de: '', tr: '' },
                 hero_subtitle: settingsData.hero_subtitle || { en: '', de: '', tr: '' },
-                hero_image_url: settingsData.hero_image_url || ''
+                hero_image_url: settingsData.hero_image_url || '',
+                social_media: settingsData.social_media || { facebook: '', instagram: '', youtube: '', tiktok: '', twitter: '', linkedin: '' }
             });
         }
 
@@ -90,6 +92,7 @@ const AdminConfig = () => {
                     hero_title: siteSettings.hero_title,
                     hero_subtitle: siteSettings.hero_subtitle,
                     hero_image_url: siteSettings.hero_image_url,
+                    social_media: siteSettings.social_media,
                     updated_at: new Date()
                 })
                 .eq('id', 1);
@@ -243,6 +246,81 @@ const AdminConfig = () => {
                         disabled={saving}
                     >
                         {saving ? 'Kaydediliyor...' : 'Anasayfa Ayarlarını Kaydet'}
+                    </button>
+                </div>
+            </div>
+
+            {/* Social Media Settings */}
+            <div className="config-section">
+                <h2>🌐 Sosyal Medya Hesapları</h2>
+                <div className="config-card">
+                    <p style={{ marginBottom: '15px', color: '#666' }}>
+                        Sosyal medya butonlarının görünmesi için ilgili platformun linkini girin. Boş bırakırsanız buton görünmez.
+                    </p>
+                    <div className="config-item-group">
+                        <div className="input-group">
+                            <label><span className="icon">📘</span> Facebook</label>
+                            <input
+                                type="text"
+                                value={siteSettings.social_media?.facebook || ''}
+                                onChange={(e) => handleSettingChange('social_media', { ...siteSettings.social_media, facebook: e.target.value })}
+                                placeholder="https://facebook.com/..."
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label><span className="icon">📷</span> Instagram</label>
+                            <input
+                                type="text"
+                                value={siteSettings.social_media?.instagram || ''}
+                                onChange={(e) => handleSettingChange('social_media', { ...siteSettings.social_media, instagram: e.target.value })}
+                                placeholder="https://instagram.com/..."
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label><span className="icon">▶️</span> YouTube</label>
+                            <input
+                                type="text"
+                                value={siteSettings.social_media?.youtube || ''}
+                                onChange={(e) => handleSettingChange('social_media', { ...siteSettings.social_media, youtube: e.target.value })}
+                                placeholder="https://youtube.com/..."
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label><span className="icon">🎵</span> TikTok</label>
+                            <input
+                                type="text"
+                                value={siteSettings.social_media?.tiktok || ''}
+                                onChange={(e) => handleSettingChange('social_media', { ...siteSettings.social_media, tiktok: e.target.value })}
+                                placeholder="https://tiktok.com/..."
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label><span className="icon">🐦</span> Twitter / X</label>
+                            <input
+                                type="text"
+                                value={siteSettings.social_media?.twitter || ''}
+                                onChange={(e) => handleSettingChange('social_media', { ...siteSettings.social_media, twitter: e.target.value })}
+                                placeholder="https://twitter.com/..."
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label><span className="icon">💼</span> LinkedIn</label>
+                            <input
+                                type="text"
+                                value={siteSettings.social_media?.linkedin || ''}
+                                onChange={(e) => handleSettingChange('social_media', { ...siteSettings.social_media, linkedin: e.target.value })}
+                                placeholder="https://linkedin.com/..."
+                            />
+                        </div>
+                    </div>
+
+                    <button
+                        className="btn btn-primary"
+                        style={{ marginTop: '20px' }}
+                        onClick={updateSiteSettings}
+                        disabled={saving}
+                    >
+                        {saving ? 'Kaydediliyor...' : 'Sosyal Medya Ayarlarını Kaydet'}
                     </button>
                 </div>
             </div>

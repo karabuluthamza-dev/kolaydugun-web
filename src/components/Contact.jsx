@@ -1,10 +1,13 @@
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../supabaseClient';
+import SocialMediaLinks from './SocialMediaLinks';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 import './Contact.css';
 
 const Contact = () => {
     const { t } = useLanguage();
+    const { settings } = useSiteSettings();
     const [status, setStatus] = React.useState('idle'); // idle, submitting, success, error
     const [errorMessage, setErrorMessage] = React.useState('');
 
@@ -54,6 +57,11 @@ const Contact = () => {
                         <div className="contact-info">
                             <div>📍 Schützenstraße 1, 89269 Vöhringen, Deutschland</div>
                             <div>✉️ kontakt@kolaydugun.de</div>
+                            {settings?.social_media && (
+                                <div style={{ marginTop: '20px' }}>
+                                    <SocialMediaLinks socialMedia={settings.social_media} />
+                                </div>
+                            )}
                         </div>
                     </div>
 

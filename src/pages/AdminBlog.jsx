@@ -260,6 +260,9 @@ const AdminBlog = () => {
     const fetchPosts = async () => {
         setLoading(true);
         try {
+            // Trigger auto-publish check so admin sees up-to-date status
+            await supabase.rpc('auto_publish_scheduled_posts');
+
             let query = supabase
                 .from('posts')
                 .select('*', { count: 'exact' });
@@ -522,7 +525,8 @@ const AdminBlog = () => {
                 slug: activeSlug,
                 author_id: user.id,
                 updated_at: new Date(),
-                scheduled_for: formData.scheduled_for || null
+                // Fix timezone issue: Convert local input time to UTC ISO string
+                scheduled_for: formData.scheduled_for ? new Date(formData.scheduled_for).toISOString() : null
             };
 
             console.log("📝 Preparing to save post data:", postData);
@@ -1450,15 +1454,22 @@ const AdminBlog = () => {
                                         <span className={`status-badge ${post.status}`} style={{
                                             padding: '4px 8px',
                                             borderRadius: '4px',
-                                            background: post.status === 'published' ? '#d1fae5' : '#f3f4f6',
-                                            color: post.status === 'published' ? '#065f46' : '#374151',
+                                            background: post.status === 'published' ? '#d1fae5' : (post.status === 'scheduled' ? '#e0f2fe' : '#f3f4f6'),
+                                            color: post.status === 'published' ? '#065f46' : (post.status === 'scheduled' ? '#0369a1' : '#374151'),
                                             fontSize: '12px'
                                         }}>
-                                            {post.status === 'published' ? 'Yayında' : 'Taslak'}
+                                            {post.status === 'published' ? 'Yayında' : (post.status === 'scheduled' ? 'Zamanlanmış' : 'Taslak')}
                                         </span>
                                     </td>
                                     <td style={{ padding: '10px' }}>
-                                        {new Date(post.created_at).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        {post.status === 'scheduled' && post.scheduled_for ? (
+                                            <div>
+                                                <small style={{ display: 'block', color: '#0369a1' }}>Planlandı:</small>
+                                                {new Date(post.scheduled_for).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                        ) : (
+                                            new Date(post.created_at).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                                        )}
                                     </td>
                                     <td style={{ padding: '10px' }}>
                                         <button className="btn btn-sm btn-secondary" onClick={() => handleEdit(post)} style={{ marginRight: '5px' }}>Düzenle</button>
