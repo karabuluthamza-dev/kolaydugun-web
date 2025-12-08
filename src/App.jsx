@@ -71,7 +71,7 @@ const Datenschutz = lazy(() => import('./pages/legal/Datenschutz'));
 const AGB = lazy(() => import('./pages/legal/AGB'));
 const Widerrufsrecht = lazy(() => import('./pages/legal/Widerrufsrecht'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
-import CookieConsent from './components/CookieConsent';
+import PrivacyBanner from './components/PrivacyBanner';
 
 
 function App() {
@@ -89,7 +89,7 @@ function App() {
                   <LoadingSpinner size="large" />
                 </div>
               }>
-                <CookieConsent />
+                <PrivacyBanner />
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Login />} />

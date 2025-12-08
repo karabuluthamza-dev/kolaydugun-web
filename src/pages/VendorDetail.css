@@ -302,7 +302,8 @@
 }
 
 .faq-item.active .faq-answer {
-    max-height: 500px;
+    max-height: 2000px;
+    /* Increased from 500px to prevent truncation */
     padding: 1.5rem;
     padding-top: 0;
     border-top: 1px solid #f1f5f9;
@@ -313,6 +314,8 @@
     color: var(--text-secondary);
     line-height: 1.6;
     padding-top: 1rem;
+    white-space: pre-line;
+    /* Preserves line breaks */
 }
 
 /* Mobile Optimization */

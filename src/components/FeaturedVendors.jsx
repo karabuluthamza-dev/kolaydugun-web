@@ -94,7 +94,8 @@ const FeaturedVendors = () => {
                     // 4. Default placeholder
                     const categoryImageFromDb = categoryMap[normalizedCat] || categoryMap[vendor.category];
                     const categoryDefault = categoryImageFromDb || categoryImages[normalizedCat] || categoryImages[vendor.category] || defaultImage;
-                    const initialImage = vendor.image_url || vendor.images?.[0] || categoryDefault;
+                    // Logic aligned with user preference: Prioritize gallery[0] as it's the most recently updated source
+                    const initialImage = (vendor.gallery && vendor.gallery.length > 0 ? vendor.gallery[0] : vendor.image) || categoryDefault;
 
                     return (
                         <Link to={`/vendors/${vendor.id}`} key={vendor.id} className="vendor-card">

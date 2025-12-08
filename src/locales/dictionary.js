@@ -4405,6 +4405,11 @@ export const dictionary = {
     },
     vendorDashboard: {
         alerts: {
+            saved: {
+                en: "Changes saved successfully!",
+                de: "Änderungen erfolgreich gespeichert!",
+                tr: "Değişiklikler başarıyla kaydedildi!"
+            },
             locked: {
                 en: "🔒 Upgrade to Premium to unlock this feature",
                 de: "🔒 Upgrade auf Premium, um diese Funktion freizuschalten",

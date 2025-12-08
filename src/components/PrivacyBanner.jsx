@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import './CookieConsent.css';
+import './PrivacyBanner.css';
 
-const CookieConsent = () => {
+const PrivacyBanner = () => {
     const { t } = useLanguage();
     const [isVisible, setIsVisible] = useState(false);
 
@@ -50,4 +50,4 @@ const CookieConsent = () => {
     );
 };
 
-export default CookieConsent;
+export default PrivacyBanner;

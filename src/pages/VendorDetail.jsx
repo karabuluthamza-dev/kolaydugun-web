@@ -396,8 +396,9 @@ const VendorDetail = () => {
                             </div>
 
                             {/* Social Media Links - Protected */}
-                            {vendor.social_media && showFeature('social') && (
-                                <SocialMediaLinks socialMedia={vendor.social_media} />
+                            {/* Social Media Links - Protected */}
+                            {showFeature('social') && (
+                                <SocialMediaLinks socialMedia={{ ...vendor.social_media, website: vendor.website_url }} />
                             )}
 
                             <div className="vendor-tags">
@@ -439,7 +440,7 @@ const VendorDetail = () => {
                         {activeTab === 'about' && (
                             <div className="tab-content">
                                 <h3 style={{ marginBottom: '1rem' }}>{t('vendorDetail.about') || 'Hakkında'}</h3>
-                                <p style={{ lineHeight: '1.8', marginBottom: '2rem', color: 'var(--text-secondary)' }}>
+                                <p style={{ lineHeight: '1.8', marginBottom: '2rem', color: 'var(--text-secondary)', whiteSpace: 'pre-line' }}>
                                     {vendor.description}
                                 </p>
 

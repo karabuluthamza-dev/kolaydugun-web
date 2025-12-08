@@ -170,7 +170,7 @@ const VendorCard = ({ id, name, category, location, price, image, rating, review
                     <div className="vendor-card-rating">
                         <span className="star">⭐</span>
                         <span className="score">{rating}</span>
-                        {reviews && <span className="reviews">({reviews})</span>}
+                        {reviews > 0 && <span className="reviews">({reviews})</span>}
                     </div>
                 </div>
 

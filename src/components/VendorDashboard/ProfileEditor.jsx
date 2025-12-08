@@ -100,6 +100,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 capacity: vendor.capacity || '',
                 years_experience: vendor.years_experience || 0,
                 website_url: vendor.website_url || '',
+                video_url: vendor.video_url || '', // Add video_url support
                 payment_methods: vendor.payment_methods || [],
                 languages: vendor.languages || [],
                 social_media: vendor.social_media || { instagram: '', facebook: '' },
@@ -208,6 +209,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 capacity: safeInt(formData.capacity),
                 years_experience: safeInt(formData.years_experience),
                 website_url: formData.website_url || null, // Send null if empty
+                video_url: formData.video_url || null, // Send null if empty
                 payment_methods: formData.payment_methods,
                 languages: formData.languages,
                 social_media: formData.social_media,
@@ -394,7 +396,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
 
                     <div className="form-group">
                         <label>{t('dashboard.profile.description')} *</label>
-                        <textarea name="description" value={formData.description} onChange={handleChange} required rows="5" className="form-control" />
+                        <textarea name="description" value={formData.description} onChange={handleChange} required rows="10" className="form-control" />
                     </div>
                 </div>
 
@@ -486,10 +488,20 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 <div className={`form-section ${!features.website ? 'locked' : ''}`}>
                     {!features.website && renderLockedOverlay()}
                     <h3>{t('dashboard.profile.website')} & {t('dashboard.profile.socialMedia')}</h3>
+
                     <div className="form-group">
                         <label>{t('dashboard.profile.website')}</label>
-                        <input type="url" name="website_url" value={formData.website_url} onChange={handleChange} disabled={!features.website} className="form-control" placeholder="https://" />
+                        <input type="url" name="website_url" value={formData.website_url} onChange={handleChange} disabled={!features.website} className="form-control" placeholder="https://example.com" />
                     </div>
+
+                    <div className="form-group">
+                        <label>YouTube / Vimeo Video URL</label>
+                        <input type="url" name="video_url" value={formData.video_url} onChange={handleChange} disabled={!features.website} className="form-control" placeholder="https://youtube.com/watch?v=..." />
+                        <small className="text-muted">
+                            {t('dashboard.profile.videoHint') || "Tanıtım videonuzun linkini buraya yapıştırın. Profilinizde görünecektir."}
+                        </small>
+                    </div>
+
                     <div className="form-row">
                         <div className="form-group">
                             <label>Instagram</label>
@@ -522,7 +534,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                             <div className="form-group">
                                 <label>{t('vendorDashboard.faq.answer')}</label>
                                 <textarea
-                                    rows="3"
+                                    rows="6"
                                     value={item.answer}
                                     onChange={(e) => handleFaqChange(index, 'answer', e.target.value)}
                                     className="form-control"
@@ -553,7 +565,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 </div>
 
                 <button type="submit" className="btn btn-primary mt-3" disabled={loading}>
-                    {loading ? t('vendorDashboard.alerts.saved') : `${t('dashboard.profile.save')} (v3)`}
+                    {loading ? t('vendorDashboard.alerts.saved') : t('dashboard.profile.save')}
                 </button>
             </form>
         </div>

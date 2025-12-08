@@ -63,22 +63,43 @@ const GalleryManager = ({ vendor, onUpdate }) => {
         }
     };
 
-    const handleDelete = async (imageUrl) => {
-        if (!window.confirm('Are you sure?')) return;
+    const handleDelete = async (e, imageUrl) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!window.confirm(t('common.areYouSure') || 'Emin misiniz?')) return;
+
+        console.log('🗑️ Deleting image:', imageUrl);
+        console.log('🆔 Vendor ID:', vendor.id);
+
+        if (!vendor.id) {
+            alert('Hata: Satıcı kimliği bulunamadı.');
+            return;
+        }
 
         try {
-            const newGallery = vendor.gallery.filter(img => img !== imageUrl);
+            // Filter out the image strictly
+            const newGallery = (vendor.gallery || []).filter(img => img !== imageUrl);
+            console.log('📉 New gallery count:', newGallery.length);
 
-            const { error } = await supabase
+            const { error, data } = await supabase
                 .from('vendors')
                 .update({ gallery: newGallery })
-                .eq('id', vendor.id);
+                .eq('id', vendor.id)
+                .select();
 
-            if (error) throw error;
+            if (error) {
+                console.error('❌ Update error:', error);
+                throw error;
+            }
+
+            console.log('✅ Update success:', data);
+
+            // Optimistic update or wait for refetch
             onUpdate();
         } catch (error) {
             console.error('Delete error:', error);
-            alert('Error: ' + error.message);
+            alert('Silme sırasında hata oluştu: ' + error.message);
         }
     };
 
@@ -126,7 +147,7 @@ const GalleryManager = ({ vendor, onUpdate }) => {
                             style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '8px' }}
                         />
                         <button
-                            onClick={() => handleDelete(img)}
+                            onClick={(e) => handleDelete(e, img)}
                             style={{
                                 position: 'absolute',
                                 top: '5px',

@@ -7,7 +7,7 @@ const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
     const { translations, loading } = useTranslations();
-    const [language, setLanguage] = useState(i18n.language || 'tr');
+    const [language, setLanguage] = useState(i18n.language || 'de');
 
     // Update i18n resources when translations change
     useEffect(() => {
