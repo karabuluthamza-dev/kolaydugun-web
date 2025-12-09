@@ -1,14 +1,63 @@
-import React from 'react';
-import { useLanguage } from '../context/LanguageContext';
-import { CATEGORIES, CITIES, getCategoryTranslationKey } from '../constants/vendorData';
-import { dictionary } from '../locales/dictionary';
-import '../pages/VendorList.css'; // Reusing existing styles for now
+import { supabase } from '../supabaseClient';
+import React, { useState, useEffect } from 'react';
+// ... imports
 
 const VendorFilters = ({ filters, onFilterChange, userLocation, onLocationRequest, locationLoading, locationError }) => {
     const { t, language } = useLanguage();
+    const [dynamicSchema, setDynamicSchema] = useState([]);
+    const [schemaLoading, setSchemaLoading] = useState(false);
+
+    // Fetch schema when category changes
+    useEffect(() => {
+        const fetchSchema = async () => {
+            if (!filters.category) {
+                setDynamicSchema([]);
+                return;
+            }
+
+            setSchemaLoading(true);
+            try {
+                // Find category by name (Note: category names are stored in English or Turkish in DB? usually Turkish based on CATEGORIES constant)
+                // Use the exact value from filters.category which comes from CATEGORIES
+                const { data, error } = await supabase
+                    .from('categories')
+                    .select('form_schema')
+                    .eq('name', filters.category)
+                    .single();
+
+                if (data && data.form_schema) {
+                    // Check if it's string or object
+                    const parsed = typeof data.form_schema === 'string'
+                        ? JSON.parse(data.form_schema)
+                        : data.form_schema;
+                    setDynamicSchema(parsed);
+                } else {
+                    setDynamicSchema([]);
+                }
+            } catch (err) {
+                console.error("Error fetching category schema:", err);
+                setDynamicSchema([]);
+            } finally {
+                setSchemaLoading(false);
+            }
+        };
+
+        fetchSchema();
+    }, [filters.category]);
 
     const handleChange = (key, value) => {
         onFilterChange({ ...filters, [key]: value });
+    };
+
+    // Helper to translate dynamic labels/options
+    const tr = (key) => {
+        // Try dictionary first
+        if (dictionary.schemas && dictionary.schemas[key] && dictionary.schemas[key][language]) {
+            return dictionary.schemas[key][language];
+        }
+        // Fallback to t()
+        const tVal = t(`schemas.${key}`);
+        return tVal !== `schemas.${key}` ? tVal : key; // Return key if translation missing
     };
 
     return (
@@ -23,11 +72,38 @@ const VendorFilters = ({ filters, onFilterChange, userLocation, onLocationReques
                     className="filter-input"
                     value={filters.search || ''}
                     onChange={(e) => handleChange('search', e.target.value)}
-                    aria-label="Search vendors"
                 />
             </div>
 
+            {/* Dynamic Filters from Schema */}
+            {filters.category && dynamicSchema.length > 0 && (
+                <div className="dynamic-filters-section" style={{ borderBottom: '1px solid #eee', marginBottom: '15px', paddingBottom: '15px' }}>
+                    <h4 style={{ fontSize: '1rem', color: '#666', marginBottom: '10px' }}>{filters.category} {t('common.options') || 'Seçenekleri'}</h4>
+                    {dynamicSchema.map(field => {
+                        if (field.type === 'select' || field.type === 'multiselect') {
+                            return (
+                                <div key={field.key} className="filter-group">
+                                    <label className="filter-label">{tr(field.label)}</label>
+                                    <select
+                                        className="filter-select"
+                                        value={filters[field.key] || ''}
+                                        onChange={(e) => handleChange(field.key, e.target.value)}
+                                    >
+                                        <option value="">{t('filters.all') || 'Tümü'}</option>
+                                        {field.options?.map(opt => (
+                                            <option key={opt} value={opt}>{tr(opt)}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            );
+                        }
+                        return null;
+                    })}
+                </div>
+            )}
+
             {/* Location Filter */}
+            {/* ... rest of the filters ... */}
             <div className="filter-group">
                 <label className="filter-label">📍 Konum</label>
                 <button

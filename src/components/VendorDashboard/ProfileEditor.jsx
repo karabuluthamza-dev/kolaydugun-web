@@ -303,6 +303,30 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                             </select>
                         </div>
                         <div className="form-group">
+                            <label>{t('dashboard.profile.additionalCategories') || 'Ek Hizmet Alanları (Opsiyonel)'}</label>
+                            <select
+                                multiple
+                                name="additional_categories"
+                                value={formData.additional_categories || []}
+                                onChange={(e) => handleMultiSelect(e, 'additional_categories')}
+                                className="form-control"
+                                style={{ height: '100px' }}
+                            >
+                                {categories.map(c => (
+                                    c.name !== formData.category && // Don't show main category
+                                    <option key={c.id} value={c.name}>
+                                        {t('categories.' + getCategoryTranslationKey(c.name))}
+                                    </option>
+                                ))}
+                            </select>
+                            <small className="text-muted" style={{ fontSize: '0.8rem' }}>
+                                {t('dashboard.profile.multiSelectHint') || 'Birden fazla seçim için CTRL (Mac için CMD) tuşuna basılı tutun.'}
+                            </small>
+                        </div>
+                    </div>
+
+                    <div className="form-row">
+                        <div className="form-group">
                             <label>{t('dashboard.profile.city')} *</label>
                             <select name="location" value={formData.location} onChange={handleChange} required className="form-control">
                                 <option value="">-</option>

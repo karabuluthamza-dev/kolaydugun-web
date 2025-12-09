@@ -72,17 +72,50 @@ const VendorList = () => {
             const matchCategory = !filters.category ||
                 vendor.category === filters.category ||
                 vendorCat === catFilter ||
-                (vendorCat && catFilter && vendorCat.includes(catFilter));
+                (vendorCat && catFilter && vendorCat.includes(catFilter)) ||
+                (vendor.additional_categories && vendor.additional_categories.some(ac =>
+                    ac.toLowerCase().replace(/\s+/g, '-').includes(catFilter)
+                ));
 
             const matchCity = !filters.city || vendor.city === filters.city || vendor.location === filters.city;
             const matchPrice = !filters.price || vendor.priceRange === filters.price || vendor.price === filters.price;
             const matchCapacity = !filters.capacity || (vendor.capacity && vendor.capacity >= parseInt(filters.capacity));
 
+            // Dynamic Schema Filtering (e.g. "music_instruments")
+            let matchDynamic = true;
+            if (filters.category) {
+                // We iterate over filter keys that are NOT standard filters
+                const standardKeys = ['search', 'sort', 'category', 'city', 'price', 'capacity', 'radius'];
+                Object.keys(filters).forEach(key => {
+                    if (!standardKeys.includes(key) && filters[key]) {
+                        // Check logic:
+                        // vendor.details is where schema answers are stored.
+                        // If vendor.details[key] is an array (multiselect), check if it includes value
+                        // If vendor.details[key] is a string, check equality
+                        const vendorVal = vendor.details ? vendor.details[key] : null;
+
+                        if (Array.isArray(vendorVal)) {
+                            // Vendor has multiple items (e.g. ["davul", "zurna"])
+                            // Filter value is usually single selection from dropdown (e.g. "davul")
+                            // Check if vendor has that specific item
+                            if (!vendorVal.includes(filters[key])) {
+                                matchDynamic = false;
+                            }
+                        } else {
+                            // Vendor has single value, check equality
+                            if (vendorVal !== filters[key]) {
+                                matchDynamic = false;
+                            }
+                        }
+                    }
+                });
+            }
+
             // Radius filter
             const matchRadius = !userLocation || !filters.radius ||
                 (vendor.distance !== null && isWithinRadius(vendor.distance, parseInt(filters.radius)));
 
-            return matchSearch && matchCategory && matchCity && matchPrice && matchCapacity && matchRadius;
+            return matchSearch && matchCategory && matchCity && matchPrice && matchCapacity && matchRadius && matchDynamic;
         });
 
         // Sort logic

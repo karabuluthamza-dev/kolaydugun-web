@@ -4941,5 +4941,87 @@ export const dictionary = {
         messages: { en: "Messages", de: "Nachrichten", tr: "Mesajlarım" },
         registerBtn: { en: "Sign Up", de: "Registrieren", tr: "Kayıt Ol" }
     }
+    schemas: {
+        enstrumanlar_label: {
+            en: "Instruments / Team Type",
+            de: "Instrumente / Team-Typ",
+            tr: "Enstrümanlar / Ekip Tipi"
+        },
+        instr_davul_zurna: {
+            en: "Davul & Zurna",
+            de: "Davul & Zurna (Trommel & Flöte)",
+            tr: "Davul Zurna"
+        },
+        instr_solist: {
+            en: "Soloist",
+            de: "Solist",
+            tr: "Solist"
+        },
+        instr_bendir: {
+            en: "Bendir",
+            de: "Bendir",
+            tr: "Bendir"
+        },
+        instr_darbuka: {
+            en: "Darbuka",
+            de: "Darbuka",
+            tr: "Darbuka"
+        },
+        instr_baglama: {
+            en: "Baglama / Saz",
+            de: "Baglama / Saz",
+            tr: "Bağlama / Saz"
+        },
+        instr_ud: {
+            en: "Oud",
+            de: "Oud",
+            tr: "Ud (Oud)"
+        },
+        instr_kanun: {
+            en: "Kanun",
+            de: "Kanun (Zither)",
+            tr: "Kanun"
+        },
+        instr_cumbus: {
+            en: "Cumbus",
+            de: "Cümbüş",
+            tr: "Cümbüş"
+        },
+        instr_tanbur: {
+            en: "Tanbur",
+            de: "Tanbur",
+            tr: "Tanbur"
+        },
+        instr_ney: {
+            en: "Ney",
+            de: "Ney (Rohrflöte)",
+            tr: "Ney"
+        },
+        instr_mey: {
+            en: "Mey",
+            de: "Mey",
+            tr: "Mey"
+        },
+        instr_kaval: {
+            en: "Kaval",
+            de: "Kaval",
+            tr: "Kaval"
+        },
+        instr_sipsi: {
+            en: "Sipsi",
+            de: "Sipsi",
+            tr: "Sipsi"
+        },
+        instr_keyboard: {
+            en: "Keyboard",
+            de: "Keyboard",
+            tr: "Klavye / Keyboard"
+        },
+        instr_orkestra: {
+            en: "Orchestra (Band)",
+            de: "Orchester (Band)",
+            tr: "Orkestra (Grup)"
+        },
+    }
 };
 
