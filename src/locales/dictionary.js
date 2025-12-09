@@ -4982,6 +4982,137 @@ export const dictionary = {
             de: "Kanun (Zither)",
             tr: "Kanun"
         },
+        // Photographer Schema Translations
+        photo_services_label: {
+            en: "Services Offered",
+            de: "Angebotene Dienstleistungen",
+            tr: "Sunulan Hizmetler"
+        },
+        photo_service_story: {
+            en: "Wedding Story (Full Day)",
+            de: "Hochzeitsreportage (Ganztags)",
+            tr: "Düğün Hikayesi"
+        },
+        photo_service_save_date: {
+            en: "Save the Date",
+            de: "Save the Date Shooting",
+            tr: "Save the Date"
+        },
+        photo_service_trash_dress: {
+            en: "Trash the Dress",
+            de: "Trash the Dress",
+            tr: "Trash the Dress"
+        },
+        photo_service_drone: {
+            en: "Drone Shooting",
+            de: "Drohnenaufnahmen",
+            tr: "Drone Çekimi"
+        },
+        photo_service_album: {
+            en: "Album / Print",
+            de: "Album / Druck",
+            tr: "Albüm / Baskı"
+        },
+        photo_service_digital: {
+            en: "Digital Delivery",
+            de: "Digitale Lieferung",
+            tr: "Dijital Teslim"
+        },
+        photo_service_jimmy_jib: {
+            en: "Jimmy Jib",
+            de: "Jimmy Jib",
+            tr: "Jimmy Jib"
+        },
+        photo_service_studio: {
+            en: "Studio Shooting",
+            de: "Studioaufnahme",
+            tr: "Stüdyo Çekimi"
+        },
+        photo_shooting_types_label: {
+            en: "Shooting Style",
+            de: "Aufnahmestil",
+            tr: "Çekim Türleri"
+        },
+        shoot_documentary: {
+            en: "Documentary",
+            de: "Dokumentarisch",
+            tr: "Belgesel / Doğal"
+        },
+        shoot_story: {
+            en: "Storytelling",
+            de: "Storytelling",
+            tr: "Hikaye Anlatımı"
+        },
+        shoot_catalog: {
+            en: "Catalog / Fashion",
+            de: "Katalog / Fashion",
+            tr: "Katalog / Moda"
+        },
+        shoot_concept: {
+            en: "Concept",
+            de: "Konzept",
+            tr: "Konsept Çekim"
+        },
+        shoot_engagement: {
+            en: "Engagement",
+            de: "Verlobung",
+            tr: "Nişan Çekimi"
+        },
+        shoot_classic: {
+            en: "Classic",
+            de: "Klassisch",
+            tr: "Klasik"
+        },
+        photo_team_size_label: {
+            en: "Team Size",
+            de: "Teamgröße",
+            tr: "Ekip Büyüklüğü"
+        },
+        team_size_1: {
+            en: "1 Photographer",
+            de: "1 Fotograf",
+            tr: "1 Fotoğrafçı"
+        },
+        team_size_2: {
+            en: "2 Photographers",
+            de: "2 Fotografen",
+            tr: "2 Fotoğrafçı"
+        },
+        team_size_3: {
+            en: "3 Photographers",
+            de: "3 Fotografen",
+            tr: "3 Fotoğrafçı"
+        },
+        team_size_4_plus: {
+            en: "4+ Photographers",
+            de: "4+ Fotografen",
+            tr: "4+ Fotoğrafçı"
+        },
+        photo_delivery_time_label: {
+            en: "Delivery Time",
+            de: "Lieferzeit",
+            tr: "Teslim Süresi"
+        },
+        delivery_2_weeks: {
+            en: "2 Weeks",
+            de: "2 Wochen",
+            tr: "2 Hafta"
+        },
+        delivery_4_weeks: {
+            en: "4 Weeks",
+            de: "4 Wochen",
+            tr: "4 Hafta"
+        },
+        delivery_8_weeks: {
+            en: "8 Weeks",
+            de: "8 Wochen",
+            tr: "8 Hafta"
+        },
+        delivery_3_months: {
+            en: "3 Months",
+            de: "3 Monate",
+            tr: "3 Ay"
+        },
         instr_cumbus: {
             en: "Cumbus",
             de: "Cümbüş",
