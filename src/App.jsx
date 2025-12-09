@@ -119,7 +119,7 @@ function App() {
                           </ProtectedRoute>
                         } />
 
-                        <Route path="/vendor-dashboard/*" element={
+                        <Route path="/vendor/dashboard/*" element={
                           <ProtectedRoute>
                             <VendorDashboard />
                           </ProtectedRoute>
