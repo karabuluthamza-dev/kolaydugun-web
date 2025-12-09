@@ -1,6 +1,9 @@
 import { supabase } from '../supabaseClient';
 import React, { useState, useEffect } from 'react';
-// ... imports
+import { useLanguage } from '../context/LanguageContext';
+import { CATEGORIES, CITIES, getCategoryTranslationKey } from '../constants/vendorData';
+import { dictionary } from '../locales/dictionary';
+import '../pages/VendorList.css';
 
 const VendorFilters = ({ filters, onFilterChange, userLocation, onLocationRequest, locationLoading, locationError }) => {
     const { t, language } = useLanguage();
