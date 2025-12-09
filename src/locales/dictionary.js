@@ -378,6 +378,13 @@ export const dictionary = {
             de: "Teilen",
             tr: "Paylaş"
         },
+        shareOptions: {
+            whatsapp: { en: "WhatsApp", de: "WhatsApp", tr: "WhatsApp" },
+            facebook: { en: "Facebook", de: "Facebook", tr: "Facebook" },
+            copyLink: { en: "Copy Link", de: "Link kopieren", tr: "Linki Kopyala" },
+            copied: { en: "Link Copied!", de: "Link kopiert!", tr: "Link Kopyalandı!" },
+            title: { en: "Share on", de: "Teilen auf", tr: "Şurada paylaş" }
+        },
         claimed: {
             en: "Claimed",
             de: "Verifiziert",

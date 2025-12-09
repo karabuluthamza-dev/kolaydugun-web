@@ -98,7 +98,7 @@ function App() {
                   <Route path="/update-password" element={<UpdatePassword />} />
                   <Route path="/vendors" element={<VendorList />} />
                   <Route path="/services" element={<VendorList />} /> {/* Alias for vendors */}
-                  <Route path="/vendors/:id" element={<VendorDetail />} />
+                  <Route path="/vendors/:slug" element={<VendorDetail />} />
 
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/blog/:slug" element={<BlogPost />} />

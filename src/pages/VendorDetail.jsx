@@ -17,12 +17,14 @@ import VendorReviews from '../components/Reviews/VendorReviews';
 import './VendorDetail.css';
 
 const VendorDetail = () => {
-    const { id } = useParams();
+    const { slug } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     // const { getVendor } = useVendors(); // No longer needed for fetching
     const { t } = useLanguage();
     const [vendor, setVendor] = useState(null);
+    const [id, setId] = useState(null); // Keep track of the actual ID for downstream components
+
     const [activeTab, setActiveTab] = useState('about');
     const [expandedFaq, setExpandedFaq] = useState(null);
     const [isBetaMode, setIsBetaMode] = useState(false);
@@ -51,15 +53,24 @@ const VendorDetail = () => {
         const fetchVendorDetail = async () => {
             try {
                 setLoading(true);
-                const { data, error } = await supabase
-                    .from('vendors')
-                    .select('*')
-                    .eq('id', id)
-                    .single();
+                let query = supabase.from('vendors').select('*');
+
+                // Check if the param is a valid UUID
+                const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+
+                if (isUuid) {
+                    query = query.eq('id', slug);
+                } else {
+                    query = query.eq('slug', slug);
+                }
+
+                const { data, error } = await query.single();
 
                 if (error) throw error;
 
                 if (data) {
+                    setId(data.id);
+
                     // Fetch category image
                     const { data: catData } = await supabase
                         .from('categories')
@@ -67,29 +78,16 @@ const VendorDetail = () => {
                         .ilike('name', data.category) // Case-insensitive match
                         .maybeSingle();
 
-                    // If not found by name, try normalization map (simplified here or use same logic)
-                    // For now, ilike name is a good start. If fails, we can try to map known TR names.
+                    // If not found by name, try normalization map
                     let fetchedCatImage = catData?.image_url;
 
                     if (!fetchedCatImage) {
-                        // Fallback normalization if direct match fails
                         const normalizeCategory = (cat) => {
                             if (!cat) return '';
                             const lower = cat.toLowerCase();
-                            if (lower === 'düğün mekanları' || lower === 'hochzeitslocations') return 'Wedding Venues';
-                            if (lower === 'gelinlik ve moda' || lower === 'brautmode') return 'Bridal Fashion';
-                            if (lower === 'saç ve makyaj' || lower === 'brautstyling & make-up') return 'Hair & Make-Up';
-                            if (lower === 'damatlık' || lower === 'herrenmode') return 'Groom Suits';
-                            if (lower === 'düğün pastası' || lower === 'hochzeitstorten') return 'Wedding Cakes';
-                            if (lower === 'düğün organizasyonu' || lower === 'hochzeitsplaner') return 'Wedding Planners';
-                            if (lower === 'gelin arabası' || lower === 'hochzeitsautos') return 'Wedding Cars';
-                            if (lower === 'catering' || lower === 'catering & partyservice') return 'Catering & Party Service';
-                            if (lower === 'nikah memuru / konuşmacı' || lower === 'trauredner') return 'Wedding Speakers (Trauredner)';
-                            if (lower === 'çiçek ve dekorasyon' || lower === 'floristik & dekoration') return 'Flowers & Decoration';
-                            if (lower === 'davetiye ve kırtasiye' || lower === 'einladungen & papeterie') return 'Invitations & Stationery';
-                            if (lower === 'alyans ve takı' || lower === 'trauringe & schmuck') return 'Wedding Rings';
-                            if (lower === 'düğün fotoğrafçısı' || lower === 'hochzeitsfotografie') return 'Wedding Photography';
-                            if (lower === 'düğün videografisi' || lower === 'hochzeitsvideografie') return 'Wedding Videography';
+                            // Simple mapping for common categories
+                            if (lower.includes('mekan') || lower.includes('venue')) return 'Wedding Venues';
+                            if (lower.includes('foto')) return 'Wedding Photography';
                             return cat;
                         };
                         const normalized = normalizeCategory(data.category);
@@ -130,7 +128,7 @@ const VendorDetail = () => {
         };
 
         fetchVendorDetail();
-    }, [id]);
+    }, [slug]);
 
     if (loading) {
         return (
@@ -324,7 +322,7 @@ const VendorDetail = () => {
             "ratingValue": vendor.rating || 5,
             "reviewCount": vendor.reviews || 1
         },
-        "url": `https://kolaydugun.de/vendors/${id}`
+        "url": `https://kolaydugun.de/vendors/${vendor.slug || id}`
     } : null;
 
     return (
@@ -335,7 +333,7 @@ const VendorDetail = () => {
                     description={vendor ? (vendor.description?.substring(0, 160) + '...') : 'Vendor details page'}
                     keywords={`${vendor?.category}, ${vendor?.city}, Wedding, Düğün, Hochzeit`}
                     image={vendor?.image}
-                    url={`/vendors/${id}`}
+                    url={`/vendors/${vendor?.slug || id}`}
                     structuredData={structuredData}
                 />
 

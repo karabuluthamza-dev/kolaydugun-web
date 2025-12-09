@@ -9,7 +9,7 @@ import { supabase } from '../supabaseClient';
 import { formatDistance } from '../utils/geoUtils';
 import './VendorCard.css';
 
-const VendorCard = ({ id, name, category, location, price, image, rating, reviews, isFeatured, gallery, categoryImage, distance }) => {
+const VendorCard = ({ id, name, slug, category, location, price, image, rating, reviews, isFeatured, gallery, categoryImage, distance }) => {
     const { t, language } = useLanguage();
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -175,7 +175,7 @@ const VendorCard = ({ id, name, category, location, price, image, rating, review
                 </div>
 
                 <h3 className="vendor-card-title">
-                    <Link to={`/vendors/${id}`}>{name}</Link>
+                    <Link to={`/vendors/${slug || id}`}>{name}</Link>
                 </h3>
 
                 <div className="vendor-card-location">
@@ -200,7 +200,7 @@ const VendorCard = ({ id, name, category, location, price, image, rating, review
                     <div className="vendor-card-price">
                         {price}
                     </div>
-                    <Link to={`/vendors/${id}`} className="vendor-card-cta">
+                    <Link to={`/vendors/${slug || id}`} className="vendor-card-cta">
                         {t('vendorDetail.requestQuote') || 'Teklif Al'}
                     </Link>
                 </div>
