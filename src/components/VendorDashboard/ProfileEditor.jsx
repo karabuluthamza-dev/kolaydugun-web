@@ -82,7 +82,8 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
         faq: [],
         details: {}, // Dynamic details
         latitude: '',
-        longitude: ''
+        longitude: '',
+        additional_categories: [] // New field
     });
 
     useEffect(() => {
@@ -107,7 +108,8 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 faq: vendor.faq || [],
                 details: vendor.details || {},
                 latitude: vendor.latitude || '',
-                longitude: vendor.longitude || ''
+                longitude: vendor.longitude || '',
+                additional_categories: vendor.additional_categories || []
             });
         }
     }, [vendor]);
@@ -216,7 +218,8 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 faq: formData.faq,
                 details: formData.details, // Save dynamic details
                 latitude: formData.latitude || null,
-                longitude: formData.longitude || null
+                longitude: formData.longitude || null,
+                additional_categories: formData.additional_categories // Submit new field
             };
 
             // Critical Fix v3: Use UPSERT to handle both new and existing records gracefully
