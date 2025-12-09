@@ -450,13 +450,17 @@ const VendorDetail = () => {
 
                                             let displayValue = value;
                                             if (Array.isArray(value)) {
-                                                displayValue = value.map(v => t(`schemas.${v}`) || v).join(', ');
+                                                displayValue = value.map(v => {
+                                                    // Handle dirty data: strip schemas. prefix if it exists
+                                                    const cleanKey = v.replace(/^schemas\./, '');
+                                                    return t(`schemas.${cleanKey}`) || cleanKey;
+                                                }).join(', ');
                                             } else if (typeof value === 'boolean') {
                                                 displayValue = value ? t('common.yes') : t('common.no');
                                             }
 
                                             const labelKey = `schemas.${key}_label`;
-                                            const label = t(labelKey) !== labelKey ? t(labelKey) : t(`schemas.${key}`) || key;
+                                            const label = t(labelKey) !== labelKey ? t(labelKey) : (t(`schemas.${key}`) || key);
 
                                             return (
                                                 <div key={idx} className="feature-item">

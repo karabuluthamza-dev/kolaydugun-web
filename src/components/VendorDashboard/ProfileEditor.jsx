@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useVendors } from '../../context/VendorContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { CITIES, getCategoryTranslationKey } from '../../constants/vendorData';
+import { dictionary } from '../../locales/dictionary';
 import MapView from '../MapView';
 import i18n from '../../i18n';
 
@@ -92,6 +93,22 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
 
     useEffect(() => {
         if (vendor) {
+            // Clean dirty data on load
+            const rawDetails = vendor.details || {};
+            const cleanDetails = {};
+            if (rawDetails) {
+                Object.keys(rawDetails).forEach(key => {
+                    const cleanKey = key.replace(/^schemas\./, '');
+                    let val = rawDetails[key];
+                    if (Array.isArray(val)) {
+                        val = val.map(v => v.replace(/^schemas\./, ''));
+                    } else if (typeof val === 'string') {
+                        val = val.replace(/^schemas\./, '');
+                    }
+                    cleanDetails[cleanKey] = val;
+                });
+            }
+
             setFormData({
                 name: vendor.business_name || vendor.name || '',
                 category: vendor.category || '',
@@ -106,7 +123,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 languages: vendor.languages || [],
                 social_media: vendor.social_media || { instagram: '', facebook: '' },
                 faq: vendor.faq || [],
-                details: vendor.details || {},
+                details: cleanDetails,
                 latitude: vendor.latitude || '',
                 longitude: vendor.longitude || '',
                 additional_categories: vendor.additional_categories || []
@@ -436,14 +453,27 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                 <div key={idx} className="form-group" style={field.type === 'multiselect' ? { gridColumn: 'span 2' } : {}}>
                                     <label>
                                         {(() => {
-                                            const key = `schemas.${field.label}`;
+                                            // Handle dirty data: strip schemas. prefix
+                                            const cleanLabel = field.label.replace(/^schemas\./, '');
+                                            const key = `schemas.${cleanLabel}`;
                                             const val = t(key);
-                                            if (val !== key) return val;
+
+                                            // If t() returns key, try direct dictionary lookup
+                                            if (val === key) {
+                                                const lang = i18n.language || 'tr';
+                                                const dictVal = dictionary.schemas?.[cleanLabel]?.[lang] ||
+                                                    dictionary.schemas?.[cleanLabel]?.en;
+                                                if (dictVal) return dictVal;
+                                            } else {
+                                                return val;
+                                            }
+
+                                            // Fallbacks for specific known issues
                                             const fallbacks = {
                                                 'schemas.performance_duration_label': { tr: 'Performans Süresi', en: 'Performance Duration', de: 'Auftrittsdauer' },
                                                 'schemas.experience_years_label': { tr: 'Deneyim Yılı', en: 'Years of Experience', de: 'Jahre Erfahrung' }
                                             };
-                                            return fallbacks[key]?.[i18n.language || 'tr'] || field.label;
+                                            return fallbacks[key]?.[i18n.language || 'tr'] || cleanLabel;
                                         })()}
                                     </label>
 
@@ -483,9 +513,21 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                             className="form-control"
                                         >
                                             <option value="">{t('common.select')}</option>
-                                            {field.options?.map(opt => (
-                                                <option key={opt} value={opt}>{t(`schemas.${opt}`) || opt}</option>
-                                            ))}
+                                            {field.options?.map(opt => {
+                                                const cleanOpt = opt.replace(/^schemas\./, '');
+                                                const key = `schemas.${cleanOpt}`;
+                                                const val = t(key);
+                                                let display = val;
+
+                                                if (val === key) {
+                                                    const lang = i18n.language || 'tr';
+                                                    display = dictionary.schemas?.[cleanOpt]?.[lang] ||
+                                                        dictionary.schemas?.[cleanOpt]?.en ||
+                                                        cleanOpt;
+                                                }
+
+                                                return <option key={opt} value={opt}>{display}</option>;
+                                            })}
                                         </select>
                                     )}
 
@@ -498,9 +540,10 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                                 className="form-control"
                                                 style={{ height: '120px' }}
                                             >
-                                                {field.options?.map(opt => (
-                                                    <option key={opt} value={opt}>{t(`schemas.${opt}`) || opt}</option>
-                                                ))}
+                                                {field.options?.map(opt => {
+                                                    const cleanOpt = opt.replace(/^schemas\./, '');
+                                                    return <option key={opt} value={opt}>{t(`schemas.${cleanOpt}`) || cleanOpt}</option>;
+                                                })}
                                             </select>
                                             <small className="text-muted">{t('dashboard.profile.multiSelectHint')}</small>
                                         </>
