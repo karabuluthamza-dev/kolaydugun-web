@@ -18,8 +18,8 @@ const SEO = ({
     const siteName = 'KolayDugun.de';
     const defaultDescription = 'Find the best wedding vendors in Germany. Turkish & International weddings made easy.';
 
-    // Use the uploaded OG image if available, otherwise use a default hardcoded one
-    const defaultImage = settings?.og_image_url || 'https://kolaydugun.de/og-image.jpg';
+    // Use the uploaded OG image if available, fallback to logo, then default
+    const defaultImage = settings?.og_image_url || settings?.logo_url || 'https://kolaydugun.de/og-image.jpg';
     const siteUrl = 'https://kolaydugun.de';
 
     const fullTitle = title ? `${title} | ${siteName}` : siteName;
