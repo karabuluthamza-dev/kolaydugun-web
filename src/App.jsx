@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -125,11 +125,19 @@ function App() {
                           </ProtectedRoute>
                         } />
 
-                        <Route path="/tools/*" element={
+                        {/* Tools Routes */}
+                        <Route path="/tools" element={
                           <ProtectedRoute>
-                            <ToolsDashboard />
+                            <Outlet />
                           </ProtectedRoute>
-                        } />
+                        }>
+                          <Route index element={<ToolsDashboard />} />
+                          <Route path="website" element={<WeddingWebsiteSetup />} />
+                          <Route path="timeline" element={<Timeline />} />
+                          <Route path="budget" element={<BudgetPlanner />} />
+                          <Route path="seating" element={<SeatingChart />} />
+                          <Route path="weather" element={<Weather />} />
+                        </Route>
 
                         {/* Admin Routes */}
                         <Route path="/admin" element={
