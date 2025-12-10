@@ -104,7 +104,7 @@ function App() {
                         <Route path="/vendors/:slug" element={<VendorDetail />} />
                         <Route path="/vendor-landing" element={<VendorLanding />} />
                         <Route path="/blog" element={<Blog />} />
-                        <Route path="/blog/:id" element={<BlogPost />} />
+                        <Route path="/blog/:slug" element={<BlogPost />} />
                         <Route path="/faq" element={<FAQPage />} />
                         <Route path="/contact" element={<LeadForm />} />
                         <Route path="/weather" element={<Weather />} />

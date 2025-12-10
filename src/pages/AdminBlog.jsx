@@ -456,7 +456,7 @@ const AdminBlog = () => {
             excerpt: post.excerpt || { tr: '', en: '', de: '' },
             content: post.content || { tr: '', en: '', de: '' },
             meta_title: post.meta_title || { tr: '', en: '', de: '' },
-            meta_title: post.meta_title || { tr: '', en: '', de: '' },
+
             meta_description: post.meta_description || { tr: '', en: '', de: '' },
             is_featured: post.is_featured || false
         });

@@ -6,7 +6,7 @@ import WhyUs from '../components/WhyUs';
 import Services from '../components/Services';
 import About from '../components/About';
 import Contact from '../components/Contact';
-import useSEO from '../hooks/useSEO';
+import SEO from '../components/SEO';
 import { useLanguage } from '../context/LanguageContext';
 
 import PlanningTools from '../components/PlanningTools';
@@ -34,17 +34,18 @@ const Home = () => {
         fetchSettings();
     }, []);
 
+    /* Replaced useSEO with SEO component */
     const heroTitle = heroSettings?.hero_title?.[language] || t('hero.title');
     const heroSubtitle = heroSettings?.hero_subtitle?.[language] || t('hero.subtitle');
     const heroImage = heroSettings?.hero_image_url;
 
-    useSEO({
-        title: heroTitle || 'Wedding Planner Germany',
-        description: heroSubtitle || 'Plan your dream wedding in Germany with KolayDugun.'
-    });
-
     return (
         <>
+            <SEO
+                title={heroTitle || 'Wedding Planner Germany'}
+                description={heroSubtitle || 'Plan your dream wedding in Germany with KolayDugun.'}
+                image={heroImage}
+            />
             <Hero
                 title={heroTitle}
                 subtitle={heroSubtitle}

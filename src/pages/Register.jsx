@@ -98,7 +98,6 @@ const Register = () => {
                     <h2 style={{ marginBottom: '15px' }}>{t('register.successTitle', 'Lütfen E-postanızı Kontrol Edin')}</h2>
                     <p style={{ color: '#666', lineHeight: '1.6', marginBottom: '30px' }}>
                         {t('register.successMessage', 'E-posta adresinizi doğrulamanız için bir bağlantı gönderdik. Hesabınızı onaylamak için lütfen bağlantıya tıklayın.')}
-                        `Kayıt işlemini tamamlamak için ${formData.email} adresine gönderdiğimiz onay linkine tıklayınız.`}
                     </p>
                     <div style={{ padding: '15px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.9rem', color: '#64748b' }}>
                         <strong>Not:</strong> E-postayı göremiyorsanız Spam/Gereksiz klasörünü kontrol etmeyi unutmayın.
