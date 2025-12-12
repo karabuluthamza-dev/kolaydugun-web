@@ -44,8 +44,17 @@ const VendorDashboard = () => {
             navigate('/login');
             return;
         }
+        // Role kontrolü - vendor olmayan kullanıcıları doğru dashboard'a yönlendir
+        if (user.role === 'admin') {
+            navigate('/admin');
+            return;
+        }
+        if (user.role !== 'vendor') {
+            navigate('/dashboard');
+            return;
+        }
         fetchVendorProfile();
-    }, [user]);
+    }, [user, navigate]);
 
     const fetchVendorProfile = async () => {
         try {

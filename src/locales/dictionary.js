@@ -1,4 +1,6 @@
+import { community } from './community';
 // Unified Translation Dictionary
+
 // Updated: 2025-12-07 16:55
 // All languages are defined side-by-side to ensure consistency.
 
@@ -376,7 +378,7 @@ export const dictionary = {
         select: {
             en: "Select",
             de: "Auswählen",
-            tr: "Seçiniz"
+            tr: "Seç"
         },
         add: {
             en: "Add",
@@ -760,6 +762,28 @@ export const dictionary = {
             de: "Abmelden",
             tr: "Çıkış Yap"
         },
+        forum: {
+            en: "Community",
+            de: "Community",
+            tr: "Forum"
+        },
+
+        newTopic: {
+            button: { en: "New Topic", de: "Neues Thema", tr: "Yeni Konu Aç" },
+            title: { en: "Create New Topic", de: "Neues Thema erstellen", tr: "Yeni Konu Oluştur" },
+            inputTitle: { en: "Topic Title", de: "Thementitel", tr: "Konu Başlığı" },
+            inputTitlePlaceholder: { en: "e.g. Which wedding dress model?", de: "z.B. Welches Brautkleid-Modell?", tr: "Örn: Hangi gelinlik modeli daha rahat?" },
+            inputCategory: { en: "Category", de: "Kategorie", tr: "Kategori" },
+            inputCategoryPlaceholder: { en: "Select a Category", de: "Kategorie wählen", tr: "Bir Kategori Seçin" },
+            inputDetails: { en: "Details", de: "Details", tr: "Detaylar" },
+            inputDetailsPlaceholder: { en: "Share the details of your question...", de: "Teilen Sie die Details Ihrer Frage...", tr: "Sorunuzun veya konunuzun detaylarını paylaşın..." },
+            cancel: { en: "Cancel", de: "Abbrechen", tr: "İptal" },
+            submit: { en: "Create Topic", de: "Thema erstellen", tr: "Konuyu Oluştur" },
+            submitting: { en: "Creating...", de: "Erstellen...", tr: "Oluşturuluyor..." },
+            loginRequired: { en: "You must be logged in.", de: "Sie müssen eingeloggt sein.", tr: "Giriş yapmalısınız." },
+            loginMessage: { en: "Please login to start a topic.", de: "Bitte melden Sie sich an, um ein Thema zu starten.", tr: "Konu başlatmak için lütfen giriş yapın." },
+            loginButton: { en: "Login", de: "Anmelden", tr: "Giriş Yap" }
+        },
 
         tools: {
             en: "Planning Tools",
@@ -778,32 +802,11 @@ export const dictionary = {
         },
         messages: {
             en: "My Messages",
-            de: "Meine Nachrichten",
-            tr: "Mesajlarım"
+            de: "Nachrichten",
+            tr: "Mesajlar"
         }
     },
-    register: {
-        priceRange: {
-            en: "Price Range",
-            de: "Preisklasse",
-            tr: "Fiyat Aralığı"
-        },
-        capacity: {
-            en: "Capacity (Guests)",
-            de: "Kapazität (Gäste)",
-            tr: "Kapasite (Kişi Sayısı)"
-        },
-        selectPrice: {
-            en: "Select Price",
-            de: "Preis wählen",
-            tr: "Fiyat Seçiniz"
-        },
-        promoCode: {
-            en: "Promo Code (Optional)",
-            de: "Gutscheincode (Optional)",
-            tr: "Promosyon Kodu (İsteğe Bağlı)"
-        }
-    },
+
     vendors: {
         title: {
             en: "Vendor Marketplace",
@@ -1378,7 +1381,7 @@ export const dictionary = {
         },
         submitVendor: {
             en: "Register as Vendor",
-            de: "Als Dienstleister registrieren",
+            de: "Partner werden",
             tr: "Tedarikçi Olarak Kaydol"
         },
         loginLink: {
@@ -1412,6 +1415,46 @@ export const dictionary = {
                 de: "Bitte wählen Sie einen Standort",
                 tr: "Lütfen bir konum seçin"
             }
+        },
+        priceRange: {
+            en: "Price Range",
+            de: "Preisklasse",
+            tr: "Fiyat Aralığı"
+        },
+        capacity: {
+            en: "Capacity (Guests)",
+            de: "Kapazität (Gäste)",
+            tr: "Kapasite (Kişi Sayısı)"
+        },
+        selectTypeParams: {
+            en: "Please select your registration type:",
+            de: "Bitte wählen Sie Ihren Registrierungstyp:",
+            tr: "Lütfen kayıt türünüzü seçin:"
+        },
+        coupleDesc: {
+            en: "I want to plan my wedding. Compare venues, get quotes and use planning tools.",
+            de: "Ich möchte meine Hochzeit planen. Orte vergleichen, Angebote einholen.",
+            tr: "Düğünümü planlamak istiyorum. Mekanları incele, teklif al ve planlama araçlarını kullan."
+        },
+        vendorDesc: {
+            en: "I want to offer services. Reach couples, send quotes and grow your business.",
+            de: "Ich möchte Dienstleistungen anbieten. Paare erreichen, Angebote senden.",
+            tr: "Hizmet vermek istiyorum. Çiftlere ulaş, teklif ver ve işini büyüt."
+        },
+        selectPrice: {
+            en: "Select Price",
+            de: "Preis wählen",
+            tr: "Fiyat Seçiniz"
+        },
+        promoCode: {
+            en: "Promo Code (Optional)",
+            de: "Gutscheincode (Optional)",
+            tr: "Promosyon Kodu (İsteğe Bağlı)"
+        },
+        creating: {
+            en: "Creating Account...",
+            de: "Konto wird erstellt...",
+            tr: "Hesap Oluşturuluyor..."
         }
     },
     services: {
@@ -1662,110 +1705,6 @@ export const dictionary = {
             unlockSuccess: { en: "✅ Contact info unlocked! Remaining credits: ", de: "✅ Kontaktinfo freigeschaltet! Verbleibende Credits: ", tr: "✅ İletişim bilgileri açıldı! Kalan kredi: " },
             unlockError: { en: "❌ Error: ", de: "❌ Fehler: ", tr: "❌ Hata: " },
             genericError: { en: "Operation failed. Please check your balance.", de: "Vorgang fehlgeschlagen. Bitte Guthaben prüfen.", tr: "İşlem başarısız. Lütfen bakiyenizi kontrol edin." }
-        }
-    },
-    register: {
-        title: {
-            en: "Create Account",
-            de: "Konto erstellen",
-            tr: "Hesap Oluştur"
-        },
-        forCouples: {
-            en: "For Couples",
-            de: "Für Paare",
-            tr: "Çiftler İçin"
-        },
-        forVendors: {
-            en: "For Vendors",
-            de: "Für Dienstleister",
-            tr: "Tedarikçiler İçin"
-        },
-        fullName: {
-            en: "Full Name",
-            de: "Vollständiger Name",
-            tr: "Ad Soyad"
-        },
-        businessName: {
-            en: "Business Name",
-            de: "Firmenname",
-            tr: "İşletme Adı"
-        },
-        email: {
-            en: "Email Address",
-            de: "E-Mail-Adresse",
-            tr: "E-posta Adresi"
-        },
-        category: {
-            en: "Category",
-            de: "Kategorie",
-            tr: "Kategori"
-        },
-        location: {
-            en: "Location",
-            de: "Standort",
-            tr: "Konum"
-        },
-        selectCity: {
-            en: "Select City...",
-            de: "Stadt wählen...",
-            tr: "Şehir seçin..."
-        },
-        password: {
-            en: "Password",
-            de: "Passwort",
-            tr: "Şifre"
-        },
-        confirmPassword: {
-            en: "Confirm Password",
-            de: "Passwort bestätigen",
-            tr: "Şifreyi Onayla"
-        },
-        submitCouple: {
-            en: "Register as Couple",
-            de: "Als Paar registrieren",
-            tr: "Çift Olarak Kaydol"
-        },
-        submitVendor: {
-            en: "Register as Vendor",
-            de: "Als Dienstleister registrieren",
-            tr: "Tedarikçi Olarak Kaydol"
-        },
-        loginLink: {
-            en: "Already have an account?",
-            de: "Bereits ein Konto?",
-            tr: "Zaten hesabınız var mı?"
-        },
-        creating: {
-            en: "Creating Account...",
-            de: "Konto wird erstellt...",
-            tr: "Hesap Oluşturuluyor..."
-        },
-        errors: {
-            name: {
-                en: "Name is required",
-                de: "Name ist erforderlich",
-                tr: "İsim gereklidir"
-            },
-            email: {
-                en: "Invalid email address",
-                de: "Ungültige E-Mail-Adresse",
-                tr: "Geçersiz e-posta adresi"
-            },
-            password: {
-                en: "Password must be at least 6 characters",
-                de: "Passwort muss mindestens 6 Zeichen lang sein",
-                tr: "Şifre en az 6 karakter olmalıdır"
-            },
-            confirmPassword: {
-                en: "Passwords do not match",
-                de: "Passwörter stimmen nicht überein",
-                tr: "Şifreler eşleşmiyor"
-            },
-            location: {
-                en: "Please select a location",
-                de: "Bitte wählen Sie einen Standort",
-                tr: "Lütfen bir konum seçin"
-            }
         }
     },
     edit: {
@@ -5276,4 +5215,10 @@ try {
     console.error('Dictionary merge error', e);
 }
 
+dictionary.community = community;
 
+
+
+dictionary.onlineCounter = {
+    text: { en: "couples planning their wedding right now", de: "Paare planen gerade ihre Hochzeit", tr: "çift şu an düğününü planlıyor" }
+};

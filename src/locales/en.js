@@ -4,7 +4,11 @@ export const en = {
         "inspiration": "Inspiration",
         "tools": "Planning Tools",
         "vendorJoin": "For Vendors",
-        "registerBtn": "Register"
+        "registerBtn": "Register",
+        "messages": "Messages",
+        "logout": "Logout",
+        "dashboard": "Dashboard",
+        "forum": "Community"
     },
     "hero": {
         "title": "Your Dream Wedding in Germany",

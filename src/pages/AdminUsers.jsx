@@ -519,6 +519,19 @@ const AdminUsers = () => {
                                             }}>
                                                 {user.role === 'admin' ? '👑 Admin' : user.role === 'vendor' ? '🏢 Tedarikçi' : '💑 Çift'}
                                             </span>
+                                            {user.is_bot && (
+                                                <span style={{
+                                                    marginLeft: '6px',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '8px',
+                                                    fontSize: '11px',
+                                                    fontWeight: 'bold',
+                                                    background: '#f3e8ff',
+                                                    color: '#7c3aed'
+                                                }}>
+                                                    🤖 Bot
+                                                </span>
+                                            )}
                                         </td>
                                         <td style={{ padding: '16px', fontSize: '14px', color: '#6b7280' }}>
                                             {new Date(user.created_at).toLocaleDateString('tr-TR')}

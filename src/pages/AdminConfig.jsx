@@ -15,11 +15,27 @@ const AdminConfig = () => {
         hero_image_url: '',
         og_image_url: '',
         logo_url: '',
-        favicon_url: '', // New field for Favicon
-        social_media: { facebook: '', instagram: '', youtube: '', tiktok: '', twitter: '', linkedin: '' }
+        favicon_url: '',
+        social_media: { facebook: '', instagram: '', youtube: '', tiktok: '', twitter: '', linkedin: '' },
+        online_counter_config: { mode: 'simulated', base: 150, range: 30 },
+        blog_author_name: { en: 'KolayDugun Editorial', de: 'KolayDugun Redaktion', tr: 'KolayDüğün Editörü' },
+        blog_author_avatar: '',
+        trust_badges: { enabled: true, items: [] },
+        cta_settings: { show_floating: false },
+        hero_settings: { use_video: false, video_url: '' }
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [videoUploading, setVideoUploading] = useState(false);
+    const [digestSettings, setDigestSettings] = useState({
+        enabled: true,
+        email: 'karabulut.hamza@gmail.com',
+        frequency: 'daily',
+        times: ['08:00'],
+        instant_notifications: { payment: true, critical_reports: true }
+    });
+    const [sendingTestEmail, setSendingTestEmail] = useState(false);
+    const [digestMessage, setDigestMessage] = useState({ type: '', text: '' });
 
     useEffect(() => {
         if (user) {
@@ -65,8 +81,19 @@ const AdminConfig = () => {
                 og_image_url: settingsData.og_image_url || '',
                 logo_url: settingsData.logo_url || '',
                 favicon_url: settingsData.favicon_url || '',
-                social_media: settingsData.social_media || { facebook: '', instagram: '', youtube: '', tiktok: '', twitter: '', linkedin: '' }
+                social_media: settingsData.social_media || { facebook: '', instagram: '', youtube: '', tiktok: '', twitter: '', linkedin: '' },
+                online_counter_config: settingsData.online_counter_config || { mode: 'simulated', base: 150, range: 30 },
+                blog_author_name: settingsData.blog_author_name || { en: 'KolayDugun Editorial', de: 'KolayDugun Redaktion', tr: 'KolayDüğün Editörü' },
+                blog_author_avatar: settingsData.blog_author_avatar || '',
+                trust_badges: settingsData.trust_badges || { enabled: true, items: [] },
+                cta_settings: settingsData.cta_settings || { show_floating: false },
+                hero_settings: settingsData.hero_settings || { use_video: false, video_url: '' }
             });
+
+            // Fetch digest settings
+            if (settingsData?.admin_digest_settings) {
+                setDigestSettings(settingsData.admin_digest_settings);
+            }
         }
 
         setLoading(false);
@@ -107,6 +134,12 @@ const AdminConfig = () => {
                     logo_url: siteSettings.logo_url,
                     favicon_url: siteSettings.favicon_url,
                     social_media: siteSettings.social_media,
+                    online_counter_config: siteSettings.online_counter_config,
+                    blog_author_name: siteSettings.blog_author_name,
+                    blog_author_avatar: siteSettings.blog_author_avatar,
+                    trust_badges: siteSettings.trust_badges,
+                    cta_settings: siteSettings.cta_settings,
+                    hero_settings: siteSettings.hero_settings,
                     updated_at: new Date()
                 })
                 .eq('id', 1);
@@ -118,6 +151,52 @@ const AdminConfig = () => {
             alert('Hata: ' + err.message);
         } finally {
             setSaving(false);
+        }
+    };
+
+    const updateDigestSettings = async () => {
+        setSaving(true);
+        try {
+            const { error } = await supabase
+                .from('site_settings')
+                .update({
+                    admin_digest_settings: digestSettings,
+                    updated_at: new Date()
+                })
+                .eq('id', 1);
+
+            if (error) throw error;
+            alert('✅ Rapor ayarları güncellendi!');
+        } catch (err) {
+            console.error('Error updating digest settings:', err);
+            alert('Hata: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const sendTestDigestEmail = async () => {
+        setSendingTestEmail(true);
+        setDigestMessage({ type: '', text: '' });
+        try {
+            const { data, error } = await supabase.functions.invoke('send_admin_digest', {
+                body: { test_mode: true }
+            });
+
+            if (error) throw error;
+
+            if (data?.success) {
+                setDigestMessage({ type: 'success', text: `✅ Test e-postası ${digestSettings.email} adresine gönderildi!` });
+            } else {
+                setDigestMessage({ type: 'error', text: '⚠️ ' + (data?.message || 'E-posta gönderilemedi') });
+            }
+        } catch (err) {
+            console.error('Test email error:', err);
+            setDigestMessage({ type: 'error', text: 'Hata: ' + err.message });
+        } finally {
+            setSendingTestEmail(false);
+            // Auto-hide success message after 5 seconds
+            setTimeout(() => setDigestMessage({ type: '', text: '' }), 8000);
         }
     };
 
@@ -300,6 +379,317 @@ const AdminConfig = () => {
                 </div>
             </div>
 
+            {/* Trust Badges Settings */}
+            <div className="config-section">
+                <h2>🏅 Güven Rozetleri</h2>
+                <div className="config-card">
+                    <p style={{ marginBottom: '15px', color: '#666' }}>
+                        Hero alanında, başlığın altında gösterilecek güvenilirlik rozetleri.
+                    </p>
+
+                    <div className="config-item">
+                        <div className="config-label">
+                            <strong>Rozetleri Göster</strong>
+                            <small>Güven rozetlerini aktif/pasif yap</small>
+                        </div>
+                        <div className="config-value">
+                            <label className="switch">
+                                <input
+                                    type="checkbox"
+                                    checked={siteSettings.trust_badges?.enabled || false}
+                                    onChange={(e) => handleSettingChange('trust_badges', { ...siteSettings.trust_badges, enabled: e.target.checked })}
+                                    disabled={saving}
+                                />
+                                <span className="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {siteSettings.trust_badges?.enabled && (
+                        <div className="config-item-group" style={{ marginTop: '20px' }}>
+                            <h3>Rozetler</h3>
+
+                            {/* Existing badges */}
+                            {siteSettings.trust_badges?.items?.map((badge, index) => (
+                                <div key={index} style={{
+                                    padding: '15px',
+                                    background: '#f8f9fa',
+                                    borderRadius: '8px',
+                                    marginBottom: '10px',
+                                    border: '1px solid #e5e7eb'
+                                }}>
+                                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
+                                        <input
+                                            type="text"
+                                            value={badge.icon}
+                                            onChange={(e) => {
+                                                const newItems = [...siteSettings.trust_badges.items];
+                                                newItems[index].icon = e.target.value;
+                                                handleSettingChange('trust_badges', { ...siteSettings.trust_badges, items: newItems });
+                                            }}
+                                            placeholder="İkon (emoji)"
+                                            style={{ width: '60px', textAlign: 'center', fontSize: '1.5rem' }}
+                                        />
+                                        <button
+                                            className="btn btn-sm"
+                                            style={{ background: '#dc3545', color: 'white' }}
+                                            onClick={() => {
+                                                const newItems = siteSettings.trust_badges.items.filter((_, i) => i !== index);
+                                                handleSettingChange('trust_badges', { ...siteSettings.trust_badges, items: newItems });
+                                            }}
+                                        >
+                                            Sil
+                                        </button>
+                                    </div>
+                                    <div className="input-group">
+                                        <label>🇹🇷 Türkçe</label>
+                                        <input
+                                            type="text"
+                                            value={badge.text?.tr || ''}
+                                            onChange={(e) => {
+                                                const newItems = [...siteSettings.trust_badges.items];
+                                                newItems[index].text = { ...newItems[index].text, tr: e.target.value };
+                                                handleSettingChange('trust_badges', { ...siteSettings.trust_badges, items: newItems });
+                                            }}
+                                            placeholder="Örn: 4.9/5 Memnuniyet"
+                                        />
+                                    </div>
+                                    <div className="input-group">
+                                        <label>🇬🇧 İngilizce</label>
+                                        <input
+                                            type="text"
+                                            value={badge.text?.en || ''}
+                                            onChange={(e) => {
+                                                const newItems = [...siteSettings.trust_badges.items];
+                                                newItems[index].text = { ...newItems[index].text, en: e.target.value };
+                                                handleSettingChange('trust_badges', { ...siteSettings.trust_badges, items: newItems });
+                                            }}
+                                            placeholder="Ex: 4.9/5 Satisfaction"
+                                        />
+                                    </div>
+                                    <div className="input-group">
+                                        <label>🇩🇪 Almanca</label>
+                                        <input
+                                            type="text"
+                                            value={badge.text?.de || ''}
+                                            onChange={(e) => {
+                                                const newItems = [...siteSettings.trust_badges.items];
+                                                newItems[index].text = { ...newItems[index].text, de: e.target.value };
+                                                handleSettingChange('trust_badges', { ...siteSettings.trust_badges, items: newItems });
+                                            }}
+                                            placeholder="z.B: 4.9/5 Zufriedenheit"
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+
+                            {/* Add new badge button */}
+                            <button
+                                className="btn btn-secondary"
+                                style={{ marginTop: '10px' }}
+                                onClick={() => {
+                                    const newItems = [...(siteSettings.trust_badges?.items || []), { icon: '✓', text: { tr: '', en: '', de: '' } }];
+                                    handleSettingChange('trust_badges', { ...siteSettings.trust_badges, items: newItems });
+                                }}
+                            >
+                                + Yeni Rozet Ekle
+                            </button>
+                        </div>
+                    )}
+
+                    <button
+                        className="btn btn-primary"
+                        style={{ marginTop: '20px' }}
+                        onClick={updateSiteSettings}
+                        disabled={saving}
+                    >
+                        {saving ? 'Kaydediliyor...' : 'Güven Rozetlerini Kaydet'}
+                    </button>
+                </div>
+            </div>
+
+            {/* Floating CTA Settings */}
+            <div className="config-section">
+                <h2>📍 Floating CTA Butonu</h2>
+                <div className="config-card">
+                    <p style={{ marginBottom: '15px', color: '#666' }}>
+                        Sayfa aşağı kaydırıldığında sağ alt köşede görünen "Ücretsiz Teklif Al" butonu.
+                    </p>
+
+                    <div className="config-item">
+                        <div className="config-label">
+                            <strong>Floating CTA'yı Göster</strong>
+                            <small>Kaydırıldığında sağ alt köşede buton göster</small>
+                        </div>
+                        <div className="config-value">
+                            <label className="switch">
+                                <input
+                                    type="checkbox"
+                                    checked={siteSettings.cta_settings?.show_floating || false}
+                                    onChange={(e) => handleSettingChange('cta_settings', { ...siteSettings.cta_settings, show_floating: e.target.checked })}
+                                    disabled={saving}
+                                />
+                                <span className="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button
+                        className="btn btn-primary"
+                        style={{ marginTop: '20px' }}
+                        onClick={updateSiteSettings}
+                        disabled={saving}
+                    >
+                        {saving ? 'Kaydediliyor...' : 'CTA Ayarlarını Kaydet'}
+                    </button>
+                </div>
+            </div>
+
+            {/* Video Background Settings */}
+            <div className="config-section">
+                <h2>🎬 Video Arka Plan</h2>
+                <div className="config-card">
+                    <p style={{ marginBottom: '15px', color: '#666' }}>
+                        Hero alanında statik görsel yerine video oynatın. MP4 formatı önerilir.
+                    </p>
+
+                    <div className="config-item">
+                        <div className="config-label">
+                            <strong>Video Kullan</strong>
+                            <small>Statik görsel yerine video arka plan</small>
+                        </div>
+                        <div className="config-value">
+                            <label className="switch">
+                                <input
+                                    type="checkbox"
+                                    checked={siteSettings.hero_settings?.use_video || false}
+                                    onChange={(e) => handleSettingChange('hero_settings', { ...siteSettings.hero_settings, use_video: e.target.checked })}
+                                    disabled={saving}
+                                />
+                                <span className="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {siteSettings.hero_settings?.use_video && (
+                        <div className="config-item-group" style={{ marginTop: '15px' }}>
+                            <h3>Video Yükle</h3>
+                            <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '10px' }}>
+                                MP4 formatında video dosyası seçin. Maksimum 20MB önerilir.
+                            </p>
+
+                            {/* Video Upload */}
+                            <div style={{
+                                border: '2px dashed #ccc',
+                                borderRadius: '10px',
+                                padding: '20px',
+                                textAlign: 'center',
+                                background: '#fafafa',
+                                marginBottom: '15px'
+                            }}>
+                                <input
+                                    type="file"
+                                    accept="video/mp4,video/webm"
+                                    onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (!file) return;
+
+                                        if (file.size > 50 * 1024 * 1024) {
+                                            alert('Video dosyası 50MB\'dan küçük olmalı!');
+                                            return;
+                                        }
+
+                                        setVideoUploading(true);
+                                        try {
+                                            const fileName = `videos/hero-video-${Date.now()}.mp4`;
+                                            const { data, error } = await supabase.storage
+                                                .from('blog-images')
+                                                .upload(fileName, file, {
+                                                    cacheControl: '3600',
+                                                    upsert: true
+                                                });
+
+                                            if (error) throw error;
+
+                                            const { data: urlData } = supabase.storage
+                                                .from('blog-images')
+                                                .getPublicUrl(fileName);
+
+                                            handleSettingChange('hero_settings', {
+                                                ...siteSettings.hero_settings,
+                                                video_url: urlData.publicUrl
+                                            });
+
+                                            alert('✅ Video başarıyla yüklendi!');
+                                        } catch (err) {
+                                            console.error('Video upload error:', err);
+                                            alert('Video yükleme hatası: ' + err.message);
+                                        } finally {
+                                            setVideoUploading(false);
+                                        }
+                                    }}
+                                    disabled={videoUploading}
+                                    style={{ display: 'none' }}
+                                    id="video-upload-input"
+                                />
+                                <label
+                                    htmlFor="video-upload-input"
+                                    style={{
+                                        cursor: videoUploading ? 'wait' : 'pointer',
+                                        display: 'block'
+                                    }}
+                                >
+                                    <div style={{ fontSize: '3rem', marginBottom: '10px' }}>🎬</div>
+                                    <span style={{
+                                        background: videoUploading ? '#ccc' : '#8B2252',
+                                        color: 'white',
+                                        padding: '10px 20px',
+                                        borderRadius: '8px',
+                                        display: 'inline-block',
+                                        fontWeight: 'bold'
+                                    }}>
+                                        {videoUploading ? 'Yükleniyor...' : 'Video Dosyası Seç'}
+                                    </span>
+                                </label>
+                            </div>
+
+                            {/* Current Video Preview */}
+                            {siteSettings.hero_settings?.video_url && (
+                                <div style={{ marginBottom: '15px' }}>
+                                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Mevcut Video:</label>
+                                    <video
+                                        src={siteSettings.hero_settings.video_url}
+                                        style={{ width: '100%', maxWidth: '400px', borderRadius: '8px' }}
+                                        controls
+                                        muted
+                                    />
+                                </div>
+                            )}
+
+                            {/* Manual URL Input */}
+                            <div className="input-group">
+                                <label>Veya Video URL girin:</label>
+                                <input
+                                    type="text"
+                                    value={siteSettings.hero_settings?.video_url || ''}
+                                    onChange={(e) => handleSettingChange('hero_settings', { ...siteSettings.hero_settings, video_url: e.target.value })}
+                                    placeholder="https://example.com/wedding-video.mp4"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    <button
+                        className="btn btn-primary"
+                        style={{ marginTop: '20px' }}
+                        onClick={updateSiteSettings}
+                        disabled={saving}
+                    >
+                        {saving ? 'Kaydediliyor...' : 'Video Ayarlarını Kaydet'}
+                    </button>
+                </div>
+            </div>
+
             {/* Social Media Settings */}
             <div className="config-section">
                 <h2>🌐 Sosyal Medya Hesapları</h2>
@@ -337,6 +727,85 @@ const AdminConfig = () => {
                         disabled={saving}
                     >
                         {saving ? 'Kaydediliyor...' : 'Sosyal Medya Ayarlarını Kaydet'}
+                    </button>
+                </div>
+            </div>
+
+            {/* Blog Author Settings */}
+            <div className="config-section">
+                <h2>✍️ Blog Yazarı Ayarları</h2>
+                <div className="config-card">
+                    <p style={{ marginBottom: '15px', color: '#666' }}>
+                        Blog yazılarında görünecek yazar bilgilerini buradan yönetin.
+                    </p>
+
+                    <div className="config-item-group">
+                        <h3>Yazar Fotoğrafı</h3>
+                        <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '10px' }}>
+                            Blog yazılarında görünecek yazar avatarı. (Önerilen: 100x100px kare resim)
+                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                            {siteSettings.blog_author_avatar && (
+                                <img
+                                    src={siteSettings.blog_author_avatar}
+                                    alt="Author"
+                                    style={{
+                                        width: '80px',
+                                        height: '80px',
+                                        borderRadius: '50%',
+                                        objectFit: 'cover',
+                                        border: '3px solid #e5e7eb'
+                                    }}
+                                />
+                            )}
+                            <div style={{ flex: 1 }}>
+                                <ImageUpload
+                                    currentImageUrl={siteSettings.blog_author_avatar}
+                                    onUploadComplete={(url) => handleSettingChange('blog_author_avatar', url)}
+                                    folder="site-assets"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="config-item-group" style={{ marginTop: '20px' }}>
+                        <h3>Yazar Adı (3 Dil)</h3>
+                        <div className="input-group">
+                            <label>🇹🇷 Türkçe</label>
+                            <input
+                                type="text"
+                                value={siteSettings.blog_author_name?.tr || ''}
+                                onChange={(e) => handleSettingChange('blog_author_name', e.target.value, 'tr')}
+                                placeholder="Örn: KolayDüğün Editörü"
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label>🇬🇧 İngilizce</label>
+                            <input
+                                type="text"
+                                value={siteSettings.blog_author_name?.en || ''}
+                                onChange={(e) => handleSettingChange('blog_author_name', e.target.value, 'en')}
+                                placeholder="Ex: KolayDugun Editorial"
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label>🇩🇪 Almanca</label>
+                            <input
+                                type="text"
+                                value={siteSettings.blog_author_name?.de || ''}
+                                onChange={(e) => handleSettingChange('blog_author_name', e.target.value, 'de')}
+                                placeholder="z.B: KolayDugun Redaktion"
+                            />
+                        </div>
+                    </div>
+
+                    <button
+                        className="btn btn-primary"
+                        style={{ marginTop: '20px' }}
+                        onClick={updateSiteSettings}
+                        disabled={saving}
+                    >
+                        {saving ? 'Kaydediliyor...' : 'Blog Yazarı Ayarlarını Kaydet'}
                     </button>
                 </div>
             </div>
@@ -405,6 +874,63 @@ const AdminConfig = () => {
                 </div>
             </div>
 
+            {/* Online Counter Settings (NEW) */}
+            <div className="config-section">
+                <h2>🟢 Online Sayaç Ayarları</h2>
+                <div className="config-card">
+                    <div className="config-item-group">
+                        <h3>Sayaç Modu</h3>
+                        <div className="flex gap-4 mb-4">
+                            {['simulated', 'static', 'off'].map(mode => (
+                                <label key={mode} className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="counterMode"
+                                        checked={siteSettings.online_counter_config?.mode === mode}
+                                        onChange={() => handleSettingChange('online_counter_config', { ...siteSettings.online_counter_config, mode })}
+                                    />
+                                    <span className="capitalize">{mode === 'simulated' ? 'Simülasyon' : (mode === 'static' ? 'Sabit' : 'Kapalı')}</span>
+                                </label>
+                            ))}
+                        </div>
+
+                        {siteSettings.online_counter_config?.mode !== 'off' && (
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="input-group">
+                                    <label>Başlangıç Sayısı (Base)</label>
+                                    <input
+                                        type="number"
+                                        value={siteSettings.online_counter_config?.base || 150}
+                                        onChange={(e) => handleSettingChange('online_counter_config', { ...siteSettings.online_counter_config, base: parseInt(e.target.value) })}
+                                    />
+                                    <small className="text-gray-400">Sayaç bu sayı etrafında döner.</small>
+                                </div>
+                                {siteSettings.online_counter_config?.mode === 'simulated' && (
+                                    <div className="input-group">
+                                        <label>Dalgalanma (Range +/-)</label>
+                                        <input
+                                            type="number"
+                                            value={siteSettings.online_counter_config?.range || 30}
+                                            onChange={(e) => handleSettingChange('online_counter_config', { ...siteSettings.online_counter_config, range: parseInt(e.target.value) })}
+                                        />
+                                        <small className="text-gray-400">Örn: 30 ise, sayı Base +/- 30 arasında değişir.</small>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    <button
+                        className="btn btn-primary"
+                        style={{ marginTop: '20px' }}
+                        onClick={updateSiteSettings}
+                        disabled={saving}
+                    >
+                        {saving ? 'Kaydediliyor...' : 'Sayaç Ayarlarını Kaydet'}
+                    </button>
+                </div>
+            </div>
+
             {/* Lead Prices */}
             <div className="config-section">
                 <h2>📋 Lead Fiyatları (Kredi)</h2>
@@ -452,6 +978,192 @@ const AdminConfig = () => {
                             </div>
                         </div>
                     ))}
+                </div>
+            </div>
+
+            {/* Admin Digest Email Settings */}
+            <div className="config-section">
+                <h2>📧 Günlük Rapor E-postası</h2>
+                <div className="config-card">
+                    <p style={{ marginBottom: '15px', color: '#666' }}>
+                        Her gün belirlenen saatte site istatistiklerini içeren bir özet e-postası alın.
+                    </p>
+
+                    <div className="config-item">
+                        <div className="config-label">
+                            <strong>Günlük Raporu Aktif Et</strong>
+                            <small>Her sabah 08:00'de e-posta al</small>
+                        </div>
+                        <div className="config-value">
+                            <label className="switch">
+                                <input
+                                    type="checkbox"
+                                    checked={digestSettings.enabled || false}
+                                    onChange={(e) => setDigestSettings({ ...digestSettings, enabled: e.target.checked })}
+                                    disabled={saving}
+                                />
+                                <span className="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div className="config-item">
+                        <div className="config-label">
+                            <strong>💰 Anlık Ödeme Bildirimi</strong>
+                            <small>Ödeme alındığında hemen e-posta gönder</small>
+                        </div>
+                        <div className="config-value">
+                            <label className="switch">
+                                <input
+                                    type="checkbox"
+                                    checked={digestSettings.instant_notifications?.payment || false}
+                                    onChange={(e) => setDigestSettings({
+                                        ...digestSettings,
+                                        instant_notifications: {
+                                            ...digestSettings.instant_notifications,
+                                            payment: e.target.checked
+                                        }
+                                    })}
+                                    disabled={saving}
+                                />
+                                <span className="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div className="config-item-group" style={{ marginTop: '15px' }}>
+                        <div className="input-group">
+                            <label>📬 E-posta Adresleri</label>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {(Array.isArray(digestSettings.emails) ? digestSettings.emails : [digestSettings.email || '']).map((email, index) => (
+                                    <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => {
+                                                const emails = Array.isArray(digestSettings.emails)
+                                                    ? [...digestSettings.emails]
+                                                    : [digestSettings.email || ''];
+                                                emails[index] = e.target.value;
+                                                setDigestSettings({ ...digestSettings, emails, email: emails[0] });
+                                            }}
+                                            placeholder="ornek@email.com"
+                                            style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #ddd' }}
+                                        />
+                                        {(Array.isArray(digestSettings.emails) ? digestSettings.emails : []).length > 1 && (
+                                            <button
+                                                onClick={() => {
+                                                    const emails = digestSettings.emails.filter((_, i) => i !== index);
+                                                    setDigestSettings({ ...digestSettings, emails, email: emails[0] });
+                                                }}
+                                                style={{ background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', padding: '8px 12px', cursor: 'pointer' }}
+                                            >
+                                                ×
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                                <button
+                                    onClick={() => {
+                                        const emails = Array.isArray(digestSettings.emails)
+                                            ? [...digestSettings.emails, '']
+                                            : [digestSettings.email || '', ''];
+                                        setDigestSettings({ ...digestSettings, emails });
+                                    }}
+                                    style={{ alignSelf: 'flex-start', background: '#28a745', color: 'white', border: 'none', borderRadius: '6px', padding: '8px 15px', cursor: 'pointer' }}
+                                >
+                                    + E-posta Ekle
+                                </button>
+                            </div>
+                            <small style={{ color: '#666', marginTop: '5px', display: 'block' }}>
+                                Birden fazla e-posta ekleyebilirsiniz. Her birine rapor gönderilecek.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div className="config-item-group" style={{ marginTop: '15px' }}>
+                        <div className="input-group">
+                            <label>⏰ Rapor Saati</label>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                {digestSettings.times?.map((time, index) => (
+                                    <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                        <input
+                                            type="time"
+                                            value={time}
+                                            onChange={(e) => {
+                                                const newTimes = [...(digestSettings.times || [])];
+                                                newTimes[index] = e.target.value;
+                                                setDigestSettings({ ...digestSettings, times: newTimes });
+                                            }}
+                                            style={{ padding: '8px', borderRadius: '6px', border: '1px solid #ddd' }}
+                                        />
+                                        {digestSettings.times?.length > 1 && (
+                                            <button
+                                                onClick={() => {
+                                                    const newTimes = digestSettings.times.filter((_, i) => i !== index);
+                                                    setDigestSettings({ ...digestSettings, times: newTimes });
+                                                }}
+                                                style={{ background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', padding: '5px 8px', cursor: 'pointer' }}
+                                            >
+                                                ×
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                                <button
+                                    onClick={() => {
+                                        const newTimes = [...(digestSettings.times || []), '18:00'];
+                                        setDigestSettings({ ...digestSettings, times: newTimes });
+                                    }}
+                                    style={{ background: '#28a745', color: 'white', border: 'none', borderRadius: '6px', padding: '8px 12px', cursor: 'pointer' }}
+                                >
+                                    + Saat Ekle
+                                </button>
+                            </div>
+                            <small style={{ color: '#666', marginTop: '5px', display: 'block' }}>
+                                Birden fazla saat ekleyebilirsiniz. Örneğin: 08:00 sabah, 18:00 akşam.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px', flexWrap: 'wrap' }}>
+                        <button
+                            className="btn btn-primary"
+                            onClick={updateDigestSettings}
+                            disabled={saving}
+                        >
+                            {saving ? 'Kaydediliyor...' : 'Rapor Ayarlarını Kaydet'}
+                        </button>
+                        <button
+                            className="btn btn-secondary"
+                            onClick={sendTestDigestEmail}
+                            disabled={sendingTestEmail || !digestSettings.email}
+                            style={{ background: '#4caf50', color: 'white', border: 'none' }}
+                        >
+                            {sendingTestEmail ? '📤 Gönderiliyor...' : '🧪 Test E-postası Gönder'}
+                        </button>
+                    </div>
+
+                    {/* Success/Error Message */}
+                    {digestMessage.text && (
+                        <div style={{
+                            marginTop: '15px',
+                            padding: '15px 20px',
+                            borderRadius: '10px',
+                            background: digestMessage.type === 'success' ? '#d4edda' : '#f8d7da',
+                            color: digestMessage.type === 'success' ? '#155724' : '#721c24',
+                            border: `1px solid ${digestMessage.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            fontWeight: '500'
+                        }}>
+                            <span style={{ fontSize: '1.2rem' }}>
+                                {digestMessage.type === 'success' ? '✅' : '⚠️'}
+                            </span>
+                            {digestMessage.text}
+                        </div>
+                    )}
                 </div>
             </div>
 

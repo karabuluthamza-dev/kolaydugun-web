@@ -15,6 +15,7 @@ import FeaturedVendors from '../components/FeaturedVendors';
 import HomePricing from '../components/HomePricing';
 import FAQSection from '../components/FAQSection';
 import HomeBlogShowcase from '../components/HomeBlogShowcase';
+import FloatingCTA from '../components/FloatingCTA';
 
 const Home = () => {
     const { t, language } = useLanguage();
@@ -38,6 +39,10 @@ const Home = () => {
     const heroTitle = heroSettings?.hero_title?.[language] || t('hero.title');
     const heroSubtitle = heroSettings?.hero_subtitle?.[language] || t('hero.subtitle');
     const heroImage = heroSettings?.hero_image_url;
+    const onlineConfig = heroSettings?.online_counter_config;
+    const trustBadges = heroSettings?.trust_badges;
+    const ctaSettings = heroSettings?.cta_settings;
+    const videoSettings = heroSettings?.hero_settings;
 
     return (
         <>
@@ -50,6 +55,9 @@ const Home = () => {
                 title={heroTitle}
                 subtitle={heroSubtitle}
                 backgroundImage={heroImage}
+                onlineConfig={onlineConfig}
+                trustBadges={trustBadges}
+                heroSettings={videoSettings}
             />
             <PlanningTools />
             <FeaturedCategories />
@@ -61,6 +69,7 @@ const Home = () => {
             <About />
             <FAQSection />
             <Contact />
+            <FloatingCTA settings={ctaSettings} />
         </>
     );
 };

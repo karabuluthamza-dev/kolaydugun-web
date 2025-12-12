@@ -127,32 +127,72 @@ const Blog = () => {
                                 : 'Latest tips, trends and guides for your wedding planning.'}
                     </p>
 
-                    {/* Category Filter */}
+                    {/* Category Filter - Pill Buttons */}
                     {categories.length > 0 && (
-                        <div style={{ maxWidth: '400px', margin: '0 auto' }}>
-                            <select
-                                value={selectedCategory}
-                                onChange={(e) => setSelectedCategory(e.target.value)}
+                        <div
+                            className="category-filter-container"
+                            style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '10px',
+                                justifyContent: 'center',
+                                padding: '10px 20px 20px',
+                                maxWidth: '900px',
+                                margin: '0 auto'
+                            }}
+                        >
+                            {/* All Categories Button */}
+                            <button
+                                onClick={() => setSelectedCategory('')}
                                 style={{
-                                    width: '100%',
-                                    padding: '12px 16px',
-                                    fontSize: '16px',
-                                    border: '2px solid #e5e7eb',
-                                    borderRadius: '8px',
-                                    background: '#fff',
+                                    padding: '10px 20px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: selectedCategory === '' ? '600' : '500',
+                                    border: 'none',
+                                    borderRadius: '50px',
                                     cursor: 'pointer',
-                                    outline: 'none'
+                                    transition: 'all 0.3s ease',
+                                    background: selectedCategory === ''
+                                        ? 'linear-gradient(135deg, #d63638, #ff6b6b)'
+                                        : '#fff',
+                                    color: selectedCategory === '' ? '#fff' : '#4b5563',
+                                    boxShadow: selectedCategory === ''
+                                        ? '0 4px 15px rgba(214, 54, 56, 0.3)'
+                                        : '0 2px 8px rgba(0,0,0,0.08)',
+                                    whiteSpace: 'nowrap',
+                                    flexShrink: 0
                                 }}
                             >
-                                <option value="">
-                                    {currentLang === 'tr' ? '📁 Tüm Kategoriler' : 'All Categories'}
-                                </option>
-                                {categories.map(cat => (
-                                    <option key={cat.id} value={cat.slug}>
-                                        {cat.name[currentLang] || cat.name.tr}
-                                    </option>
-                                ))}
-                            </select>
+                                {currentLang === 'tr' ? 'Tümü' : currentLang === 'de' ? 'Alle' : 'All'}
+                            </button>
+
+                            {/* Category Buttons */}
+                            {categories.map(cat => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setSelectedCategory(cat.slug)}
+                                    style={{
+                                        padding: '10px 20px',
+                                        fontSize: '0.9rem',
+                                        fontWeight: selectedCategory === cat.slug ? '600' : '500',
+                                        border: 'none',
+                                        borderRadius: '50px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease',
+                                        background: selectedCategory === cat.slug
+                                            ? 'linear-gradient(135deg, #d63638, #ff6b6b)'
+                                            : '#fff',
+                                        color: selectedCategory === cat.slug ? '#fff' : '#4b5563',
+                                        boxShadow: selectedCategory === cat.slug
+                                            ? '0 4px 15px rgba(214, 54, 56, 0.3)'
+                                            : '0 2px 8px rgba(0,0,0,0.08)',
+                                        whiteSpace: 'nowrap',
+                                        flexShrink: 0
+                                    }}
+                                >
+                                    {cat.name[currentLang] || cat.name.tr}
+                                </button>
+                            ))}
                         </div>
                     )}
                 </div>

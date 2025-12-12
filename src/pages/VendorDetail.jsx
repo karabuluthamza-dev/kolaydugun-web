@@ -563,8 +563,25 @@ const VendorDetail = () => {
                                 <label>{t('contact.message')}</label>
                                 <textarea name="message" rows="4" placeholder={t('contact.messagePlaceholder') || "Merhaba, fiyat teklifi almak istiyorum..."} required></textarea>
 
-                                <button type="submit" className="booking-submit-btn" disabled={submitting}>
-                                    {submitting ? (t('vendorLeads.processing') || 'Gönderiliyor...') : (t('vendorDetail.send') || 'Teklif İste')}
+                                <button
+                                    type="submit"
+                                    className="booking-submit-btn"
+                                    disabled={submitting}
+                                    style={{
+                                        background: 'linear-gradient(135deg, #FF6B9D 0%, #FF8E53 100%)',
+                                        color: '#ffffff',
+                                        width: '100%',
+                                        padding: '1rem',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        fontWeight: '600',
+                                        fontSize: '1rem',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 4px 15px rgba(255, 107, 157, 0.3)',
+                                        opacity: submitting ? 0.7 : 1
+                                    }}
+                                >
+                                    {submitting ? (t('vendorLeads.processing') || 'Gönderiliyor...') : (t('vendorDetail.send') || 'Fiyat Teklifi İste')}
                                 </button>
 
                                 {formSuccess && (

@@ -4,7 +4,11 @@ export const tr = {
         "inspiration": "İlham",
         "tools": "Planlama Araçları",
         "vendorJoin": "Tedarikçiler İçin",
-        "registerBtn": "Kayıt Ol"
+        "registerBtn": "Kayıt Ol",
+        "messages": "Mesajlarım",
+        "logout": "Çıkış Yap",
+        "dashboard": "Panel",
+        "forum": "Forum"
     },
     "hero": {
         "title": "Almanya'da Hayalinizdeki Düğün",

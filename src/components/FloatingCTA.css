@@ -1,0 +1,77 @@
+.floating-cta {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 22px;
+    background: linear-gradient(135deg, #FF6B9D 0%, #FF8E53 100%);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255, 107, 157, 0.35);
+    transform: translateY(120px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.3px;
+}
+
+.floating-cta.visible {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.floating-cta:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(255, 107, 157, 0.45);
+    background: linear-gradient(135deg, #FF8E53 0%, #FF6B9D 100%);
+}
+
+.floating-cta-icon {
+    font-size: 1.1rem;
+    animation: gentle-bounce 2s ease-in-out infinite;
+}
+
+.floating-cta-text {
+    white-space: nowrap;
+}
+
+@keyframes gentle-bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    .floating-cta {
+        bottom: 16px;
+        right: 16px;
+        padding: 12px 18px;
+        font-size: 0.8rem;
+        border-radius: 25px;
+    }
+
+    .floating-cta-icon {
+        font-size: 1rem;
+    }
+}
+
+/* Hide on very small screens or when keyboard is open */
+@media (max-height: 500px) {
+    .floating-cta {
+        display: none;
+    }
+}

@@ -127,9 +127,9 @@
 }
 
 .admin-topbar {
-    height: 50px;
-    background-color: #fff;
-    border-bottom: 1px solid #ddd;
+    height: 60px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-bottom: 1px solid #e5e7eb;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -137,11 +137,53 @@
     position: sticky;
     top: 0;
     z-index: 900;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .admin-breadcrumbs {
     font-size: 14px;
-    color: #666;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.breadcrumb-home {
+    color: #9ca3af;
+}
+
+.breadcrumb-separator {
+    color: #d1d5db;
+    font-size: 16px;
+}
+
+.breadcrumb-current {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.admin-user-menu {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.admin-time {
+    color: #6b7280;
+    font-size: 13px;
+    padding: 6px 12px;
+    background: #f3f4f6;
+    border-radius: 20px;
+}
+
+.admin-user-info {
+    color: #1f2937;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
 }
 
 .admin-page-header h1 {
@@ -160,4 +202,126 @@
     box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
     padding: 20px;
     margin-bottom: 20px;
+}
+
+/* Nav Divider & Label */
+.admin-nav-divider {
+    margin: 10px 0;
+    border-top: 1px solid #3c4349;
+}
+
+.admin-nav-label {
+    padding: 8px 20px 4px;
+    font-size: 11px;
+    color: #72aee6;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Nav Item with Tooltip */
+.admin-nav-item {
+    position: relative;
+}
+
+.admin-nav-item .nav-label {
+    flex: 1;
+}
+
+.admin-nav-item .nav-tooltip {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 10px;
+    background: #1d2327;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+    width: 260px;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid #3c4349;
+    pointer-events: none;
+}
+
+.admin-nav-item .nav-tooltip::before {
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-right-color: #3c4349;
+}
+
+.admin-nav-item:hover .nav-tooltip {
+    display: block;
+    animation: tooltipFadeIn 0.2s ease;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+
+/* Admin Notification Bell */
+.admin-notification-bell {
+    position: relative;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-notification-bell:hover {
+    background-color: #f3f4f6;
+    transform: scale(1.1);
+}
+
+.admin-notif-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: linear-gradient(135deg, #ff4757 0%, #ff6348 100%);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 50px;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+    animation: badgePulse 2s infinite;
+}
+
+@keyframes badgePulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
 }

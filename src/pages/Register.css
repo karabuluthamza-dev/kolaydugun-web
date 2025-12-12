@@ -81,3 +81,111 @@
     color: var(--color-primary);
     font-weight: 500;
 }
+
+/* Selection Screen Styles */
+.selection-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+    .selection-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.selection-card {
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    border: 2px solid transparent;
+    background-color: white;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 320px;
+}
+
+.selection-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.selection-card.couple:hover {
+    border-color: #ec4899;
+}
+
+.selection-card.vendor:hover {
+    border-color: #a855f7;
+}
+
+.card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 9999px;
+    font-size: 2.25rem;
+    margin-bottom: 1.5rem;
+    transition: background-color 0.3s;
+}
+
+.selection-card.couple .card-icon {
+    background-color: #fce7f3;
+    color: #db2777;
+}
+
+.selection-card.couple:hover .card-icon {
+    background-color: #fbcfe8;
+}
+
+.selection-card.vendor .card-icon {
+    background-color: #f3e8ff;
+    color: #9333ea;
+}
+
+.selection-card.vendor:hover .card-icon {
+    background-color: #e9d5ff;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.75rem;
+}
+
+.card-desc {
+    color: #6b7280;
+    font-size: 0.875rem;
+    line-height: 1.625;
+    flex-grow: 1;
+}
+
+.card-action {
+    margin-top: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.selection-card.couple .card-action {
+    color: #db2777;
+}
+
+.selection-card.vendor .card-action {
+    color: #9333ea;
+}

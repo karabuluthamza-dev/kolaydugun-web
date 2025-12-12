@@ -3,11 +3,7 @@ import { supabase } from '../supabaseClient';
 import { dictionary } from '../locales/dictionary';
 
 export const useTranslations = () => {
-    const [translations, setTranslations] = useState({});
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    // Helper to flatten dictionary for initial state
+    // Initialize with local dictionary immediately to prevent FOUC / missing keys
     const flattenDictionary = useCallback((dict) => {
         const flat = {};
         const traverse = (obj, path = []) => {
@@ -15,11 +11,9 @@ export const useTranslations = () => {
                 if (typeof obj[key] === 'object' && !obj[key].en) {
                     traverse(obj[key], [...path, key]);
                 } else if (typeof obj[key] === 'object' && obj[key].en) {
-                    // It's a translation node
                     const flatKey = [...path, key].join('.');
                     flat[flatKey] = obj[key];
                 } else if (typeof obj[key] === 'string') {
-                    // Direct string (legacy support)
                     const flatKey = [...path, key].join('.');
                     flat[flatKey] = { en: obj[key], de: obj[key], tr: obj[key] };
                 }
@@ -29,20 +23,21 @@ export const useTranslations = () => {
         return flat;
     }, []);
 
+    const [translations, setTranslations] = useState(() => flattenDictionary(dictionary));
+    const [loading, setLoading] = useState(false); // No loading state needed for local content
+    const [error, setError] = useState(null);
+
     const fetchTranslations = useCallback(async () => {
         try {
-            setLoading(true);
+            // Background update
             const { data, error } = await supabase
                 .from('translations')
                 .select('*');
 
             if (error) throw error;
 
-            // Start with local dictionary as base
-            const merged = flattenDictionary(dictionary);
-
-            // Override/Add from DB
-            if (data) {
+            if (data && data.length > 0) {
+                const merged = flattenDictionary(dictionary);
                 data.forEach(item => {
                     merged[item.key] = {
                         en: item.en,
@@ -50,16 +45,11 @@ export const useTranslations = () => {
                         tr: item.tr
                     };
                 });
+                setTranslations(merged);
             }
-
-            setTranslations(merged);
         } catch (err) {
-            console.error('Error fetching translations:', err);
-            setError(err);
-            // Fallback to local dictionary on error
-            setTranslations(flattenDictionary(dictionary));
-        } finally {
-            setLoading(false);
+            console.error('Error fetching translations (using local fallback):', err);
+            // No need to reset translations, already have local
         }
     }, [flattenDictionary]);
 

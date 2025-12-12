@@ -186,3 +186,8 @@
 .btn-close:hover {
     color: #000;
 }
+
+/* Category Scroll Container - Hide Scrollbar */
+.category-scroll-container::-webkit-scrollbar {
+    display: none;
+}

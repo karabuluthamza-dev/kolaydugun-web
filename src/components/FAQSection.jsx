@@ -49,17 +49,19 @@ const FAQSection = () => {
     return (
         <section className="faq-section section">
             <div className="container">
-                <div className="faq-section-header">
+                <div className="faq-section-header" data-aos="fade-up">
                     <h2>{t('faq.title') || 'Sıkça Sorulan Sorular'}</h2>
                     <p>{t('faq.subtitle') || 'Merak ettiğiniz soruların cevapları'}</p>
                 </div>
 
                 <div className="faq-grid">
-                    {faqs.map(faq => (
+                    {faqs.map((faq, index) => (
                         <div
                             key={faq.id}
                             className={`faq-card ${expandedFaq === faq.id ? 'active' : ''}`}
                             onClick={() => setExpandedFaq(expandedFaq === faq.id ? null : faq.id)}
+                            data-aos="fade-up"
+                            data-aos-delay={index * 100}
                         >
                             <div className="faq-card-question">
                                 <h3>{getQuestionByLanguage(faq)}</h3>
@@ -72,7 +74,7 @@ const FAQSection = () => {
                     ))}
                 </div>
 
-                <div className="faq-section-footer">
+                <div className="faq-section-footer" data-aos="fade-up">
                     <Link to="/faq" className="btn btn-primary">
                         {t('faq.viewAll') || 'Tüm Soruları Görüntüle'} →
                     </Link>

@@ -43,6 +43,7 @@ const AdminVendors = lazy(() => import('./pages/AdminVendors'));
 const AdminConfig = lazy(() => import('./pages/AdminConfig'));
 const AdminTranslations = lazy(() => import('./pages/AdminTranslations'));
 const AdminCategories = lazy(() => import('./pages/AdminCategories'));
+const AdminAvatars = lazy(() => import('./pages/AdminAvatars'));
 const AdminBlog = lazy(() => import('./pages/AdminBlog'));
 const AdminLeads = lazy(() => import('./pages/AdminLeads'));
 const AdminUsers = lazy(() => import('./pages/AdminUsers'));
@@ -57,7 +58,18 @@ const AdminFAQ = lazy(() => import('./pages/AdminFAQ'));
 const AdminNotifications = lazy(() => import('./pages/AdminNotifications'));
 const UserNotifications = lazy(() => import('./pages/UserNotifications'));
 const AdminLayout = lazy(() => import('./components/AdminLayout'));
+const AdminForumSettings = lazy(() => import('./pages/AdminForumSettings'));
+const AdminForumCategories = lazy(() => import('./pages/AdminForumCategories'));
+const AdminGhostGenerator = lazy(() => import('./pages/AdminGhostGenerator'));
+const AdminBotManager = lazy(() => import('./pages/AdminBotManager'));
+const AdminModeration = lazy(() => import('./pages/AdminModeration'));
 const CoupleMessages = lazy(() => import('./components/CoupleMessages'));
+const ProfileSettings = lazy(() => import('./pages/ProfileSettings'));
+const CommunityLayout = lazy(() => import('./pages/community/CommunityLayout'));
+const CommunityHome = lazy(() => import('./pages/community/CommunityHome'));
+const CommunityTopicDetail = lazy(() => import('./pages/community/CommunityTopicDetail'));
+const CommunityAsk = lazy(() => import('./pages/community/CommunityAsk'));
+const UserProfile = lazy(() => import('./pages/community/UserProfile'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const AdminPages = lazy(() => import('./pages/AdminPages'));
@@ -75,8 +87,22 @@ const Widerrufsrecht = lazy(() => import('./pages/legal/Widerrufsrecht'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
 import PrivacyBanner from './components/PrivacyBanner';
 
+// AOS - Animate on Scroll
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import { useEffect } from 'react';
 
 function App() {
+  // Initialize AOS
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-out',
+      once: true,
+      offset: 50,
+    });
+  }, []);
+
   return (
     <AuthProvider>
       <LanguageProvider>
@@ -112,10 +138,37 @@ function App() {
                         <Route path="/examples/seating" element={<SeatingChart />} />
                         <Route path="/examples/timeline" element={<Timeline />} />
 
+                        {/* Community / Forum Routes */}
+                        <Route path="/community" element={<CommunityLayout />}>
+                          <Route index element={<CommunityHome />} />
+                          <Route path="category/:categorySlug" element={<CommunityHome />} /> {/* Added Category Route using same Home component */}
+                          <Route path="ask" element={<CommunityAsk />} />
+                          <Route path="topic/:slug" element={<CommunityTopicDetail />} />
+                          <Route path="user/:userId" element={<UserProfile />} />
+                        </Route>
+
                         {/* Protected Routes */}
                         <Route path="/dashboard/*" element={
                           <ProtectedRoute>
                             <UserDashboard />
+                          </ProtectedRoute>
+                        } />
+
+                        <Route path="/messages" element={
+                          <ProtectedRoute>
+                            <CoupleMessages />
+                          </ProtectedRoute>
+                        } />
+
+                        <Route path="/notifications" element={
+                          <ProtectedRoute>
+                            <UserNotifications />
+                          </ProtectedRoute>
+                        } />
+
+                        <Route path="/profile" element={
+                          <ProtectedRoute>
+                            <ProfileSettings />
                           </ProtectedRoute>
                         } />
 
@@ -152,15 +205,24 @@ function App() {
                           <Route path="config" element={<AdminConfig />} />
                           <Route path="translations" element={<AdminTranslations />} />
                           <Route path="categories" element={<AdminCategories />} />
+                          <Route path="avatars" element={<AdminAvatars />} />
                           <Route path="blog" element={<AdminBlog />} />
                           <Route path="pricing" element={<AdminPricing />} />
                           <Route path="analytics" element={<AdminAnalytics />} />
                           <Route path="reviews" element={<AdminReviews />} />
                           <Route path="messages" element={<AdminMessages />} />
-                          <Route path="credits" element={<AdminCreditApproval />} />
+                          <Route path="credit-approval" element={<AdminCreditApproval />} />
                           <Route path="pages" element={<AdminPages />} />
                           <Route path="finance" element={<AdminFinance />} />
                           <Route path="notifications" element={<AdminNotifications />} />
+
+                          {/* Forum Routes */}
+                          <Route path="forum" element={<AdminForumSettings />} />
+                          <Route path="forum-categories" element={<AdminForumCategories />} />
+                          <Route path="forum-ghosts" element={<AdminGhostGenerator />} />
+                          <Route path="forum-bots" element={<AdminBotManager />} />
+                          <Route path="forum-moderation" element={<AdminModeration />} />
+
                           <Route path="pages/:pageId" element={<AdminPageEdit />} />
                           <Route path="comments" element={<AdminComments />} />
                           <Route path="faq" element={<AdminFAQ />} />

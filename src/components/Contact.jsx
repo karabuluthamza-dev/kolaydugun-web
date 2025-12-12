@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../supabaseClient';
 import SocialMediaLinks from './SocialMediaLinks';
 import { useSiteSettings } from '../hooks/useSiteSettings';
+import { adminNotifications } from '../utils/adminNotifications';
 import './Contact.css';
 
 const Contact = () => {
@@ -35,6 +36,13 @@ const Contact = () => {
                 emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', data, 'YOUR_PUBLIC_KEY')
             );
             */
+
+            // 3. Send admin panel notification
+            try {
+                await adminNotifications.newContactMessage(data);
+            } catch (notifError) {
+                console.error('Admin notification failed:', notifError);
+            }
 
             setStatus('success');
             e.target.reset();

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { getOptimizedImageUrl } from '../utils/imageOptimizer';
 
 const BlogCard = ({ post, lang, categories = [] }) => {
     const title = post.title?.[lang] || post.title?.['tr'] || post.title?.['en'] || 'Untitled';
@@ -25,8 +26,10 @@ const BlogCard = ({ post, lang, categories = [] }) => {
         }}>
             <div className="blog-image-wrapper" style={{ position: 'relative', paddingTop: '60%', overflow: 'hidden' }}>
                 <img
-                    src={post.featured_image_url || post.image_url || 'https://via.placeholder.com/400x250?text=No+Image'}
+                    src={getOptimizedImageUrl(post.featured_image_url || post.image_url, 'card') || 'https://via.placeholder.com/400x250?text=No+Image'}
                     alt={title}
+                    loading="lazy"
+                    decoding="async"
                     style={{
                         position: 'absolute',
                         top: 0,

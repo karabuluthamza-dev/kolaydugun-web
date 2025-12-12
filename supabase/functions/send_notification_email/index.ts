@@ -8,42 +8,78 @@ const resendApiKey = Deno.env.get("RESEND_API_KEY");
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 serve(async (req) => {
-    try {
-        const { notification_id, user_ids } = await req.json();
+  try {
+    const { notification_id, user_ids } = await req.json();
 
-        if (!notification_id || !user_ids) {
-            return new Response(JSON.stringify({ error: "Missing parameters" }), { status: 400 });
-        }
+    if (!notification_id || !user_ids) {
+      return new Response(JSON.stringify({ error: "Missing parameters" }), { status: 400 });
+    }
 
-        // Get notification details
-        const { data: notification, error: notifError } = await supabase
-            .from("admin_notifications")
-            .select("*")
-            .eq("id", notification_id)
-            .single();
+    // Get notification details
+    const { data: notification, error: notifError } = await supabase
+      .from("admin_notifications")
+      .select("*")
+      .eq("id", notification_id)
+      .single();
 
-        if (notifError) throw notifError;
+    if (notifError) throw notifError;
 
-        // Get user emails
-        const { data: users, error: usersError } = await supabase
-            .from("auth.users")
-            .select("id, email")
-            .in("id", user_ids);
+    // Check if Resend API key is configured
+    if (!resendApiKey) {
+      console.warn("RESEND_API_KEY not configured, skipping email send");
+      return new Response(JSON.stringify({
+        success: false,
+        message: "Email service not configured"
+      }), { status: 200 });
+    }
 
-        if (usersError) throw usersError;
+    // Get user notification settings to filter out users who disabled email
+    const { data: userSettings, error: settingsError } = await supabase
+      .from("user_notification_settings")
+      .select("user_id, email_enabled")
+      .in("user_id", user_ids);
 
-        // Check if Resend API key is configured
-        if (!resendApiKey) {
-            console.warn("RESEND_API_KEY not configured, skipping email send");
-            return new Response(JSON.stringify({
-                success: false,
-                message: "Email service not configured"
-            }), { status: 200 });
-        }
+    if (settingsError) {
+      console.warn("Could not fetch user settings:", settingsError);
+    }
 
-        // Send emails using Resend
-        const emailPromises = users.map(async (user: any) => {
-            const emailHtml = `
+    // Create a map of user settings (default to enabled if no settings exist)
+    const settingsMap = new Map();
+    (userSettings || []).forEach((s: any) => {
+      settingsMap.set(s.user_id, s.email_enabled);
+    });
+
+    // Filter user_ids to only include those with email_enabled (or no setting = default enabled)
+    const enabledUserIds = user_ids.filter((id: string) => {
+      const emailEnabled = settingsMap.get(id);
+      // If no setting exists, default to enabled (true)
+      // If setting exists, use its value
+      return emailEnabled !== false;
+    });
+
+    if (enabledUserIds.length === 0) {
+      console.log("No users with email enabled, skipping send");
+      return new Response(JSON.stringify({
+        success: true,
+        sent: 0,
+        skipped: user_ids.length,
+        message: "All users have disabled email notifications"
+      }), { status: 200 });
+    }
+
+    // Get user emails for enabled users only
+    const { data: users, error: usersError } = await supabase
+      .from("profiles")
+      .select("id, email")
+      .in("id", enabledUserIds);
+
+    if (usersError) throw usersError;
+
+    // Send emails using Resend
+    const emailPromises = (users || []).map(async (user: any) => {
+      if (!user.email) return { skipped: true, reason: "no email" };
+
+      const emailHtml = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -64,52 +100,57 @@ serve(async (req) => {
             </div>
             <div class="content">
               <p>${notification.message.replace(/\n/g, '<br>')}</p>
-              <a href="${supabaseUrl.replace('/rest/v1', '')}/notifications" class="button">
+              <a href="https://kolaydugun.de/notifications" class="button">
                 Bildirimleri Görüntüle
               </a>
             </div>
             <div class="footer">
               <p>KolayDugun.de Ekibi</p>
-              <p><small>Bu e-postayı almak istemiyorsanız, hesap ayarlarınızdan bildirim tercihlerinizi güncelleyebilirsiniz.</small></p>
+              <p><small>Bu e-postayı almak istemiyorsanız, <a href="https://kolaydugun.de/notifications">hesap ayarlarınızdan</a> bildirim tercihlerinizi güncelleyebilirsiniz.</small></p>
             </div>
           </div>
         </body>
         </html>
       `;
 
-            const response = await fetch("https://api.resend.com/emails", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${resendApiKey}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    from: "KolayDugun.de <noreply@kolaydugun.de>",
-                    to: user.email,
-                    subject: `🔔 ${notification.title}`,
-                    html: emailHtml
-                })
-            });
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          from: "KolayDugun.de <noreply@kolaydugun.de>",
+          to: user.email,
+          subject: `🔔 ${notification.title}`,
+          html: emailHtml
+        })
+      });
 
-            return response.json();
-        });
+      return response.json();
+    });
 
-        const results = await Promise.allSettled(emailPromises);
+    const results = await Promise.allSettled(emailPromises);
 
-        // Update email_sent_at timestamp
-        await supabase
-            .from("admin_notifications")
-            .update({ email_sent_at: new Date().toISOString() })
-            .eq("id", notification_id);
+    // Update email_sent_at timestamp
+    await supabase
+      .from("admin_notifications")
+      .update({ email_sent_at: new Date().toISOString() })
+      .eq("id", notification_id);
 
-        return new Response(JSON.stringify({
-            success: true,
-            sent: results.filter(r => r.status === "fulfilled").length,
-            failed: results.filter(r => r.status === "rejected").length
-        }), { status: 200 });
+    const sent = results.filter(r => r.status === "fulfilled").length;
+    const skipped = user_ids.length - enabledUserIds.length;
 
-    } catch (e) {
-        console.error(e);
-        return new Response(JSON.stringify({ error: e.message || "Server error" }), { status: 500 });
-    }
+    return new Response(JSON.stringify({
+      success: true,
+      sent: sent,
+      skipped: skipped,
+      failed: results.filter(r => r.status === "rejected").length,
+      message: skipped > 0 ? `${skipped} kullanıcı e-posta bildirimlerini kapatmış` : undefined
+    }), { status: 200 });
+
+  } catch (e) {
+    console.error(e);
+    return new Response(JSON.stringify({ error: e.message || "Server error" }), { status: 500 });
+  }
 });

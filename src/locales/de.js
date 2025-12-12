@@ -4,7 +4,11 @@ export const de = {
         "inspiration": "Inspiration",
         "tools": "Planungstools",
         "vendorJoin": "Für Dienstleister",
-        "registerBtn": "Registrieren"
+        "registerBtn": "Registrieren",
+        "messages": "Chat",
+        "logout": "Logout",
+        "dashboard": "Panel",
+        "forum": "Forum"
     },
     "hero": {
         "title": "Ihre Traumhochzeit in Deutschland",

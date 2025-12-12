@@ -310,8 +310,15 @@ const AdminDashboard = () => {
     return (
         <div className="section container admin-dashboard-container">
             <div className="admin-dashboard-header">
-                <h1>Admin Dashboard</h1>
-                <p>Pazaryeri sistemini yönetin</p>
+                <h1>👋 Hoş Geldiniz!</h1>
+                <p>
+                    {new Date().toLocaleDateString('tr-TR', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    })} • KolayDugun Yönetim Paneli
+                </p>
             </div>
 
             {/* Stats Cards */}

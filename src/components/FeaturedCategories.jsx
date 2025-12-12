@@ -73,9 +73,9 @@ const FeaturedCategories = () => {
 
     return (
         <section className="section container featured-categories">
-            <h2 className="section-title">{t('featured.title') || 'Beliebte Kategorien'}</h2>
+            <h2 className="section-title" data-aos="fade-up">{t('featured.title') || 'Beliebte Kategorien'}</h2>
             <div className="categories-grid">
-                {categories.map((cat) => {
+                {categories.map((cat, index) => {
                     const translationKey = getTranslationKey(cat.name);
                     // Try to translate, fallback to DB name
                     const translatedName = t(`featured.${translationKey}`) !== `featured.${translationKey}`
@@ -87,6 +87,8 @@ const FeaturedCategories = () => {
                             to={`/vendors?category=${cat.slug || cat.name.toLowerCase().replace(/\s+/g, '-')}`}
                             key={cat.id}
                             className="category-card"
+                            data-aos="fade-up"
+                            data-aos-delay={index * 100}
                         >
                             <div className="category-image-wrapper">
                                 {cat.image_url ? (

@@ -117,6 +117,14 @@ const NotificationBell = () => {
             case 'campaign': return '🎉';
             case 'system': return '🔔';
             case 'new_message': return '💬';
+            case 'forum_comment': return '💬';
+            case 'forum_like': return '❤️';
+            // Admin notification types
+            case 'admin_new_lead': return '📋';
+            case 'admin_new_vendor': return '🏢';
+            case 'admin_new_contact': return '✉️';
+            case 'admin_forum_report': return '🚩';
+            case 'admin_new_user': return '👤';
             default: return '📬';
         }
     };
@@ -216,6 +224,20 @@ const NotificationBell = () => {
                                     linkTo = leadId ? `/vendor/dashboard?tab=leads&leadId=${leadId}` : '/vendor/dashboard?tab=leads';
                                 } else if (notifType === 'contact_form' || (notifType === 'system' && notifTitle.includes('İletişim Mesajı'))) {
                                     linkTo = '/admin/leads';
+                                } else if (notifType === 'forum_comment' || notifType === 'forum_like') {
+                                    linkTo = item.deep_link || '/community';
+                                }
+                                // Admin notification types - use deep_link if available
+                                else if (notifType === 'admin_new_lead') {
+                                    linkTo = item.deep_link || '/admin/leads';
+                                } else if (notifType === 'admin_new_vendor') {
+                                    linkTo = item.deep_link || '/admin/vendors';
+                                } else if (notifType === 'admin_new_contact') {
+                                    linkTo = item.deep_link || '/admin/messages';
+                                } else if (notifType === 'admin_forum_report') {
+                                    linkTo = item.deep_link || '/admin/forum-moderation';
+                                } else if (notifType === 'admin_new_user') {
+                                    linkTo = item.deep_link || '/admin/users';
                                 }
 
                                 // Title Cleanup

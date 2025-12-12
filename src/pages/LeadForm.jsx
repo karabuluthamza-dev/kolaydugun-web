@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../supabaseClient';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { getCategoryTranslationKey } from '../constants/vendorData';
+import { adminNotifications } from '../utils/adminNotifications';
 import './LeadForm.css';
 
 const LeadForm = () => {
@@ -116,6 +117,16 @@ const LeadForm = () => {
             } catch (emailError) {
                 console.error('Email sending failed:', emailError);
                 // Don't block success flow if email fails
+            }
+
+            // Send admin panel notification
+            try {
+                await adminNotifications.newLead({
+                    contact_name: formData.contact_name,
+                    contact_email: formData.contact_email
+                });
+            } catch (notifError) {
+                console.error('Admin notification failed:', notifError);
             }
 
             // Show success message

@@ -8,7 +8,11 @@ import { CATEGORIES, CITIES, getCategoryTranslationKey } from '../../constants/v
 // Note: This requires the ANON key, which is public.
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const tempClient = createClient(supabaseUrl, supabaseAnonKey);
+const tempClient = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        persistSession: false
+    }
+});
 
 const VendorCreateModal = ({ onClose, onCreated }) => {
     const { t } = useLanguage();

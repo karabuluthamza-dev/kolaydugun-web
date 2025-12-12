@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
-
 @import './theme.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --color-bg: #FFF9F5;
@@ -29,6 +32,12 @@
   --shadow-md: 0 8px 24px rgba(255, 107, 157, 0.15);
 
   --header-height: 80px;
+
+  /* Compatibility Aliases */
+  --primary: var(--color-primary);
+  --primary-color: var(--color-primary);
+  --text-primary: var(--color-text);
+  --text-secondary: var(--color-secondary);
 }
 
 * {

@@ -9,6 +9,7 @@ import './AdminConfig.css';
 import AIBlogGenerator from '../components/Admin/AIBlogGenerator';
 import AffiliateSlotManager from '../components/Admin/AffiliateSlotManager';
 import ContentRepurposer from '../components/Admin/ContentRepurposer';
+import BulkImageOptimizer from '../components/Admin/BulkImageOptimizer';
 import { generateInternalLinks } from '../utils/seoHelpers';
 
 const AdminBlog = () => {
@@ -23,6 +24,7 @@ const AdminBlog = () => {
     // AI & Affiliate State
     const [showAIGenerator, setShowAIGenerator] = useState(false);
     const [showRepurposer, setShowRepurposer] = useState(false);
+    const [showImageOptimizer, setShowImageOptimizer] = useState(false);
     const [affiliateSlots, setAffiliateSlots] = useState([]);
     const [imageKeywords, setImageKeywords] = useState([]);
     const [aiImagePrompt, setAiImagePrompt] = useState('');
@@ -780,6 +782,13 @@ const AdminBlog = () => {
                     >
                         ⚙️ Vitrin Ayarları
                     </button>
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => setShowImageOptimizer(true)}
+                        style={{ background: '#10b981', color: 'white', border: 'none' }}
+                    >
+                        📸 Resimleri Optimize Et
+                    </button>
                     {selectedPosts.length > 0 && (
                         <button
                             className="btn btn-danger"
@@ -798,6 +807,10 @@ const AdminBlog = () => {
                     onClose={() => setShowAIGenerator(false)}
                     onGenerate={handleAIGenerated}
                 />
+            )}
+
+            {showImageOptimizer && (
+                <BulkImageOptimizer onClose={() => setShowImageOptimizer(false)} />
             )}
 
             {showShowcaseSettings && (

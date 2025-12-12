@@ -61,6 +61,7 @@ const Navbar = () => {
                 <div className={`navbar-links ${isMobileMenuOpen ? 'active' : ''}`}>
                     <Link to="/vendors" className="navbar-link" onClick={closeMobileMenu}>{t('nav.services')}</Link>
                     <Link to="/blog" className="navbar-link" onClick={closeMobileMenu}>Blog</Link>
+                    <Link to="/community" className="navbar-link text-purple-600 font-medium" onClick={closeMobileMenu}>{t('nav.forum')}</Link>
 
                     <Link to="/tools" className="navbar-link" onClick={closeMobileMenu}>{t('nav.tools')}</Link>
                     <Link to="/vendor-landing" className="navbar-link" onClick={closeMobileMenu}>{t('nav.vendorJoin')}</Link>
@@ -70,22 +71,76 @@ const Navbar = () => {
                         <LanguageSwitcher />
                         {user ? (
                             <>
+                                <NotificationBell />
                                 <Link
-                                    to={user.role === 'admin' ? '/admin' : user.role === 'vendor' ? '/vendor/dashboard' : '/user-dashboard'}
+                                    to={user.role === 'admin' ? '/admin' : user.role === 'vendor' ? '/vendor/dashboard' : '/dashboard'}
                                     className="navbar-link"
                                     onClick={closeMobileMenu}
-                                    style={{ position: 'relative' }}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        background: 'linear-gradient(135deg, #FF6B9D, #FF8E53)',
+                                        color: 'white',
+                                        padding: '10px 20px',
+                                        borderRadius: '25px',
+                                        margin: '5px 0',
+                                        position: 'relative',
+                                        boxShadow: '0 4px 15px rgba(255, 107, 157, 0.3)'
+                                    }}
                                 >
-                                    {t('nav.dashboard') || 'Panelim'}
+                                    🎯 {t('nav.dashboard') || 'Panel'}
                                     {user.role === 'vendor' && unreadCount > 0 && (
-                                        <span className="unread-badge">{unreadCount}</span>
+                                        <span className="unread-badge" style={{
+                                            position: 'absolute',
+                                            top: '-5px',
+                                            right: '-5px'
+                                        }}>{unreadCount}</span>
                                     )}
                                 </Link>
+                                {(user.role === 'couple' || user.role === 'vendor') && (
+                                    <Link
+                                        to="/profile"
+                                        className="navbar-link"
+                                        onClick={closeMobileMenu}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            background: 'linear-gradient(135deg, #9333ea, #c084fc)',
+                                            color: 'white',
+                                            padding: '10px 20px',
+                                            borderRadius: '25px',
+                                            margin: '5px 0'
+                                        }}
+                                    >
+                                        👤 Profil
+                                    </Link>
+                                )}
                                 {user.role === 'couple' && (
-                                    <Link to="/messages" className="navbar-link" onClick={closeMobileMenu}>
+                                    <Link
+                                        to="/messages"
+                                        className="navbar-link"
+                                        onClick={closeMobileMenu}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            background: 'linear-gradient(135deg, #ff6b6b, #ff8e53)',
+                                            color: 'white',
+                                            padding: '10px 20px',
+                                            borderRadius: '25px',
+                                            margin: '5px 0',
+                                            position: 'relative'
+                                        }}
+                                    >
                                         💬 {t('nav.messages')}
                                         {unreadCount > 0 && (
-                                            <span className="unread-badge">{unreadCount}</span>
+                                            <span className="unread-badge" style={{
+                                                position: 'absolute',
+                                                top: '-5px',
+                                                right: '-5px'
+                                            }}>{unreadCount}</span>
                                         )}
                                     </Link>
                                 )}
@@ -109,7 +164,7 @@ const Navbar = () => {
                         <div className="navbar-user">
                             <NotificationBell />
                             <Link
-                                to={user.role === 'admin' ? '/admin' : user.role === 'vendor' ? '/vendor/dashboard' : '/user-dashboard'}
+                                to={user.role === 'admin' ? '/admin' : user.role === 'vendor' ? '/vendor/dashboard' : '/dashboard'}
                                 className="btn-dashboard"
                                 style={{ position: 'relative' }}
                             >
@@ -118,23 +173,52 @@ const Navbar = () => {
                                     <span className="unread-badge">{unreadCount}</span>
                                 )}
                             </Link>
+                            {(user.role === 'couple' || user.role === 'vendor') && (
+                                <Link
+                                    to="/profile"
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        background: '#9333ea',
+                                        color: 'white',
+                                        padding: '6px 10px',
+                                        borderRadius: '18px',
+                                        textDecoration: 'none',
+                                        fontWeight: '500',
+                                        fontSize: '0.8rem',
+                                        transition: 'all 0.2s ease',
+                                        boxShadow: '0 2px 6px rgba(147, 51, 234, 0.25)'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.transform = 'translateY(-1px)';
+                                        e.target.style.boxShadow = '0 4px 12px rgba(147, 51, 234, 0.4)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.transform = 'translateY(0)';
+                                        e.target.style.boxShadow = '0 2px 8px rgba(147, 51, 234, 0.3)';
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1rem' }}>👤</span>
+                                    <span>Profil</span>
+                                </Link>
+                            )}
                             {user.role === 'couple' && (
                                 <Link
                                     to="/messages"
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: '8px',
+                                        gap: '4px',
                                         background: '#ff6b6b',
                                         color: 'white',
-                                        padding: '8px 16px',
-                                        borderRadius: '20px',
+                                        padding: '6px 10px',
+                                        borderRadius: '18px',
                                         textDecoration: 'none',
                                         fontWeight: '500',
-                                        fontSize: '0.9rem',
-                                        marginRight: '10px',
+                                        fontSize: '0.8rem',
                                         transition: 'all 0.2s ease',
-                                        boxShadow: '0 2px 8px rgba(255, 107, 107, 0.3)',
+                                        boxShadow: '0 2px 6px rgba(255, 107, 107, 0.25)',
                                         position: 'relative'
                                     }}
                                     onMouseEnter={(e) => {
@@ -163,9 +247,31 @@ const Navbar = () => {
                                     )}
                                 </Link>
                             )}
-                            <span className="user-name">{user.name || user.full_name || user.email}</span>
-                            <button onClick={handleLogout} className="btn-logout" aria-label="Logout">
-                                {t('nav.logout')}
+                            <button
+                                onClick={handleLogout}
+                                className="btn-logout"
+                                aria-label="Logout"
+                                style={{
+                                    background: 'transparent',
+                                    border: '1px solid #e0e0e0',
+                                    color: '#666',
+                                    padding: '6px 12px',
+                                    borderRadius: '20px',
+                                    fontSize: '0.85rem',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    whiteSpace: 'nowrap'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.borderColor = '#ff6b6b';
+                                    e.target.style.color = '#ff6b6b';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.borderColor = '#e0e0e0';
+                                    e.target.style.color = '#666';
+                                }}
+                            >
+                                🚪 {t('nav.logout')}
                             </button>
                         </div>
                     ) : (

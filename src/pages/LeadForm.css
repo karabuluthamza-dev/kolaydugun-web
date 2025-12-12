@@ -11,7 +11,8 @@
 
 .lead-form-header h1 {
     font-size: 2.5rem;
-    color: var(--primary);
+    color: #FF6B9D !important;
+    /* Fallback to Pink if var fails */
     margin-bottom: 10px;
 }
 

@@ -34,6 +34,50 @@ const ImageUpload = ({ onUploadComplete, currentImageUrl = '', folder = 'blog' }
         }
     };
 
+    // Compress and resize image before upload
+    const compressImage = (file, maxWidth = 1920, quality = 0.8) => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Only resize if larger than maxWidth
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convert to blob with compression
+                    canvas.toBlob(
+                        (blob) => {
+                            // Create a new File from the blob
+                            const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            console.log(`📸 Image compressed: ${(file.size / 1024).toFixed(1)}KB → ${(compressedFile.size / 1024).toFixed(1)}KB (${Math.round((1 - compressedFile.size / file.size) * 100)}% smaller)`);
+                            resolve(compressedFile);
+                        },
+                        'image/jpeg',
+                        quality
+                    );
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
     const handleFile = async (file) => {
         // Validate file type
         if (!file.type.startsWith('image/')) {
@@ -41,37 +85,55 @@ const ImageUpload = ({ onUploadComplete, currentImageUrl = '', folder = 'blog' }
             return;
         }
 
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            alert('Dosya boyutu 5MB\'dan küçük olmalıdır');
+        // Validate file size (max 10MB before compression)
+        if (file.size > 10 * 1024 * 1024) {
+            alert('Dosya boyutu 10MB\'dan küçük olmalıdır');
             return;
         }
 
         setUploading(true);
 
         try {
-            // Create unique filename
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-            const filePath = `${folder}/${fileName}`;
+            // Generate unique base filename
+            const baseFileName = `${Math.random().toString(36).substring(2)}-${Date.now()}`;
 
-            // Upload to Supabase Storage
-            const { data, error } = await supabase.storage
-                .from('blog-images')
-                .upload(filePath, file, {
-                    cacheControl: '3600',
-                    upsert: false
-                });
+            // Define image sizes
+            const sizes = [
+                { name: 'hero', width: 1920, quality: 0.85 },
+                { name: 'card', width: 600, quality: 0.80 }
+            ];
 
-            if (error) throw error;
+            const uploadedUrls = {};
 
-            // Get public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('blog-images')
-                .getPublicUrl(filePath);
+            // Upload each size
+            for (const size of sizes) {
+                const compressedFile = await compressImage(file, size.width, size.quality);
+                const filePath = `${folder}/${baseFileName}_${size.name}.jpg`;
 
-            setPreview(publicUrl);
-            onUploadComplete(publicUrl);
+                const { error } = await supabase.storage
+                    .from('blog-images')
+                    .upload(filePath, compressedFile, {
+                        cacheControl: '31536000',
+                        upsert: false
+                    });
+
+                if (error) throw error;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('blog-images')
+                    .getPublicUrl(filePath);
+
+                uploadedUrls[size.name] = publicUrl;
+                console.log(`📸 Uploaded ${size.name}: ${(compressedFile.size / 1024).toFixed(0)}KB`);
+            }
+
+            // Use hero as main preview
+            setPreview(uploadedUrls.hero);
+
+            // Pass hero URL as main (for backward compatibility)
+            // But also pass all URLs if the parent can use them
+            onUploadComplete(uploadedUrls.hero, uploadedUrls);
+
         } catch (error) {
             console.error('Upload error:', error);
             alert('Yükleme hatası: ' + error.message);

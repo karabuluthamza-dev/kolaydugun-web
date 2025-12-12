@@ -12,13 +12,16 @@ const Register = () => {
         title: t('register.title'),
         description: 'Create a new account on KolayDugun.de.'
     });
-    const [userType, setUserType] = useState('couple');
+
+    // Initial state is null to show selection screen first
+    const [userType, setUserType] = useState(null);
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: '',
         confirmPassword: '',
-        // Vendor specific - ONLY basic info during registration
+        // Vendor specific
         category: 'Wedding Venues',
         location: '',
         promoCode: ''
@@ -37,6 +40,8 @@ const Register = () => {
         const type = searchParams.get('type');
         if (type === 'vendor') {
             setUserType('vendor');
+        } else if (type === 'couple') {
+            setUserType('couple');
         }
     }, [searchParams]);
 
@@ -110,25 +115,80 @@ const Register = () => {
         );
     }
 
+    // SELECTION SCREEN UI (if userType is not selected)
+    if (!userType) {
+        return (
+            <div className="section container register-container">
+                <div className="register-card" style={{ maxWidth: '800px' }}>
+                    <h2 className="register-title" style={{ marginBottom: '40px' }}>{t('register.title')}</h2>
+                    <p style={{ textAlign: 'center', marginBottom: '40px', color: '#666', fontSize: '1.1rem' }}>
+                        {t('register.selectTypeParams')}
+                    </p>
+
+                    <div className="selection-grid">
+                        {/* Couple Selection Card */}
+                        <div
+                            onClick={() => setUserType('couple')}
+                            className="selection-card couple group"
+                        >
+                            <div className="card-icon group-hover:bg-pink-100">
+                                👰‍♀️
+                            </div>
+                            <h3 className="card-title">{t('register.forCouples')}</h3>
+                            <p className="card-desc">
+                                {t('register.coupleDesc')}
+                            </p>
+                            <div className="card-action">
+                                {t('common.select')} <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                            </div>
+                        </div>
+
+                        {/* Vendor Selection Card */}
+                        <div
+                            onClick={() => setUserType('vendor')}
+                            className="selection-card vendor group"
+                        >
+                            <div className="card-icon group-hover:bg-purple-100">
+                                🏢
+                            </div>
+                            <h3 className="card-title">{t('register.forVendors')}</h3>
+                            <p className="card-desc">
+                                {t('register.vendorDesc')}
+                            </p>
+                            <div className="card-action">
+                                {t('common.select')} <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p className="login-link" style={{ marginTop: '40px' }}>
+                        {t('register.loginLink')} <Link to="/login">{t('login.title')}</Link>
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    // FORM UI (if userType is selected)
     return (
         <div className="section container register-container">
             <div className="register-card">
+                {/* Back Button */}
+                <button
+                    onClick={() => setUserType(null)}
+                    className="mb-6 flex items-center text-sm text-gray-500 hover:text-gray-800 transition-colors"
+                    title={t('common.back', 'Geri Dön')}
+                >
+                    ← {t('common.back', 'Geri')}
+                </button>
+
                 <h2 className="register-title">{t('register.title')}</h2>
                 <div className="user-type-toggle">
-
-                    <button
-                        className={`toggle-btn ${userType === 'couple' ? 'active' : ''}`}
-                        onClick={() => setUserType('couple')}
-                    >
-                        {t('register.forCouples')}
-                    </button>
-                    <button
-                        className={`toggle-btn ${userType === 'vendor' ? 'active' : ''}`}
-                        onClick={() => setUserType('vendor')}
-                    >
-                        {t('register.forVendors')}
-                    </button>
+                    <div className={`px-4 py-2 rounded-full font-bold text-sm ${userType === 'couple' ? 'bg-pink-50 text-pink-600' : 'bg-purple-50 text-purple-600'}`}>
+                        {userType === 'couple' ? `👰‍♀️ ${t('register.forCouples')}` : `🏢 ${t('register.forVendors')}`}
+                    </div>
                 </div>
+
                 <form onSubmit={handleSubmit} noValidate>
                     {/* Common fields */}
                     <div className="form-group">

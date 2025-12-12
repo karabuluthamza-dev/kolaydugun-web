@@ -1,0 +1,76 @@
+.trust-badges-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+    margin-bottom: 10px;
+}
+
+.trust-badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.trust-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+}
+
+.trust-badge-icon {
+    font-size: 1.1rem;
+}
+
+.trust-badge-text {
+    font-size: 0.8rem;
+}
+
+/* Separator between badges - desktop only */
+@media (min-width: 769px) {
+    .trust-badge:not(:last-child)::after {
+        content: '|';
+        margin-left: 16px;
+        opacity: 0.4;
+        font-weight: 300;
+    }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .trust-badges-container {
+        margin-top: 12px;
+        padding: 0 10px;
+    }
+
+    .trust-badges {
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 16px;
+    }
+
+    .trust-badge {
+        font-size: 0.75rem;
+        gap: 4px;
+    }
+
+    .trust-badge-icon {
+        font-size: 0.95rem;
+    }
+
+    .trust-badge-text {
+        font-size: 0.7rem;
+    }
+}
