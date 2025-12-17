@@ -767,6 +767,13 @@ export const dictionary = {
             tr: "Yol Tarifi Al"
         }
     },
+    mobileNav: {
+        home: { en: "Home", de: "Startseite", tr: "Ana Sayfa" },
+        shop: { en: "Shop", de: "Shop", tr: "Mağaza" },
+        vendors: { en: "Vendors", de: "Dienstleister", tr: "Tedarikçiler" },
+        forum: { en: "Forum", de: "Forum", tr: "Forum" },
+        profile: { en: "Profile", de: "Profil", tr: "Profil" }
+    },
     nav: {
         services: {
             en: "Services",

@@ -7,35 +7,38 @@ import {
     MessageSquare,
     User
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 import './MobileBottomNav.css';
 
 const MobileBottomNav = () => {
+    const { t, language } = useLanguage();
+
     return (
         <nav className="mobile-bottom-nav lg:hidden">
             <div className="mobile-nav-container">
                 <NavLink to="/" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                     <Home className="nav-icon" />
-                    <span>Ana Sayfa</span>
+                    <span>{t('mobileNav.home')}</span>
                 </NavLink>
 
-                <NavLink to="/tr/shop" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                <NavLink to={`/${language}/shop`} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                     <ShoppingBag className="nav-icon" />
-                    <span>Mağaza</span>
+                    <span>{t('mobileNav.shop')}</span>
                 </NavLink>
 
                 <NavLink to="/vendors" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                     <Users className="nav-icon" />
-                    <span>Tedarikçiler</span>
+                    <span>{t('mobileNav.vendors')}</span>
                 </NavLink>
 
                 <NavLink to="/community" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                     <MessageSquare className="nav-icon" />
-                    <span>Forum</span>
+                    <span>{t('mobileNav.forum')}</span>
                 </NavLink>
 
                 <NavLink to="/profile" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                     <User className="nav-icon" />
-                    <span>Profil</span>
+                    <span>{t('mobileNav.profile')}</span>
                 </NavLink>
             </div>
         </nav>

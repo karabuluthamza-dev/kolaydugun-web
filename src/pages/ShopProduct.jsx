@@ -796,11 +796,17 @@ const ShopProduct = () => {
             <div className="mobile-sticky-cta-footer lg:hidden">
                 <div className="sticky-cta-container">
                     <div className="sticky-cta-price">
-                        <span className="sticky-price-currency">€</span>
-                        <span className="sticky-price-amount">{product.price}</span>
+                        {product.price ? (
+                            <>
+                                <span className="sticky-price-currency">€</span>
+                                <span className="sticky-price-amount">{product.price}</span>
+                            </>
+                        ) : (
+                            <span className="sticky-price-amount" style={{ fontSize: '1rem' }}>{t.priceOnRequest}</span>
+                        )}
                     </div>
                     <button className="sticky-cta-button" onClick={handleCta}>
-                        {isAmazon ? `Amazon'da Gör` : t.contact}
+                        {isAmazon ? t.viewOnAmazon : t.contact}
                     </button>
                 </div>
             </div>
