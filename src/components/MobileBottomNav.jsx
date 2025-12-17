@@ -26,6 +26,15 @@ const MobileBottomNav = () => {
                     <span>{t('mobileNav.shop')}</span>
                 </NavLink>
 
+                <div className="mobile-nav-action-wrapper">
+                    <NavLink to="/contact" className="mobile-nav-action-btn">
+                        <div className="action-btn-inner">
+                            <span className="action-icon">💌</span>
+                        </div>
+                        <span className="action-label">{t('hero.getFreeQuote') || t('mobileNav.quote')}</span>
+                    </NavLink>
+                </div>
+
                 <NavLink to="/vendors" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                     <Users className="nav-icon" />
                     <span>{t('mobileNav.vendors')}</span>
