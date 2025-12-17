@@ -28,7 +28,24 @@ const menuDescriptions = {
     '/admin/forum-categories': 'Forum kategorilerini (Mekan Tavsiyeleri, Düğün Hikayeleri vb.) yönetin.',
     '/admin/forum-ghosts': 'Hayalet kullanıcılar - foruma gerçekçi görünüm katmak için sahte hesaplar.',
     '/admin/forum-bots': 'Bot kullanıcılar oluşturun, konu açtırın ve yorum yaptırın.',
-    '/admin/forum-moderation': 'Forum içeriklerini denetleyin, şikayetleri yönetin, kullanıcıları yasaklayın.'
+    '/admin/forum-moderation': 'Forum içeriklerini denetleyin, şikayetleri yönetin, kullanıcıları yasaklayın.',
+    '/admin/shop': 'Shop modülü genel yönetimi - kategoriler ve ürünler.',
+    '/admin/shop-accounts': 'Bağımsız shop marketplace mağaza hesaplarını yönetin, plan ve affiliate kodları.',
+    '/admin/shop-categories': 'Shop kategorilerini ekleyin, düzenleyin ve sıralayın.',
+    '/admin/shop-products': 'Boutique ve tedarikçi ürünlerini onaylayın, düzenleyin veya reddedin.',
+    '/admin/shop-inquiries': 'Boutique ürünleri için gelen iletişim taleplerini yanıtlayın.',
+    '/admin/shop-applications': 'Yeni mağaza başvurularını inceleyin, onaylayın veya reddedin.',
+    '/admin/shop-settings': 'Shop marketplace plan fiyatları, affiliate oranları ve genel ayarlar.',
+    '/admin/shop-commissions': 'Affiliate komisyonlarını yönetin, bekleyen ödemeleri onaylayın.',
+    '/admin/shop-plans': 'Starter, Business, Premium paket özelliklerini ve fiyatlarını düzenleyin.',
+    '/admin/shop-faqs': 'Tedarikçilerin göreceği sık sorulan soruları yönetin.',
+    '/admin/shop-announcements': 'Tüm mağaza sahiplerine duyuru ve bildirim gönderin.',
+    '/admin/shop-product-requests': 'Tedarikçilerin ana shop\'ta yayınlanma taleplerini onayla veya reddet.',
+    // Amazon Affiliate
+    '/admin/amazon': 'Amazon affiliate dashboard - AI önerileri, günlük görevler ve performans.',
+    '/admin/amazon/products': 'Amazon ürünlerini listele, düzenle ve yönet.',
+    '/admin/amazon/add': 'Amazon linkinden otomatik ürün bilgisi çekip ekle.',
+    '/admin/amazon/settings': 'Affiliate tag, Gemini API ve otomatik kontrol ayarları.'
 };
 
 // Sayfa başlıkları
@@ -57,7 +74,24 @@ const pageTitles = {
     '/admin/forum-ghosts': 'Hayalet Modu',
     '/admin/forum-bots': 'Bot Yönetimi',
     '/admin/forum-moderation': 'Moderasyon',
-    '/admin/analytics': 'Analitikler'
+    '/admin/shop': 'Mağaza',
+    '/admin/shop-accounts': 'Mağaza Hesapları',
+    '/admin/shop-categories': 'Shop Kategorileri',
+    '/admin/shop-products': 'Shop Ürünleri',
+    '/admin/shop-inquiries': 'İletişim Talepleri',
+    '/admin/shop-applications': 'Başvurular',
+    '/admin/shop-settings': 'Shop Ayarları',
+    '/admin/shop-plans': 'Shop Paketleri',
+    '/admin/shop-faqs': 'Tedarikçi SSS',
+    '/admin/shop-announcements': 'Tedarikçi Duyuruları',
+    '/admin/shop-product-requests': 'Ürün Başvuruları',
+    '/admin/shop-commissions': 'Komisyonlar',
+    '/admin/analytics': 'Analitikler',
+    // Amazon Affiliate
+    '/admin/amazon': '💰 Para Makinesi',
+    '/admin/amazon/products': 'Amazon Ürünleri',
+    '/admin/amazon/add': 'Ürün Ekle',
+    '/admin/amazon/settings': 'Amazon Ayarları'
 };
 
 // NavItem komponenti - tooltip ile
@@ -84,6 +118,23 @@ const AdminLayout = () => {
     const location = useLocation();
     const [currentTime, setCurrentTime] = useState(new Date());
 
+    // 🔒 SECURITY: Double-check admin role (defense-in-depth)
+    useEffect(() => {
+        const userRole = user?.role || user?.user_metadata?.role;
+        if (!user) {
+            console.warn('⚠️ SECURITY: No user in AdminLayout, redirecting to login');
+            navigate('/login', { replace: true });
+            return;
+        }
+        if (userRole !== 'admin') {
+            console.warn('⚠️ SECURITY: Non-admin user in AdminLayout!', {
+                userId: user.id,
+                userRole: userRole
+            });
+            navigate('/', { replace: true });
+        }
+    }, [user, navigate]);
+
     // Saat güncelleme
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 60000);
@@ -104,6 +155,12 @@ const AdminLayout = () => {
         const path = location.pathname;
         return pageTitles[path] || 'Yönetim Paneli';
     };
+
+    // Non-admin user check - show nothing while redirecting
+    const userRole = user?.role || user?.user_metadata?.role;
+    if (!user || userRole !== 'admin') {
+        return null;
+    }
 
     return (
         <div className="admin-layout">
@@ -143,6 +200,27 @@ const AdminLayout = () => {
                     <div className="admin-nav-label">Finans</div>
                     <NavItem to="/admin/pricing" icon="💰" label="Fiyatlandırma" />
                     <NavItem to="/admin/finance" icon="📊" label="Finans" />
+
+                    <div className="admin-nav-divider"></div>
+                    <div className="admin-nav-label">Mağaza</div>
+                    <NavItem to="/admin/shop-applications" icon="📋" label="Başvurular" />
+                    <NavItem to="/admin/shop-accounts" icon="🏪" label="Mağaza Hesapları" />
+                    <NavItem to="/admin/shop-categories" icon="🏷️" label="Shop Kategorileri" />
+                    <NavItem to="/admin/shop-products" icon="🛍️" label="Shop Ürünleri" />
+                    <NavItem to="/admin/shop-product-requests" icon="📥" label="Ürün Başvuruları" />
+                    <NavItem to="/admin/shop-inquiries" icon="📩" label="İletişim Talepleri" />
+                    <NavItem to="/admin/shop-plans" icon="💎" label="Shop Paketleri" />
+                    <NavItem to="/admin/shop-faqs" icon="❓" label="Tedarikçi SSS" />
+                    <NavItem to="/admin/shop-announcements" icon="📢" label="Tedarikçi Duyuruları" />
+                    <NavItem to="/admin/shop-commissions" icon="💸" label="Komisyonlar" />
+                    <NavItem to="/admin/shop-settings" icon="⚙️" label="Shop Ayarları" />
+
+                    <div className="admin-nav-divider"></div>
+                    <div className="admin-nav-label">💰 Para Makinesi</div>
+                    <NavItem to="/admin/amazon" icon="💰" label="Dashboard" />
+                    <NavItem to="/admin/amazon/products" icon="📦" label="Amazon Ürünleri" />
+                    <NavItem to="/admin/amazon/add" icon="➕" label="Ürün Ekle" />
+                    <NavItem to="/admin/amazon/settings" icon="⚙️" label="Amazon Ayarları" />
 
                     <div className="admin-nav-divider"></div>
                     <div className="admin-nav-label">Ayarlar</div>

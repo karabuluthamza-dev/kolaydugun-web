@@ -1,9 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
 
 console.log("Hello from Functions!");
 
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 serve(async (req) => {
     // Handle CORS
@@ -12,6 +15,41 @@ serve(async (req) => {
     }
 
     try {
+        // 🔒 SECURITY: Verify admin role
+        const authHeader = req.headers.get("Authorization");
+        if (!authHeader) {
+            return new Response(JSON.stringify({ error: "Unauthorized - No auth token" }), {
+                status: 401,
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+        }
+
+        const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+        const token = authHeader.replace("Bearer ", "");
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+        if (authError || !user) {
+            return new Response(JSON.stringify({ error: "Unauthorized - Invalid token" }), {
+                status: 401,
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+        }
+
+        // Check if user is admin
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+        if (profile?.role !== "admin") {
+            console.warn(`⚠️ SECURITY: Non-admin user ${user.id} attempted to generate blog post`);
+            return new Response(JSON.stringify({ error: "Forbidden - Admin access required" }), {
+                status: 403,
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+        }
+
         const { topic, audience, tone, length, instructions } = await req.json();
 
         if (!OPENAI_API_KEY) {

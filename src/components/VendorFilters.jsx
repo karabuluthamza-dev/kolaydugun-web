@@ -98,7 +98,6 @@ const VendorFilters = ({ filters, onFilterChange, userLocation, onLocationReques
             {/* Dynamic Filters from Schema */}
             {filters.category && dynamicSchema.length > 0 && (
                 <div className="dynamic-filters-section" style={{ borderBottom: '1px solid #eee', marginBottom: '15px', paddingBottom: '15px' }}>
-                    <h4 style={{ fontSize: '1rem', color: '#666', marginBottom: '10px' }}>{filters.category} {t('common.options') || 'Seçenekleri'}</h4>
                     {dynamicSchema.map(field => {
                         if (field.type === 'select' || field.type === 'multiselect') {
                             return (

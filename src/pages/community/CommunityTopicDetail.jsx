@@ -4,6 +4,7 @@ import { supabase } from '../../supabaseClient';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { adminNotifications } from '../../utils/adminNotifications';
+import DOMPurify from 'dompurify';
 import * as LucideIcons from 'lucide-react';
 
 const CommunityTopicDetail = () => {
@@ -519,7 +520,7 @@ const CommunityTopicDetail = () => {
                                 )}
                             </h1>
                             <div className="prose prose-purple max-w-none text-gray-600 leading-relaxed mb-8">
-                                <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
                             </div>
                         </>
                     )}
@@ -782,7 +783,7 @@ const CommunityTopicDetail = () => {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="text-gray-700 text-sm leading-relaxed whitespace-pre-line" dangerouslySetInnerHTML={{ __html: comment.content }}></div>
+                                    <div className="text-gray-700 text-sm leading-relaxed whitespace-pre-line" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(comment.content) }}></div>
                                 )}
                             </div>
                         </div>

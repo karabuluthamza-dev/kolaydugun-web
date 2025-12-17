@@ -21,7 +21,9 @@ const AdminDashboard = () => {
         conversionRate: 0,
         pendingCreditRequests: 0,
         totalRevenue: 0,
-        todayLeads: 0
+        todayLeads: 0,
+        pendingCommissions: 0,
+        activeAffiliates: 0
     });
     const [recentActivity, setRecentActivity] = useState([]);
     const [chartData, setChartData] = useState({
@@ -158,6 +160,17 @@ const AdminDashboard = () => {
             .order('created_at', { ascending: false })
             .limit(5);
 
+        // Affiliate Statistics
+        const { data: affiliateEarnings } = await supabase
+            .from('shop_affiliate_earnings')
+            .select('commission_amount, status, earning_shop_id');
+
+        const pendingCommissions = affiliateEarnings
+            ?.filter(e => e.status === 'pending' || e.status === 'approved')
+            .reduce((sum, e) => sum + parseFloat(e.commission_amount || 0), 0) || 0;
+
+        const activeAffiliates = new Set(affiliateEarnings?.map(e => e.earning_shop_id)).size;
+
         // Recent Transactions (Last 5)
         const { data: recentTransactions } = await supabase
             .from('transactions')
@@ -196,7 +209,9 @@ const AdminDashboard = () => {
 
             totalRevenue: totalRevenue,
             totalPosts: postCount || 0,
-            publishedPosts: publishedPostCount || 0
+            publishedPosts: publishedPostCount || 0,
+            pendingCommissions: pendingCommissions,
+            activeAffiliates: activeAffiliates
         });
 
         setRecentActivity(combinedActivity);
@@ -376,6 +391,15 @@ const AdminDashboard = () => {
                         <small>{stats.publishedPosts || 0} Yayında</small>
                     </div>
                 </div>
+
+                <div className="stat-card" style={{ borderLeft: '4px solid #FF6B9D', background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8ef 100%)' }} onClick={() => navigate('/admin/shop-commissions')}>
+                    <div className="stat-icon">🤝</div>
+                    <div className="stat-content">
+                        <h3>Affiliate</h3>
+                        <p className="stat-number">€{stats.pendingCommissions?.toFixed(2) || '0.00'}</p>
+                        <small>{stats.activeAffiliates || 0} Aktif Referrer</small>
+                    </div>
+                </div>
             </div>
 
             {/* Charts Section */}
@@ -440,7 +464,7 @@ const AdminDashboard = () => {
                                     icon = '💰';
                                     title = `İşlem: ${item.vendors?.business_name || 'Vendor'}`;
                                     description = `€${item.amount} - ${item.type === 'credit_purchase' ? 'Kredi Alımı' : item.type === 'pro_subscription' ? 'Pro Abonelik' : item.type}`;
-                                    navPath = '/admin/analytics';
+                                    navPath = '/admin/credit-approval';
                                     statusBadge = item.status === 'completed' ? 'Tamamlandı' : item.status === 'pending' ? 'Bekliyor' : item.status;
                                     break;
 

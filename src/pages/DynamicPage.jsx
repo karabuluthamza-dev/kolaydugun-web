@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import DOMPurify from 'dompurify';
 import { useLanguage } from '../context/LanguageContext';
 import SEO from '../components/SEO';
 import './DynamicPage.css';
@@ -75,7 +76,7 @@ const DynamicPage = () => {
             <h1 className="page-title">{title}</h1>
             <div
                 className="page-content"
-                dangerouslySetInnerHTML={{ __html: content }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
             />
         </div>
     );

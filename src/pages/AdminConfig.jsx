@@ -22,7 +22,8 @@ const AdminConfig = () => {
         blog_author_avatar: '',
         trust_badges: { enabled: true, items: [] },
         cta_settings: { show_floating: false },
-        hero_settings: { use_video: false, video_url: '' }
+        hero_settings: { use_video: false, video_url: '' },
+        default_commission_rate: 10.00
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -36,6 +37,17 @@ const AdminConfig = () => {
     });
     const [sendingTestEmail, setSendingTestEmail] = useState(false);
     const [digestMessage, setDigestMessage] = useState({ type: '', text: '' });
+
+    // FAQ Management State
+    const [faqs, setFaqs] = useState([]);
+    const [editingFaq, setEditingFaq] = useState(null);
+    const [showFaqModal, setShowFaqModal] = useState(false);
+    const [faqForm, setFaqForm] = useState({
+        question_tr: '', question_de: '', question_en: '',
+        answer_tr: '', answer_de: '', answer_en: '',
+        display_order: 0, is_active: true
+    });
+    const [faqLoading, setFaqLoading] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -87,13 +99,24 @@ const AdminConfig = () => {
                 blog_author_avatar: settingsData.blog_author_avatar || '',
                 trust_badges: settingsData.trust_badges || { enabled: true, items: [] },
                 cta_settings: settingsData.cta_settings || { show_floating: false },
-                hero_settings: settingsData.hero_settings || { use_video: false, video_url: '' }
+                hero_settings: settingsData.hero_settings || { use_video: false, video_url: '' },
+                default_commission_rate: settingsData.default_commission_rate || 10.00
             });
 
             // Fetch digest settings
             if (settingsData?.admin_digest_settings) {
                 setDigestSettings(settingsData.admin_digest_settings);
             }
+        }
+
+        // Fetch FAQs
+        const { data: faqData, error: faqError } = await supabase
+            .from('shop_page_faqs')
+            .select('*')
+            .order('display_order', { ascending: true });
+
+        if (!faqError && faqData) {
+            setFaqs(faqData);
         }
 
         setLoading(false);
@@ -140,6 +163,7 @@ const AdminConfig = () => {
                     trust_badges: siteSettings.trust_badges,
                     cta_settings: siteSettings.cta_settings,
                     hero_settings: siteSettings.hero_settings,
+                    default_commission_rate: siteSettings.default_commission_rate,
                     updated_at: new Date()
                 })
                 .eq('id', 1);
@@ -233,6 +257,107 @@ const AdminConfig = () => {
         if (newPrice && !isNaN(newPrice)) {
             const updatedPrices = { ...config.featured_prices, [duration]: parseInt(newPrice) };
             updateConfig('featured_prices', updatedPrices);
+        }
+    };
+
+    // FAQ Management Functions
+    const openFaqModal = (faq = null) => {
+        setShowFaqModal(true);
+        if (faq) {
+            setEditingFaq(faq);
+            setFaqForm({
+                question_tr: faq.question_tr,
+                question_de: faq.question_de,
+                question_en: faq.question_en,
+                answer_tr: faq.answer_tr,
+                answer_de: faq.answer_de,
+                answer_en: faq.answer_en,
+                display_order: faq.display_order,
+                is_active: faq.is_active
+            });
+        } else {
+            setEditingFaq(null);
+            setFaqForm({
+                question_tr: '', question_de: '', question_en: '',
+                answer_tr: '', answer_de: '', answer_en: '',
+                display_order: faqs.length + 1, is_active: true
+            });
+        }
+    };
+
+    const closeFaqModal = () => {
+        setShowFaqModal(false);
+        setEditingFaq(null);
+        setFaqForm({
+            question_tr: '', question_de: '', question_en: '',
+            answer_tr: '', answer_de: '', answer_en: '',
+            display_order: 0, is_active: true
+        });
+    };
+
+    const saveFaq = async () => {
+        setFaqLoading(true);
+        try {
+            if (editingFaq) {
+                // Update existing FAQ
+                const { error } = await supabase
+                    .from('shop_page_faqs')
+                    .update(faqForm)
+                    .eq('id', editingFaq.id);
+                if (error) throw error;
+                alert('✅ FAQ güncellendi!');
+            } else {
+                // Create new FAQ
+                const { error } = await supabase
+                    .from('shop_page_faqs')
+                    .insert([faqForm]);
+                if (error) throw error;
+                alert('✅ Yeni FAQ eklendi!');
+            }
+            closeFaqModal();
+            fetchConfig(); // Reload FAQs
+        } catch (err) {
+            console.error('FAQ save error:', err);
+            alert('Hata: ' + err.message);
+        } finally {
+            setFaqLoading(false);
+        }
+    };
+
+    const deleteFaq = async (id) => {
+        if (!confirm('Bu FAQ\'yu silmek istediğinize emin misiniz?')) return;
+
+        setFaqLoading(true);
+        try {
+            const { error } = await supabase
+                .from('shop_page_faqs')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
+            alert('✅ FAQ silindi!');
+            fetchConfig(); // Reload FAQs
+        } catch (err) {
+            console.error('FAQ delete error:', err);
+            alert('Hata: ' + err.message);
+        } finally {
+            setFaqLoading(false);
+        }
+    };
+
+    const toggleFaqActive = async (faq) => {
+        setFaqLoading(true);
+        try {
+            const { error } = await supabase
+                .from('shop_page_faqs')
+                .update({ is_active: !faq.is_active })
+                .eq('id', faq.id);
+            if (error) throw error;
+            fetchConfig(); // Reload FAQs
+        } catch (err) {
+            console.error('FAQ toggle error:', err);
+            alert('Hata: ' + err.message);
+        } finally {
+            setFaqLoading(false);
         }
     };
 
@@ -1157,7 +1282,8 @@ const AdminConfig = () => {
                             alignItems: 'center',
                             gap: '10px',
                             fontWeight: '500'
-                        }}>
+                        }}
+                        >
                             <span style={{ fontSize: '1.2rem' }}>
                                 {digestMessage.type === 'success' ? '✅' : '⚠️'}
                             </span>
@@ -1166,6 +1292,245 @@ const AdminConfig = () => {
                     )}
                 </div>
             </div>
+
+            {/* Affiliate Commission Settings */}
+            <div className="config-section">
+                <h2>💰 Affiliate Komisyon Ayarları</h2>
+                <div className="config-card">
+                    <p style={{ marginBottom: '20px', color: '#666' }}>
+                        Shop owner'ların ürün affiliate programı için default komisyon oranını ayarlayın.
+                    </p>
+
+                    <div className="config-item-group">
+                        <h3>Default Komisyon Oranı</h3>
+                        <div className="input-group">
+                            <label>Komisyon Oranı (%)</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    max="100"
+                                    value={siteSettings.default_commission_rate || 10.00}
+                                    onChange={(e) => handleSettingChange('default_commission_rate', parseFloat(e.target.value))}
+                                    style={{ width: '120px' }}
+                                />
+                                <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>%</span>
+                            </div>
+                            <small style={{ color: '#666', display: 'block', marginTop: '8px' }}>
+                                Tüm shop owner'lar için geçerli olan default komisyon oranı.
+                                Belirli shop'lara özel oran vermek için Admin → Shop Accounts sayfasını kullanın.
+                            </small>
+                        </div>
+
+                        <div style={{
+                            marginTop: '15px',
+                            padding: '12px',
+                            background: '#f0f9ff',
+                            borderRadius: '8px',
+                            border: '1px solid #bfdbfe'
+                        }}>
+                            <p style={{ margin: 0, fontSize: '0.9rem', color: '#0369a1' }}>
+                                💡 <strong>Örnek:</strong> %{siteSettings.default_commission_rate || 10} komisyon ile €100'lük satıştan shop owner €{((siteSettings.default_commission_rate || 10) * 100 / 100).toFixed(2)} kazanır.
+                            </p>
+                        </div>
+                    </div>
+
+                    <button
+                        className="btn btn-primary"
+                        style={{ marginTop: '20px' }}
+                        onClick={updateSiteSettings}
+                        disabled={saving}
+                    >
+                        {saving ? 'Kaydediliyor...' : 'Komisyon Ayarlarını Kaydet'}
+                    </button>
+                </div>
+            </div>
+
+            {/* Shop FAQ Management */}
+            <div className="config-section">
+                <h2>❓ Shop Sayfası FAQ'ları</h2>
+                <div className="config-card">
+                    <p style={{ marginBottom: '20px', color: '#666' }}>
+                        Amazon Shop sayfasında görünecek SSS (Sıkça Sorulan Sorular) listesini yönetin.
+                    </p>
+
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => openFaqModal()}
+                        style={{ marginBottom: '20px' }}
+                    >
+                        + Yeni FAQ Ekle
+                    </button>
+
+                    {/* FAQ List */}
+                    <div style={{ marginTop: '20px' }}>
+                        {faqs.map((faq, index) => (
+                            <div key={faq.id} style={{
+                                padding: '15px',
+                                background: faq.is_active ? '#f8f9fa' : '#ffe6e6',
+                                borderRadius: '8px',
+                                marginBottom: '10px',
+                                border: `1px solid ${faq.is_active ? '#e5e7eb' : '#ffcccc'}`
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '10px' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
+                                            #{faq.display_order} - {faq.question_tr}
+                                        </div>
+                                        <div style={{ fontSize: '0.9rem', color: '#666' }}>
+                                            {faq.answer_tr?.substring(0, 100)}...
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <button
+                                            className="btn btn-sm"
+                                            style={{ background: '#4caf50', color: 'white' }}
+                                            onClick={() => openFaqModal(faq)}
+                                        >
+                                            Düzenle
+                                        </button>
+                                        <button
+                                            className="btn btn-sm"
+                                            style={{ background: faq.is_active ? '#ff9800' : '#28a745', color: 'white' }}
+                                            onClick={() => toggleFaqActive(faq)}
+                                        >
+                                            {faq.is_active ? 'Pasif Yap' : 'Aktif Yap'}
+                                        </button>
+                                        <button
+                                            className="btn btn-sm"
+                                            style={{ background: '#dc3545', color: 'white' }}
+                                            onClick={() => deleteFaq(faq.id)}
+                                        >
+                                            Sil
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* FAQ Modal */}
+            {showFaqModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', zIndex: 9999
+                }} onClick={closeFaqModal}>
+                    <div style={{
+                        background: 'white', borderRadius: '12px', padding: '30px',
+                        maxWidth: '700px', width: '90%', maxHeight: '90vh', overflow: 'auto'
+                    }} onClick={(e) => e.stopPropagation()}>
+                        <h2 style={{ marginBottom: '20px' }}>
+                            {editingFaq ? 'FAQ Düzenle' : 'Yeni FAQ Ekle'}
+                        </h2>
+
+                        {/* Questions */}
+                        <div style={{ marginBottom: '20px' }}>
+                            <h3 style={{ fontSize: '1.1rem', marginBottom: '10px' }}>Soru</h3>
+                            <div className="input-group">
+                                <label>🇹🇷 Türkçe</label>
+                                <input
+                                    type="text"
+                                    value={faqForm.question_tr}
+                                    onChange={(e) => setFaqForm({ ...faqForm, question_tr: e.target.value })}
+                                    placeholder="Soru (Türkçe)"
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>🇩🇪 Almanca</label>
+                                <input
+                                    type="text"
+                                    value={faqForm.question_de}
+                                    onChange={(e) => setFaqForm({ ...faqForm, question_de: e.target.value })}
+                                    placeholder="Frage (Deutsch)"
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>🇬🇧 İngilizce</label>
+                                <input
+                                    type="text"
+                                    value={faqForm.question_en}
+                                    onChange={(e) => setFaqForm({ ...faqForm, question_en: e.target.value })}
+                                    placeholder="Question (English)"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Answers */}
+                        <div style={{ marginBottom: '20px' }}>
+                            <h3 style={{ fontSize: '1.1rem', marginBottom: '10px' }}>Cevap</h3>
+                            <div className="input-group">
+                                <label>🇹🇷 Türkçe</label>
+                                <textarea
+                                    value={faqForm.answer_tr}
+                                    onChange={(e) => setFaqForm({ ...faqForm, answer_tr: e.target.value })}
+                                    placeholder="Cevap (Türkçe)"
+                                    rows="4"
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>🇩🇪 Almanca</label>
+                                <textarea
+                                    value={faqForm.answer_de}
+                                    onChange={(e) => setFaqForm({ ...faqForm, answer_de: e.target.value })}
+                                    placeholder="Antwort (Deutsch)"
+                                    rows="4"
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>🇬🇧 İngilizce</label>
+                                <textarea
+                                    value={faqForm.answer_en}
+                                    onChange={(e) => setFaqForm({ ...faqForm, answer_en: e.target.value })}
+                                    placeholder="Answer (English)"
+                                    rows="4"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Display Order & Active */}
+                        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+                            <div className="input-group" style={{ flex: 1 }}>
+                                <label>Sıra</label>
+                                <input
+                                    type="number"
+                                    value={faqForm.display_order}
+                                    onChange={(e) => setFaqForm({ ...faqForm, display_order: parseInt(e.target.value) || 0 })}
+                                />
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <label>Aktif:</label>
+                                <input
+                                    type="checkbox"
+                                    checked={faqForm.is_active}
+                                    onChange={(e) => setFaqForm({ ...faqForm, is_active: e.target.checked })}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                            <button
+                                className="btn btn-secondary"
+                                onClick={closeFaqModal}
+                                disabled={faqLoading}
+                            >
+                                İptal
+                            </button>
+                            <button
+                                className="btn btn-primary"
+                                onClick={saveFaq}
+                                disabled={faqLoading || !faqForm.question_tr || !faqForm.answer_tr}
+                            >
+                                {faqLoading ? 'Kaydediliyor...' : 'Kaydet'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Info */}
             <div className="config-info">

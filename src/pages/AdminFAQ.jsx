@@ -9,8 +9,10 @@ const AdminFAQ = () => {
     const [faqs, setFaqs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('all');
+    const [expandedId, setExpandedId] = useState(null);
     const [editingFaq, setEditingFaq] = useState(null);
-    const [showAddModal, setShowAddModal] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const [formData, setFormData] = useState({
         category: 'general',
         question_tr: '',
@@ -25,11 +27,11 @@ const AdminFAQ = () => {
 
     const categories = [
         { value: 'all', label: 'Tümü', icon: '📋' },
-        { value: 'general', label: 'Genel Sorular', icon: '❓' },
-        { value: 'couples', label: 'Çiftler İçin', icon: '👰' },
-        { value: 'vendors', label: 'Tedarikçiler İçin', icon: '🏢' },
-        { value: 'payment', label: 'Ödeme & Fiyatlandırma', icon: '💳' },
-        { value: 'technical', label: 'Teknik Destek', icon: '🔧' }
+        { value: 'general', label: 'Genel', icon: '❓' },
+        { value: 'couples', label: 'Çiftler', icon: '👰' },
+        { value: 'vendors', label: 'Tedarikçiler', icon: '🏢' },
+        { value: 'payment', label: 'Ödeme', icon: '💳' },
+        { value: 'technical', label: 'Teknik', icon: '🔧' }
     ];
 
     useEffect(() => {
@@ -49,43 +51,30 @@ const AdminFAQ = () => {
             setFaqs(data || []);
         } catch (error) {
             console.error('Error fetching FAQs:', error);
-            alert('FAQ\'ler yüklenirken hata oluştu: ' + error.message);
+            alert('Hata: ' + error.message);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleInputChange = (field, value) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
             if (editingFaq) {
-                // Update existing FAQ
                 const { error } = await supabase
                     .from('site_faqs')
                     .update(formData)
                     .eq('id', editingFaq.id);
-
                 if (error) throw error;
-                alert('✅ FAQ başarıyla güncellendi!');
             } else {
-                // Create new FAQ
                 const { error } = await supabase
                     .from('site_faqs')
                     .insert([formData]);
-
                 if (error) throw error;
-                alert('✅ Yeni FAQ başarıyla eklendi!');
             }
-
-            resetForm();
+            closeModal();
             fetchFAQs();
         } catch (error) {
-            console.error('Error saving FAQ:', error);
             alert('Hata: ' + error.message);
         }
     };
@@ -94,303 +83,260 @@ const AdminFAQ = () => {
         setEditingFaq(faq);
         setFormData({
             category: faq.category,
-            question_tr: faq.question_tr,
-            question_en: faq.question_en,
-            question_de: faq.question_de,
-            answer_tr: faq.answer_tr,
-            answer_en: faq.answer_en,
-            answer_de: faq.answer_de,
-            display_order: faq.display_order,
+            question_tr: faq.question_tr || '',
+            question_en: faq.question_en || '',
+            question_de: faq.question_de || '',
+            answer_tr: faq.answer_tr || '',
+            answer_en: faq.answer_en || '',
+            answer_de: faq.answer_de || '',
+            display_order: faq.display_order || 0,
             is_active: faq.is_active
         });
-        setShowAddModal(true);
+        setShowModal(true);
     };
 
     const handleDelete = async (id) => {
         if (!window.confirm('Bu FAQ\'yi silmek istediğinizden emin misiniz?')) return;
-
         try {
-            const { error } = await supabase
-                .from('site_faqs')
-                .delete()
-                .eq('id', id);
-
+            const { error } = await supabase.from('site_faqs').delete().eq('id', id);
             if (error) throw error;
-            alert('✅ FAQ silindi!');
             fetchFAQs();
         } catch (error) {
-            console.error('Error deleting FAQ:', error);
             alert('Hata: ' + error.message);
         }
     };
 
-    const handleToggleActive = async (faq) => {
+    const toggleActive = async (faq) => {
         try {
-            const { error } = await supabase
-                .from('site_faqs')
-                .update({ is_active: !faq.is_active })
-                .eq('id', faq.id);
-
-            if (error) throw error;
+            await supabase.from('site_faqs').update({ is_active: !faq.is_active }).eq('id', faq.id);
             fetchFAQs();
         } catch (error) {
-            console.error('Error toggling FAQ:', error);
             alert('Hata: ' + error.message);
         }
     };
 
-    const resetForm = () => {
+    const closeModal = () => {
+        setShowModal(false);
+        setEditingFaq(null);
         setFormData({
             category: 'general',
-            question_tr: '',
-            question_en: '',
-            question_de: '',
-            answer_tr: '',
-            answer_en: '',
-            answer_de: '',
-            display_order: 0,
-            is_active: true
+            question_tr: '', question_en: '', question_de: '',
+            answer_tr: '', answer_en: '', answer_de: '',
+            display_order: 0, is_active: true
         });
-        setEditingFaq(null);
-        setShowAddModal(false);
     };
 
-    const filteredFaqs = selectedCategory === 'all'
-        ? faqs
-        : faqs.filter(faq => faq.category === selectedCategory);
+    // Filter FAQs
+    const filteredFaqs = faqs.filter(faq => {
+        const matchesCategory = selectedCategory === 'all' || faq.category === selectedCategory;
+        const matchesSearch = !searchQuery ||
+            faq.question_tr?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            faq.question_en?.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
 
-    const getCategoryStats = () => {
-        const stats = {};
-        categories.forEach(cat => {
-            if (cat.value === 'all') {
-                stats[cat.value] = faqs.filter(f => f.is_active).length;
-            } else {
-                stats[cat.value] = faqs.filter(f => f.category === cat.value && f.is_active).length;
-            }
-        });
-        return stats;
+    const getCategoryStats = (catValue) => {
+        if (catValue === 'all') return faqs.length;
+        return faqs.filter(f => f.category === catValue).length;
     };
-
-    const stats = getCategoryStats();
 
     if (loading) {
-        return (
-            <div className="section container" style={{ marginTop: '100px', textAlign: 'center' }}>
-                <div className="loading-spinner"></div>
-            </div>
-        );
+        return <div className="admin-faq-loading">Yükleniyor...</div>;
     }
 
     return (
-        <div className="section container admin-faq-container">
-            <div className="admin-faq-header">
+        <div className="admin-faq-simple">
+            {/* Header */}
+            <div className="afaq-header">
                 <div>
-                    <h1>📋 Sıkça Sorulan Sorular Yönetimi</h1>
-                    <p>Platform FAQ'lerini yönetin, düzenleyin ve yeni sorular ekleyin</p>
+                    <h1>📋 FAQ Yönetimi</h1>
+                    <p>{faqs.length} soru</p>
                 </div>
-                <button
-                    className="btn btn-primary"
-                    onClick={() => setShowAddModal(true)}
-                >
-                    ➕ Yeni FAQ Ekle
+                <button className="btn-add" onClick={() => setShowModal(true)}>
+                    ➕ Yeni Ekle
                 </button>
             </div>
 
-            {/* Category Filter */}
-            <div className="faq-category-filter">
-                {categories.map(cat => (
-                    <button
-                        key={cat.value}
-                        className={`category-btn ${selectedCategory === cat.value ? 'active' : ''}`}
-                        onClick={() => setSelectedCategory(cat.value)}
-                    >
-                        <span className="cat-icon">{cat.icon}</span>
-                        <span className="cat-label">{cat.label}</span>
-                        <span className="cat-count">{stats[cat.value] || 0}</span>
-                    </button>
-                ))}
+            {/* Search & Filters */}
+            <div className="afaq-toolbar">
+                <input
+                    type="text"
+                    placeholder="🔍 Soru ara..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="afaq-search"
+                />
+                <div className="afaq-tabs">
+                    {categories.map(cat => (
+                        <button
+                            key={cat.value}
+                            className={`afaq-tab ${selectedCategory === cat.value ? 'active' : ''}`}
+                            onClick={() => setSelectedCategory(cat.value)}
+                        >
+                            {cat.icon} {cat.label}
+                            <span className="tab-count">{getCategoryStats(cat.value)}</span>
+                        </button>
+                    ))}
+                </div>
             </div>
 
-            {/* FAQ List */}
-            <div className="faq-list">
+            {/* FAQ List - Accordion Style */}
+            <div className="afaq-list">
                 {filteredFaqs.length === 0 ? (
-                    <div className="empty-state">
-                        <p>Bu kategoride FAQ bulunmuyor.</p>
-                    </div>
+                    <div className="afaq-empty">Sonuç bulunamadı</div>
                 ) : (
-                    filteredFaqs.map(faq => (
-                        <div key={faq.id} className={`faq-item ${!faq.is_active ? 'inactive' : ''}`}>
-                            <div className="faq-item-header">
-                                <div className="faq-item-info">
-                                    <span className="faq-category-badge">
-                                        {categories.find(c => c.value === faq.category)?.icon} {categories.find(c => c.value === faq.category)?.label}
-                                    </span>
-                                    <span className="faq-order">Sıra: {faq.display_order}</span>
+                    filteredFaqs.map((faq, index) => (
+                        <div
+                            key={faq.id}
+                            className={`afaq-item ${!faq.is_active ? 'inactive' : ''} ${expandedId === faq.id ? 'expanded' : ''}`}
+                        >
+                            {/* Question Row - Click to expand */}
+                            <div
+                                className="afaq-question-row"
+                                onClick={() => setExpandedId(expandedId === faq.id ? null : faq.id)}
+                            >
+                                <span className="afaq-order">{index + 1}</span>
+                                <span className="afaq-cat-icon">{categories.find(c => c.value === faq.category)?.icon}</span>
+                                <span className="afaq-question">{faq.question_tr}</span>
+                                <div className="afaq-actions" onClick={(e) => e.stopPropagation()}>
+                                    <button
+                                        className={`afaq-btn-toggle ${faq.is_active ? 'on' : 'off'}`}
+                                        onClick={() => toggleActive(faq)}
+                                        title={faq.is_active ? 'Aktif' : 'Pasif'}
+                                    >
+                                        {faq.is_active ? '✅' : '⬜'}
+                                    </button>
+                                    <button className="afaq-btn-edit" onClick={() => handleEdit(faq)}>✏️</button>
+                                    <button className="afaq-btn-delete" onClick={() => handleDelete(faq.id)}>🗑️</button>
                                 </div>
-                                <div className="faq-item-actions">
-                                    <button
-                                        className={`btn-toggle ${faq.is_active ? 'active' : ''}`}
-                                        onClick={() => handleToggleActive(faq)}
-                                        title={faq.is_active ? 'Deaktif Yap' : 'Aktif Yap'}
-                                    >
-                                        {faq.is_active ? '👁️' : '🚫'}
-                                    </button>
-                                    <button
-                                        className="btn btn-sm btn-secondary"
-                                        onClick={() => handleEdit(faq)}
-                                    >
-                                        ✏️ Düzenle
-                                    </button>
-                                    <button
-                                        className="btn btn-sm btn-danger"
-                                        onClick={() => handleDelete(faq.id)}
-                                    >
-                                        🗑️ Sil
-                                    </button>
-                                </div>
+                                <span className="afaq-expand-icon">{expandedId === faq.id ? '▲' : '▼'}</span>
                             </div>
-                            <div className="faq-item-content">
-                                <div className="faq-question">
-                                    <strong>🇹🇷 TR:</strong> {faq.question_tr}
+
+                            {/* Expanded Content */}
+                            {expandedId === faq.id && (
+                                <div className="afaq-expanded">
+                                    <div className="afaq-langs">
+                                        <div className="afaq-lang-block">
+                                            <strong>🇹🇷 TR</strong>
+                                            <p className="afaq-q">{faq.question_tr}</p>
+                                            <p className="afaq-a">{faq.answer_tr}</p>
+                                        </div>
+                                        <div className="afaq-lang-block">
+                                            <strong>🇩🇪 DE</strong>
+                                            <p className="afaq-q">{faq.question_de}</p>
+                                            <p className="afaq-a">{faq.answer_de}</p>
+                                        </div>
+                                        <div className="afaq-lang-block">
+                                            <strong>🇬🇧 EN</strong>
+                                            <p className="afaq-q">{faq.question_en}</p>
+                                            <p className="afaq-a">{faq.answer_en}</p>
+                                        </div>
+                                    </div>
+                                    <div className="afaq-meta">
+                                        <span>Sıra: {faq.display_order}</span>
+                                        <span>Kategori: {categories.find(c => c.value === faq.category)?.label}</span>
+                                    </div>
                                 </div>
-                                <div className="faq-question">
-                                    <strong>🇬🇧 EN:</strong> {faq.question_en}
-                                </div>
-                                <div className="faq-question">
-                                    <strong>🇩🇪 DE:</strong> {faq.question_de}
-                                </div>
-                                <div className="faq-answer">
-                                    <small>{faq.answer_tr.substring(0, 150)}...</small>
-                                </div>
-                            </div>
+                            )}
                         </div>
                     ))
                 )}
             </div>
 
-            {/* Add/Edit Modal */}
-            {showAddModal && (
-                <div className="modal-overlay" onClick={resetForm}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2>{editingFaq ? '✏️ FAQ Düzenle' : '➕ Yeni FAQ Ekle'}</h2>
-                            <button className="modal-close" onClick={resetForm}>✕</button>
+            {/* Modal */}
+            {showModal && (
+                <div className="afaq-modal-overlay" onClick={closeModal}>
+                    <div className="afaq-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="afaq-modal-header">
+                            <h2>{editingFaq ? '✏️ FAQ Düzenle' : '➕ Yeni FAQ'}</h2>
+                            <button onClick={closeModal}>✕</button>
                         </div>
-                        <form onSubmit={handleSubmit} className="faq-form">
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Kategori *</label>
-                                    <select
-                                        value={formData.category}
-                                        onChange={(e) => handleInputChange('category', e.target.value)}
-                                        required
-                                    >
-                                        {categories.filter(c => c.value !== 'all').map(cat => (
-                                            <option key={cat.value} value={cat.value}>
-                                                {cat.icon} {cat.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="form-group">
-                                    <label>Sıralama</label>
+                        <form onSubmit={handleSubmit} className="afaq-form">
+                            <div className="afaq-form-top">
+                                <select
+                                    value={formData.category}
+                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                >
+                                    {categories.filter(c => c.value !== 'all').map(cat => (
+                                        <option key={cat.value} value={cat.value}>{cat.icon} {cat.label}</option>
+                                    ))}
+                                </select>
+                                <input
+                                    type="number"
+                                    value={formData.display_order}
+                                    onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
+                                    placeholder="Sıra"
+                                    style={{ width: '80px' }}
+                                />
+                                <label className="afaq-checkbox">
                                     <input
-                                        type="number"
-                                        value={formData.display_order}
-                                        onChange={(e) => handleInputChange('display_order', parseInt(e.target.value))}
-                                        min="0"
+                                        type="checkbox"
+                                        checked={formData.is_active}
+                                        onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                                     />
-                                </div>
-                                <div className="form-group">
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.is_active}
-                                            onChange={(e) => handleInputChange('is_active', e.target.checked)}
-                                        />
-                                        {' '}Aktif
-                                    </label>
-                                </div>
+                                    Aktif
+                                </label>
                             </div>
 
-                            <div className="form-section">
-                                <h3>🇹🇷 Türkçe</h3>
-                                <div className="form-group">
-                                    <label>Soru *</label>
+                            {/* Language Tabs in Modal */}
+                            <div className="afaq-lang-forms">
+                                <div className="afaq-lang-form">
+                                    <h4>🇹🇷 Türkçe</h4>
                                     <input
                                         type="text"
                                         value={formData.question_tr}
-                                        onChange={(e) => handleInputChange('question_tr', e.target.value)}
+                                        onChange={(e) => setFormData({ ...formData, question_tr: e.target.value })}
+                                        placeholder="Soru"
                                         required
-                                        placeholder="Örn: KolayDugun nedir?"
                                     />
-                                </div>
-                                <div className="form-group">
-                                    <label>Cevap *</label>
                                     <textarea
                                         value={formData.answer_tr}
-                                        onChange={(e) => handleInputChange('answer_tr', e.target.value)}
+                                        onChange={(e) => setFormData({ ...formData, answer_tr: e.target.value })}
+                                        placeholder="Cevap"
+                                        rows="3"
                                         required
-                                        rows="4"
-                                        placeholder="Detaylı cevap yazın..."
                                     />
                                 </div>
-                            </div>
-
-                            <div className="form-section">
-                                <h3>🇬🇧 English</h3>
-                                <div className="form-group">
-                                    <label>Question *</label>
-                                    <input
-                                        type="text"
-                                        value={formData.question_en}
-                                        onChange={(e) => handleInputChange('question_en', e.target.value)}
-                                        required
-                                        placeholder="e.g: What is KolayDugun?"
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Answer *</label>
-                                    <textarea
-                                        value={formData.answer_en}
-                                        onChange={(e) => handleInputChange('answer_en', e.target.value)}
-                                        required
-                                        rows="4"
-                                        placeholder="Write detailed answer..."
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="form-section">
-                                <h3>🇩🇪 Deutsch</h3>
-                                <div className="form-group">
-                                    <label>Frage *</label>
+                                <div className="afaq-lang-form">
+                                    <h4>🇩🇪 Deutsch</h4>
                                     <input
                                         type="text"
                                         value={formData.question_de}
-                                        onChange={(e) => handleInputChange('question_de', e.target.value)}
+                                        onChange={(e) => setFormData({ ...formData, question_de: e.target.value })}
+                                        placeholder="Frage"
                                         required
-                                        placeholder="z.B: Was ist KolayDugun?"
                                     />
-                                </div>
-                                <div className="form-group">
-                                    <label>Antwort *</label>
                                     <textarea
                                         value={formData.answer_de}
-                                        onChange={(e) => handleInputChange('answer_de', e.target.value)}
+                                        onChange={(e) => setFormData({ ...formData, answer_de: e.target.value })}
+                                        placeholder="Antwort"
+                                        rows="3"
                                         required
-                                        rows="4"
-                                        placeholder="Detaillierte Antwort schreiben..."
+                                    />
+                                </div>
+                                <div className="afaq-lang-form">
+                                    <h4>🇬🇧 English</h4>
+                                    <input
+                                        type="text"
+                                        value={formData.question_en}
+                                        onChange={(e) => setFormData({ ...formData, question_en: e.target.value })}
+                                        placeholder="Question"
+                                        required
+                                    />
+                                    <textarea
+                                        value={formData.answer_en}
+                                        onChange={(e) => setFormData({ ...formData, answer_en: e.target.value })}
+                                        placeholder="Answer"
+                                        rows="3"
+                                        required
                                     />
                                 </div>
                             </div>
 
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" onClick={resetForm}>
-                                    İptal
-                                </button>
-                                <button type="submit" className="btn btn-primary">
-                                    {editingFaq ? '💾 Güncelle' : '➕ Ekle'}
+                            <div className="afaq-modal-footer">
+                                <button type="button" onClick={closeModal}>İptal</button>
+                                <button type="submit" className="btn-primary">
+                                    {editingFaq ? '💾 Kaydet' : '➕ Ekle'}
                                 </button>
                             </div>
                         </form>

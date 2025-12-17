@@ -10,7 +10,8 @@ const SEO = ({
     image,
     url,
     structuredData,
-    type = 'website'
+    type = 'website',
+    hreflangUrls = null // { de: '/de/...', tr: '/tr/...', en: '/en/...' }
 }) => {
     const { language } = useLanguage();
     const { settings } = useSiteSettings() || { settings: {} }; // Safety fallback
@@ -53,6 +54,16 @@ const SEO = ({
 
             {/* Canonical */}
             <link rel="canonical" href={fullUrl} />
+
+            {/* Hreflang for multi-language SEO */}
+            {hreflangUrls && (
+                <>
+                    {hreflangUrls.de && <link rel="alternate" hrefLang="de" href={`${siteUrl}${hreflangUrls.de}`} />}
+                    {hreflangUrls.tr && <link rel="alternate" hrefLang="tr" href={`${siteUrl}${hreflangUrls.tr}`} />}
+                    {hreflangUrls.en && <link rel="alternate" hrefLang="en" href={`${siteUrl}${hreflangUrls.en}`} />}
+                    <link rel="alternate" hrefLang="x-default" href={`${siteUrl}${hreflangUrls.de || hreflangUrls.tr}`} />
+                </>
+            )}
 
             {/* Structured Data (JSON-LD) */}
             {structuredData && (

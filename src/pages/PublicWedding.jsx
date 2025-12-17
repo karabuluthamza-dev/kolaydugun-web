@@ -56,7 +56,8 @@ const Countdown = ({ date }) => {
 };
 
 const PublicWedding = () => {
-    const { slug } = useParams();
+    const params = useParams();
+    const slug = params.slug || params.vendorSlug;
     const { t } = useLanguage();
     const [wedding, setWedding] = useState(null);
     const [loading, setLoading] = useState(true);

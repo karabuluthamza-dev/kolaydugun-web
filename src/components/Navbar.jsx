@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useUnreadMessages } from '../hooks/useUnreadMessages';
 import LanguageSwitcher from './LanguageSwitcher';
 import NotificationBell from './NotificationBell';
+import { supabase } from '../supabaseClient';
 import './Navbar.css';
 
 import { useSiteSettings } from '../context/SiteSettingsContext';
@@ -15,8 +16,33 @@ const Navbar = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const unreadCount = useUnreadMessages(user?.id, user?.role);
+    const [shopAccount, setShopAccount] = useState(null);
+
+    // Check if user has a shop account
+    useEffect(() => {
+        const checkShopAccount = async () => {
+            if (user?.email) {
+                try {
+                    const { data } = await supabase
+                        .from('shop_accounts')
+                        .select('id, slug, business_name')
+                        .eq('email', user.email)
+                        .eq('is_active', true)
+                        .single();
+                    if (data) {
+                        setShopAccount(data);
+                    }
+                } catch (err) {
+                    // No shop account - normal
+                }
+            } else {
+                setShopAccount(null);
+            }
+        };
+        checkShopAccount();
+    }, [user]);
 
     // Hide navbar on public wedding pages
     if (location.pathname.startsWith('/w/')) {
@@ -61,6 +87,7 @@ const Navbar = () => {
                 <div className={`navbar-links ${isMobileMenuOpen ? 'active' : ''}`}>
                     <Link to="/vendors" className="navbar-link" onClick={closeMobileMenu}>{t('nav.services')}</Link>
                     <Link to="/blog" className="navbar-link" onClick={closeMobileMenu}>Blog</Link>
+                    <Link to="/shop" className="navbar-link" onClick={closeMobileMenu}>🛍️ {t('shop.title', 'Mağaza')}</Link>
                     <Link to="/community" className="navbar-link text-purple-600 font-medium" onClick={closeMobileMenu}>{t('nav.forum')}</Link>
 
                     <Link to="/tools" className="navbar-link" onClick={closeMobileMenu}>{t('nav.tools')}</Link>
@@ -115,6 +142,26 @@ const Navbar = () => {
                                         }}
                                     >
                                         👤 Profil
+                                    </Link>
+                                )}
+                                {/* Shop Panel Button - for shop owners */}
+                                {shopAccount && (
+                                    <Link
+                                        to="/shop-panel"
+                                        className="navbar-link"
+                                        onClick={closeMobileMenu}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            background: 'linear-gradient(135deg, #10b981, #059669)',
+                                            color: 'white',
+                                            padding: '10px 20px',
+                                            borderRadius: '25px',
+                                            margin: '5px 0'
+                                        }}
+                                    >
+                                        🏪 Mağaza Paneli
                                     </Link>
                                 )}
                                 {user.role === 'couple' && (
@@ -201,6 +248,37 @@ const Navbar = () => {
                                 >
                                     <span style={{ fontSize: '1rem' }}>👤</span>
                                     <span>Profil</span>
+                                </Link>
+                            )}
+                            {/* Shop Panel Button - Desktop */}
+                            {shopAccount && (
+                                <Link
+                                    to="/shop-panel"
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        background: 'linear-gradient(135deg, #10b981, #059669)',
+                                        color: 'white',
+                                        padding: '6px 12px',
+                                        borderRadius: '18px',
+                                        textDecoration: 'none',
+                                        fontWeight: '500',
+                                        fontSize: '0.8rem',
+                                        transition: 'all 0.2s ease',
+                                        boxShadow: '0 2px 6px rgba(16, 185, 129, 0.25)'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.transform = 'translateY(-1px)';
+                                        e.target.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.4)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.transform = 'translateY(0)';
+                                        e.target.style.boxShadow = '0 2px 8px rgba(16, 185, 129, 0.3)';
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1rem' }}>🏪</span>
+                                    <span>Mağaza</span>
                                 </Link>
                             )}
                             {user.role === 'couple' && (

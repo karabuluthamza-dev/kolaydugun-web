@@ -31,8 +31,21 @@ const Datenschutz = () => {
                         Die Betreiber dieser Seiten nehmen den Schutz Ihrer persönlichen Daten sehr ernst. Wir behandeln Ihre personenbezogenen Daten vertraulich und entsprechend der gesetzlichen Datenschutzvorschriften sowie dieser Datenschutzerklärung.
                     </p>
 
-                    <p style={{ marginTop: '20px', fontStyle: 'italic', color: '#666' }}>
-                        (Hinweis: Dies ist ein Platzhalter. Bitte erstellen Sie eine vollständige Datenschutzerklärung mit einem Generator wie e-recht24.de)
+                    <h3 style={{ marginTop: '30px' }}>4. Amazon EU-Partnerprogramm</h3>
+                    <p>
+                        <strong>Teilnahme am Amazon.de Partnerprogramm</strong><br />
+                        Diese Website nimmt am Amazon EU-Partnerprogramm teil. Auf unseren Seiten werden Werbeanzeigen und Links zur Seite von Amazon.de eingebunden, an denen wir über Werbekostenerstattung Geld verdienen können.
+                    </p>
+                    <p style={{ marginTop: '15px' }}>
+                        <strong>Affiliate-Links</strong><br />
+                        Bei den mit 🔗 oder "Affiliate-Link" gekennzeichneten Links handelt es sich um sogenannte Affiliate-Links. Wenn Sie über diese Links ein Produkt kaufen, erhalten wir eine kleine Provision. Der Preis für Sie bleibt unverändert.
+                    </p>
+                    <p style={{ marginTop: '15px' }}>
+                        <strong>Cookies und Tracking</strong><br />
+                        Amazon setzt Cookies ein, um die Herkunft der Bestellungen nachvollziehen zu können. Dadurch kann Amazon erkennen, dass Sie den Partnerlink auf unserer Website geklickt haben. Die Speicherung von "Amazon-Cookies" erfolgt auf Grundlage von Art. 6 lit. f DSGVO.
+                    </p>
+                    <p style={{ marginTop: '15px' }}>
+                        Weitere Informationen zur Datennutzung durch Amazon finden Sie in der <a href="https://www.amazon.de/gp/help/customer/display.html?nodeId=201909010" target="_blank" rel="noopener noreferrer" style={{ color: '#D4AF37' }}>Datenschutzerklärung von Amazon</a>.
                     </p>
                 </div>
             </div>

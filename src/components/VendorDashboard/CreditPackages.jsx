@@ -173,7 +173,17 @@ const CreditPackages = ({ onPurchaseSuccess }) => {
                         ) : (
                             <button
                                 className="btn btn-primary"
-                                style={{ width: '100%' }}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 20px',
+                                    background: 'linear-gradient(135deg, #FF6B9D 0%, #c084fc 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    fontSize: '0.95rem'
+                                }}
                                 onClick={() => setSelectedPackage(pkg.id)}
                             >
                                 {t('vendorWallet.buyBtn')}

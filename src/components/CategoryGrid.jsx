@@ -118,7 +118,17 @@ const CategoryGrid = () => {
 
     return (
         <div className="category-grid-section">
-            <div className="container">
+            {/* Decorative left element */}
+            <div style={{
+                position: 'absolute',
+                top: '120px',
+                left: '3%',
+                fontSize: '3rem',
+                opacity: 0.12,
+                animation: 'floatSlow 8s ease-in-out infinite reverse'
+            }}>💍</div>
+
+            <div className="container" style={{ position: 'relative', zIndex: 1 }}>
                 <div className="category-grid-header">
                     <h2>{t('vendorLanding.gridTitle')}</h2>
                     <p>{t('vendorLanding.gridDesc')}</p>

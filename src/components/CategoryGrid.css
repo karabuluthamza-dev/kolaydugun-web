@@ -1,93 +1,252 @@
+/* ============================================
+   CATEGORY GRID - Premium Design v2
+   ============================================ */
+
 .category-grid-section {
-    padding: 40px 0;
-    background-color: #fff;
+    padding: 80px 0;
+    background: linear-gradient(180deg, #fff 0%, #fdf4ff 50%, #f0f9ff 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle dot pattern overlay */
+.category-grid-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255, 107, 157, 0.08) 1px, transparent 0);
+    background-size: 40px 40px;
+    pointer-events: none;
+}
+
+/* Decorative corner elements */
+.category-grid-section::after {
+    content: '💐';
+    position: absolute;
+    top: 40px;
+    right: 5%;
+    font-size: 4rem;
+    opacity: 0.15;
+    animation: floatSlow 6s ease-in-out infinite;
+}
+
+@keyframes floatSlow {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-15px) rotate(5deg);
+    }
 }
 
 .category-grid-header {
-    margin-bottom: 30px;
+    margin-bottom: 50px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
 }
 
+/* Glassmorphism effect for header */
 .category-grid-header h2 {
-    font-size: 28px;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 10px;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 800;
+    color: #1f2937;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #FF6B9D 0%, #c084fc 50%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+    position: relative;
+}
+
+/* Decorative underline */
+.category-grid-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #FF6B9D, #c084fc);
+    border-radius: 2px;
 }
 
 .category-grid-header p {
-    font-size: 15px;
-    color: #666;
-    line-height: 1.6;
-    max-width: 900px;
+    font-size: 1.05rem;
+    color: #4b5563;
+    line-height: 1.8;
+    max-width: 750px;
+    margin: 20px auto 0;
+    padding: 0 20px;
 }
 
 .category-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    gap: 24px;
 }
 
+/* Premium Card Design */
 .category-card {
     display: block;
     text-decoration: none;
     color: inherit;
-    transition: transform 0.2s ease;
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.category-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 107, 157, 0.1) 0%, rgba(192, 132, 252, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: 20px;
 }
 
 .category-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(255, 107, 157, 0.25);
 }
 
+.category-card:hover::before {
+    opacity: 1;
+}
+
+/* Image Container */
 .category-image {
     width: 100%;
-    height: 160px;
-    border-radius: 8px;
+    height: 180px;
     overflow: hidden;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.category-image::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.category-card:hover .category-image::after {
+    opacity: 1;
 }
 
 .category-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .category-card:hover .category-image img {
-    transform: scale(1.05);
+    transform: scale(1.15);
 }
 
+/* Info Section */
 .category-info {
+    padding: 20px;
     text-align: center;
+    background: white;
+    position: relative;
+    z-index: 2;
 }
 
 .category-info h3 {
-    font-size: 15px;
-    font-weight: 600;
-    color: #333;
-    margin: 0 0 4px 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+    transition: color 0.3s ease;
+}
+
+.category-card:hover .category-info h3 {
+    color: #FF6B9D;
 }
 
 .category-info span {
-    font-size: 13px;
-    color: #888;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #6b7280;
+    background: linear-gradient(135deg, #fdf4ff 0%, #f0f9ff 100%);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
-@media (max-width: 992px) {
+.category-card:hover .category-info span {
+    background: linear-gradient(135deg, #FF6B9D 0%, #c084fc 100%);
+    color: white;
+}
+
+/* 0 Firma için özel stil */
+.category-info span:empty,
+.category-info span[data-count="0"] {
+    opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
     .category-grid {
         grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
     }
 }
 
 @media (max-width: 768px) {
+    .category-grid-section {
+        padding: 40px 0;
+    }
+
     .category-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .category-image {
+        height: 140px;
+    }
+
+    .category-info {
+        padding: 16px;
+    }
+
+    .category-info h3 {
+        font-size: 0.9rem;
     }
 }
 
 @media (max-width: 480px) {
     .category-grid {
         grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .category-image {
+        height: 200px;
+    }
+
+    .category-card:hover {
+        transform: translateY(-8px);
     }
 }

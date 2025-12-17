@@ -21,7 +21,7 @@ const VendorDetail = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     // const { getVendor } = useVendors(); // No longer needed for fetching
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [vendor, setVendor] = useState(null);
     const [id, setId] = useState(null); // Keep track of the actual ID for downstream components
 
@@ -30,6 +30,41 @@ const VendorDetail = () => {
     const [isBetaMode, setIsBetaMode] = useState(false);
     const [formSuccess, setFormSuccess] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [vendorShop, setVendorShop] = useState(null);
+    const [categorySchema, setCategorySchema] = useState(null); // Schema for translation
+
+    // Check if vendor has a shop account
+    useEffect(() => {
+        const checkVendorShop = async () => {
+            if (vendor?.business_name) {
+                try {
+                    // Take first 4 chars for matching (e.g. "DJ34" from "DJ34Istanbul")
+                    const cleanName = vendor.business_name
+                        .replace(/[–—\-&,\.]/g, '')  // Remove special chars
+                        .substring(0, 4);             // Take first 4 chars only
+
+                    console.log('Looking for shop with name containing:', cleanName);
+
+                    const { data, error } = await supabase
+                        .from('shop_accounts')
+                        .select('id, slug, business_name, logo_url, plan, is_active')
+                        .ilike('business_name', `%${cleanName}%`)
+                        .maybeSingle();
+
+                    console.log('Shop query result:', { data, error });
+
+                    if (data && data.is_active) {
+                        console.log('Found vendor shop:', data.business_name);
+                        setVendorShop(data);
+                    }
+                } catch (err) {
+                    // Vendor has no shop - normal
+                    console.log('Shop query error:', err);
+                }
+            }
+        };
+        checkVendorShop();
+    }, [vendor]);
 
     useEffect(() => {
         const checkBetaMode = async () => {
@@ -71,10 +106,10 @@ const VendorDetail = () => {
                 if (data) {
                     setId(data.id);
 
-                    // Fetch category image
+                    // Fetch category image AND schema
                     const { data: catData } = await supabase
                         .from('categories')
-                        .select('image_url')
+                        .select('image_url, form_schema')
                         .ilike('name', data.category) // Case-insensitive match
                         .maybeSingle();
 
@@ -102,6 +137,7 @@ const VendorDetail = () => {
                     }
 
                     setCategoryImage(fetchedCatImage);
+                    setCategorySchema(catData?.form_schema || null);
 
                     const mappedVendor = {
                         ...data,
@@ -448,19 +484,105 @@ const VendorDetail = () => {
                                         Object.entries(vendor.details).map(([key, value], idx) => {
                                             if (!value || (Array.isArray(value) && value.length === 0)) return null;
 
+                                            // CRITICAL: Strip "schemas." prefix from KEY itself (dirty data)
+                                            const cleanKey = key.replace(/^schemas\./, '');
+
+                                            // MANUAL KEY MAPPING: Database keys vs Dictionary label keys
+                                            const labelKeyMap = {
+                                                'music_instruments': 'enstrumanlar_label',
+                                                'music_genres': 'music_genres_label',
+                                                'photo_services': 'photo_services_label',
+                                                'video_services': 'video_services_label',
+                                                'beauty_services': 'beauty_services_label',
+                                                'venue_type': 'venue_type_label',
+                                                'venue_features': 'venue_features_label'
+                                            };
+                                            const mappedLabelKey = labelKeyMap[cleanKey] || `${cleanKey}_label`;
+
+                                            // Find schema field for this key
+                                            const schemaField = categorySchema?.find(f => f.key === cleanKey);
+
                                             let displayValue = value;
                                             if (Array.isArray(value)) {
                                                 displayValue = value.map(v => {
-                                                    // Handle dirty data: strip schemas. prefix if it exists
-                                                    const cleanKey = v.replace(/^schemas\./, '');
-                                                    return t(`schemas.${cleanKey}`) || cleanKey;
+                                                    // Handle dirty data in VALUES: strip schemas. prefix if it exists
+                                                    const cleanValue = v.replace(/^schemas\./, '');
+
+                                                    // PRIORITY 1: Try schema translations
+                                                    if (schemaField?.options) {
+                                                        const optionObj = schemaField.options.find(opt =>
+                                                            (typeof opt === 'object' ? opt.key : opt) === cleanValue
+                                                        );
+                                                        if (optionObj && typeof optionObj === 'object' && optionObj.translations) {
+                                                            const trans = optionObj.translations[language];
+                                                            if (trans) return trans;
+                                                        }
+                                                    }
+
+                                                    // PRIORITY 2: Try ALL possible dictionary paths
+                                                    let translated = t(`schemas_4.${cleanValue}`);
+                                                    if (translated === `schemas_4.${cleanValue}`) {
+                                                        translated = t(`schemas.${cleanValue}`);
+                                                    }
+                                                    if (translated === `schemas.${cleanValue}`) {
+                                                        translated = t(cleanValue);
+                                                    }
+                                                    if (translated === cleanValue) {
+                                                        // Last resort: return the raw key
+                                                        return cleanValue;
+                                                    }
+                                                    return translated;
                                                 }).join(', ');
                                             } else if (typeof value === 'boolean') {
                                                 displayValue = value ? t('common.yes') : t('common.no');
                                             }
 
-                                            const labelKey = `schemas.${key}_label`;
-                                            const label = t(labelKey) !== labelKey ? t(labelKey) : (t(`schemas.${key}`) || key);
+                                            // LABEL TRANSLATION - Schema first, then dictionary
+                                            let label = cleanKey;
+
+                                            // PRIORITY 1: Try schema translation
+                                            if (schemaField?.translations?.label) {
+                                                const schemaLabel = schemaField.translations.label[language];
+                                                if (schemaLabel) {
+                                                    label = schemaLabel;
+                                                } else {
+                                                    // PRIORITY 2: Try dictionary with mapped key
+                                                    label = t(`schemas_4.${mappedLabelKey}`);
+                                                    if (label === `schemas_4.${mappedLabelKey}`) {
+                                                        label = t(`schemas.${mappedLabelKey}`);
+                                                    }
+                                                    if (label === `schemas.${mappedLabelKey}`) {
+                                                        label = t(mappedLabelKey);
+                                                    }
+                                                    if (label === mappedLabelKey) {
+                                                        label = t(`schemas_4.${cleanKey}`);
+                                                    }
+                                                    if (label === `schemas_4.${cleanKey}`) {
+                                                        label = t(`schemas.${cleanKey}`);
+                                                    }
+                                                    if (label === `schemas.${cleanKey}`) {
+                                                        label = cleanKey;
+                                                    }
+                                                }
+                                            } else {
+                                                // No schema translation, try dictionary
+                                                label = t(`schemas_4.${mappedLabelKey}`);
+                                                if (label === `schemas_4.${mappedLabelKey}`) {
+                                                    label = t(`schemas.${mappedLabelKey}`);
+                                                }
+                                                if (label === `schemas.${mappedLabelKey}`) {
+                                                    label = t(mappedLabelKey);
+                                                }
+                                                if (label === mappedLabelKey) {
+                                                    label = t(`schemas_4.${cleanKey}`);
+                                                }
+                                                if (label === `schemas_4.${cleanKey}`) {
+                                                    label = t(`schemas.${cleanKey}`);
+                                                }
+                                                if (label === `schemas.${cleanKey}`) {
+                                                    label = cleanKey;
+                                                }
+                                            }
 
                                             return (
                                                 <div key={idx} className="feature-item">
@@ -537,6 +659,62 @@ const VendorDetail = () => {
 
                     {/* Sticky Sidebar Contact */}
                     <aside>
+                        {/* Vendor Shop Card - TOP OF SIDEBAR */}
+                        {vendorShop && (
+                            <div className="vendor-shop-card" style={{
+                                marginBottom: '1.5rem',
+                                background: 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)',
+                                borderRadius: '16px',
+                                padding: '1.5rem',
+                                border: '2px solid #FF6B9D'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                                    <div style={{
+                                        width: '50px',
+                                        height: '50px',
+                                        borderRadius: '12px',
+                                        background: 'linear-gradient(135deg, #FF6B9D, #c084fc)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '1.5rem'
+                                    }}>🏪</div>
+                                    <div>
+                                        <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#be185d' }}>
+                                            {language === 'de' ? 'Dieser Anbieter hat einen Shop!'
+                                                : language === 'en' ? 'This vendor has a shop!'
+                                                    : 'Bu tedarikçinin mağazası var!'}
+                                        </h4>
+                                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#db2777' }}>
+                                            {language === 'de' ? 'Produkte entdecken'
+                                                : language === 'en' ? 'Browse products'
+                                                    : 'Ürünlerini keşfet'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <a
+                                    href={`/shop/magaza/${vendorShop.slug}`}
+                                    style={{
+                                        display: 'block',
+                                        width: '100%',
+                                        textAlign: 'center',
+                                        padding: '12px 20px',
+                                        background: 'linear-gradient(135deg, #FF6B9D 0%, #c084fc 100%)',
+                                        color: 'white',
+                                        textDecoration: 'none',
+                                        borderRadius: '10px',
+                                        fontWeight: '600',
+                                        fontSize: '0.95rem',
+                                        boxShadow: '0 4px 15px rgba(255, 107, 157, 0.3)'
+                                    }}
+                                >
+                                    🛍️ {language === 'de' ? 'Shop besuchen'
+                                        : language === 'en' ? 'Visit Shop'
+                                            : 'Mağazayı Ziyaret Et'}
+                                </a>
+                            </div>
+                        )}
+
                         <div className="vendor-booking-card">
                             {(vendor.priceRange || vendor.price) && (
                                 <div className="booking-price">

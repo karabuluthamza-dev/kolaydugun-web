@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../supabaseClient';
+import DOMPurify from 'dompurify';
 import SEO from '../components/SEO';
 import CommentSection from '../components/CommentSection';
 import RelatedPosts from '../components/RelatedPosts';
@@ -259,7 +260,7 @@ const BlogPost = () => {
                     lineHeight: '1.8',
                     color: '#333'
                 }}>
-                    <div dangerouslySetInnerHTML={{ __html: content }} />
+                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }} />
                 </div>
 
                 {/* Share Buttons */}

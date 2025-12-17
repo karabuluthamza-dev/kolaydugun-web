@@ -111,6 +111,27 @@ export const dictionary = {
             tr: "İletişime Geç"
         }
     },
+    filters: {
+        title: { en: "Filter", de: "Filtern", tr: "Filtrele" },
+        search: { en: "Search", de: "Suche", tr: "Arama" },
+        searchPlaceholder: { en: "Search by name or tag...", de: "Nach Name oder Tag suchen...", tr: "İsim veya etiket ara..." },
+        category: { en: "Category", de: "Kategorie", tr: "Kategori" },
+        all: { en: "All", de: "Alle", tr: "Tümü" },
+        options: { en: "Options", de: "Optionen", tr: "Seçenekleri" },
+        sort: { en: "Sort", de: "Sortieren", tr: "Sıralama" },
+        sortRecommended: { en: "Recommended", de: "Empfohlen", tr: "Önerilen" },
+        sortPriceAsc: { en: "Price: Low to High", de: "Preis: Niedrig bis Hoch", tr: "Fiyat: Düşükten Yükseğe" },
+        sortPriceDesc: { en: "Price: High to Low", de: "Preis: Hoch bis Niedrig", tr: "Fiyat: Yüksekten Düşüğe" },
+        sortRating: { en: "Rating: High to Low", de: "Bewertung: Hoch bis Niedrig", tr: "Puan: Yüksekten Düşüğe" },
+        city: { en: "City", de: "Stadt", tr: "Şehir" },
+        price: { en: "Price", de: "Preis", tr: "Fiyat" },
+        price_1: { en: "€ (Economic)", de: "€ (Günstig)", tr: "€ (Ekonomik)" },
+        price_2: { en: "€€ (Moderate)", de: "€€ (Mittel)", tr: "€€ (Orta)" },
+        price_3: { en: "€€€ (High)", de: "€€€ (Hoch)", tr: "€€€ (Yüksek)" },
+        price_4: { en: "€€€€ (Luxury)", de: "€€€€ (Luxus)", tr: "€€€€ (Lüks)" },
+        capacity: { en: "Min. Capacity", de: "Min. Kapazität", tr: "Min. Kapasite" },
+        tags: { en: "Tags", de: "Stichworte", tr: "Etiketler" }
+    },
     dashboard: {
         welcome: {
             en: "Welcome",
@@ -4257,6 +4278,31 @@ export const dictionary = {
             de: "Treten Sie unserer Plattform bei und lassen Sie Ihr Geschäft wachsen.",
             tr: "Platformumuza katılın ve işinizi büyütün."
         },
+        heroSubtitle: {
+            en: "Discover the best vendors for your dream wedding",
+            de: "Entdecken Sie die besten Dienstleister für Ihre Traumhochzeit",
+            tr: "Hayalinizdeki düğün için en iyi firmaları keşfedin"
+        },
+        searchPlaceholder: {
+            en: "🔍 Search vendors... (DJ, Photographer, Venue)",
+            de: "🔍 Suchen... (DJ, Fotograf, Location)",
+            tr: "🔍 Firma ara... (DJ, Fotoğrafçı, Mekan)"
+        },
+        searchButton: {
+            en: "Search",
+            de: "Suchen",
+            tr: "Ara"
+        },
+        ctaTitle: {
+            en: "🎉 Want to join as a vendor?",
+            de: "🎉 Möchten Sie als Dienstleister beitreten?",
+            tr: "🎉 Siz de firma olarak katılmak ister misiniz?"
+        },
+        ctaSubtitle: {
+            en: "Reach thousands of couples, grow your business",
+            de: "Erreichen Sie tausende Paare, erweitern Sie Ihr Geschäft",
+            tr: "Binlerce çifte ulaşın, işinizi büyütün"
+        },
         gridTitle: {
             en: "Wedding Vendors",
             de: "Hochzeitsdienstleister",
@@ -5221,4 +5267,113 @@ dictionary.community = community;
 
 dictionary.onlineCounter = {
     text: { en: "couples planning their wedding right now", de: "Paare planen gerade ihre Hochzeit", tr: "çift şu an düğününü planlıyor" }
+};
+
+// Shop Module Translations
+dictionary.shop = {
+    title: { en: "Shop", de: "Shop", tr: "Mağaza" },
+    subtitle: { en: "Product Recommendations", de: "Produktempfehlungen", tr: "Ürün Önerileri" },
+    categories: { en: "Categories", de: "Kategorien", tr: "Kategoriler" },
+    allProducts: { en: "All Products", de: "Alle Produkte", tr: "Tüm Ürünler" },
+    products: { en: "Products", de: "Produkte", tr: "Ürünler" },
+    productCount: { en: "products", de: "Produkte", tr: "ürün" },
+
+    // Product Types
+    productType: {
+        boutique: { en: "Boutique Collection", de: "Boutique Kollektion", tr: "Butik Koleksiyon" },
+        vendor: { en: "Vendor Product", de: "Anbieterprodukt", tr: "Tedarikçi Ürünü" },
+        amazon: { en: "Amazon Product", de: "Amazon Produkt", tr: "Amazon Ürünü" }
+    },
+
+    // Buttons
+    viewOnAmazon: { en: "View on Amazon", de: "Auf Amazon ansehen", tr: "Amazon'da Gör" },
+    contact: { en: "Contact", de: "Kontakt aufnehmen", tr: "İletişime Geç" },
+    viewVendor: { en: "View Vendor", de: "Anbieter ansehen", tr: "Tedarikçiye Git" },
+    getQuote: { en: "Get Quote", de: "Angebot anfordern", tr: "Teklif Al" },
+
+    // Share
+    share: { en: "Share", de: "Teilen", tr: "Paylaş" },
+    shareOnFacebook: { en: "Share on Facebook", de: "Auf Facebook teilen", tr: "Facebook'ta Paylaş" },
+    shareOnWhatsapp: { en: "Share on WhatsApp", de: "Auf WhatsApp teilen", tr: "WhatsApp'ta Paylaş" },
+    copyLink: { en: "Copy Link", de: "Link kopieren", tr: "Linki Kopyala" },
+    linkCopied: { en: "Link copied!", de: "Link kopiert!", tr: "Link kopyalandı!" },
+
+    // Price
+    price: { en: "Price", de: "Preis", tr: "Fiyat" },
+    priceOnRequest: { en: "Price on request", de: "Preis auf Anfrage", tr: "Fiyat için iletişime geçin" },
+
+    // Contact Modal
+    contactModal: {
+        title: { en: "Contact About Product", de: "Produkt anfragen", tr: "Ürün Hakkında İletişim" },
+        productLabel: { en: "Product", de: "Produkt", tr: "Ürün" },
+        nameLabel: { en: "Your Name", de: "Ihr Name", tr: "Adınız" },
+        emailLabel: { en: "Email", de: "E-Mail", tr: "E-posta" },
+        phoneLabel: { en: "Phone (optional)", de: "Telefon (optional)", tr: "Telefon (opsiyonel)" },
+        messageLabel: { en: "Message", de: "Nachricht", tr: "Mesajınız" },
+        messagePlaceholder: { en: "I'm interested in this product...", de: "Ich interessiere mich für dieses Produkt...", tr: "Bu ürünle ilgileniyorum..." },
+        submit: { en: "Send Message", de: "Nachricht senden", tr: "Mesaj Gönder" },
+        success: { en: "Message sent successfully!", de: "Nachricht erfolgreich gesendet!", tr: "Mesajınız başarıyla gönderildi!" },
+        error: { en: "Error sending message", de: "Fehler beim Senden", tr: "Mesaj gönderilirken hata oluştu" }
+    },
+
+    // Status
+    status: {
+        pending: { en: "Pending Approval", de: "Genehmigung ausstehend", tr: "Onay Bekliyor" },
+        approved: { en: "Approved", de: "Genehmigt", tr: "Onaylı" },
+        rejected: { en: "Rejected", de: "Abgelehnt", tr: "Reddedildi" },
+        inactive: { en: "Inactive", de: "Inaktiv", tr: "Pasif" }
+    },
+
+    // Empty states
+    noProducts: { en: "No products found", de: "Keine Produkte gefunden", tr: "Ürün bulunamadı" },
+    noCategories: { en: "No categories yet", de: "Noch keine Kategorien", tr: "Henüz kategori yok" },
+
+    // Vendor Shop Panel
+    vendorShop: {
+        title: { en: "My Shop", de: "Mein Shop", tr: "Mağazam" },
+        addProduct: { en: "Add Product", de: "Produkt hinzufügen", tr: "Ürün Ekle" },
+        editProduct: { en: "Edit Product", de: "Produkt bearbeiten", tr: "Ürün Düzenle" },
+        myProducts: { en: "My Products", de: "Meine Produkte", tr: "Ürünlerim" },
+        pendingApproval: { en: "Pending admin approval", de: "Wartet auf Genehmigung", tr: "Admin onayı bekleniyor" },
+        rejectionReason: { en: "Rejection reason", de: "Ablehnungsgrund", tr: "Red nedeni" }
+    },
+
+    // Help texts
+    help: {
+        imageUrl: {
+            en: "Upload your image to Google Drive, Imgur, or your own website, then paste the link here.",
+            de: "Laden Sie Ihr Bild auf Google Drive, Imgur oder Ihre eigene Website hoch und fügen Sie den Link hier ein.",
+            tr: "Görseli Google Drive, Imgur veya kendi sitenize yükleyip linki buraya yapıştırın."
+        },
+        imageUrlLink: { en: "How to get image link?", de: "Wie bekomme ich den Bildlink?", tr: "Görsel linki nasıl alınır?" },
+        price: {
+            en: "Enter price with comma (e.g. 49,99). Currency is set to EUR by default.",
+            de: "Geben Sie den Preis mit Komma ein (z.B. 49,99). Währung ist standardmäßig EUR.",
+            tr: "Fiyatı virgülle yazın (örn: 49,99). Para birimi otomatik EUR olarak ayarlanır."
+        },
+        category: {
+            en: "Select the most relevant category for your product.",
+            de: "Wählen Sie die relevanteste Kategorie für Ihr Produkt.",
+            tr: "Ürününüz için en uygun kategoriyi seçin."
+        }
+    },
+
+    // Admin
+    admin: {
+        title: { en: "Shop Management", de: "Shop-Verwaltung", tr: "Mağaza Yönetimi" },
+        categories: { en: "Categories", de: "Kategorien", tr: "Kategoriler" },
+        products: { en: "Products", de: "Produkte", tr: "Ürünler" },
+        inquiries: { en: "Inquiries", de: "Anfragen", tr: "İletişim Talepleri" },
+        pendingProducts: { en: "Pending Approval", de: "Zur Genehmigung", tr: "Onay Bekleyenler" },
+        approve: { en: "Approve", de: "Genehmigen", tr: "Onayla" },
+        reject: { en: "Reject", de: "Ablehnen", tr: "Reddet" },
+        rejectReason: { en: "Rejection Reason", de: "Ablehnungsgrund", tr: "Red Nedeni" },
+        rejectReasons: {
+            imageQuality: { en: "Image quality is insufficient", de: "Bildqualität ist unzureichend", tr: "Görsel kalitesi yetersiz" },
+            descriptionMissing: { en: "Description is missing or unclear", de: "Beschreibung fehlt oder ist unklar", tr: "Açıklama eksik veya belirsiz" },
+            priceError: { en: "Price information is incorrect", de: "Preisinformation ist falsch", tr: "Fiyat bilgisi hatalı" },
+            categoryWrong: { en: "Wrong category selected", de: "Falsche Kategorie ausgewählt", tr: "Yanlış kategori seçilmiş" },
+            other: { en: "Other (specify)", de: "Andere (angeben)", tr: "Diğer (belirtin)" }
+        }
+    }
 };

@@ -16,6 +16,7 @@ import HomePricing from '../components/HomePricing';
 import FAQSection from '../components/FAQSection';
 import HomeBlogShowcase from '../components/HomeBlogShowcase';
 import FloatingCTA from '../components/FloatingCTA';
+import HomeShopPromo from '../components/HomeShopPromo';
 
 const Home = () => {
     const { t, language } = useLanguage();
@@ -64,6 +65,7 @@ const Home = () => {
             <FeaturedVendors />
             <WhyUs />
             <Services />
+            <HomeShopPromo />
             <HomeBlogShowcase />
             <HomePricing />
             <About />

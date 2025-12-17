@@ -1,0 +1,377 @@
+.admin-amazon-settings {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.admin-amazon-settings.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 15px;
+}
+
+/* Header */
+.page-header {
+    margin-bottom: 30px;
+}
+
+.back-link {
+    font-size: 0.9rem;
+    color: #6b7280;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.back-link:hover {
+    color: #8B2252;
+}
+
+.page-header h1 {
+    font-size: 1.6rem;
+    margin: 0;
+    color: #1a1a2e;
+}
+
+.page-header p {
+    color: #6b7280;
+    margin: 5px 0 0;
+}
+
+/* Alerts */
+.alert {
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.alert-success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* Settings Container */
+.settings-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+.settings-section {
+    padding: 25px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.settings-section:last-of-type {
+    border-bottom: none;
+}
+
+.settings-section h2 {
+    font-size: 1.1rem;
+    margin: 0 0 20px;
+    color: #1a1a2e;
+}
+
+.setting-item {
+    margin-bottom: 20px;
+}
+
+.setting-item:last-child {
+    margin-bottom: 0;
+}
+
+.setting-item>label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #374151;
+}
+
+.setting-item input,
+.setting-item select {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+
+.setting-item input:focus,
+.setting-item select:focus {
+    outline: none;
+    border-color: #8B2252;
+}
+
+.help-text {
+    margin: 8px 0 0;
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.help-text a {
+    color: #8B2252;
+}
+
+/* Toggle Item */
+.setting-item.toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    background: #f9fafb;
+    border-radius: 10px;
+}
+
+.toggle-content {
+    flex: 1;
+}
+
+.toggle-content label {
+    display: block;
+    font-weight: 500;
+    color: #1a1a2e;
+    margin-bottom: 3px;
+}
+
+.toggle-content .help-text {
+    margin: 0;
+}
+
+/* Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #d1d5db;
+    transition: .3s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .3s;
+}
+
+input:checked+.slider {
+    background: linear-gradient(135deg, #8B2252 0%, #a855f7 100%);
+}
+
+input:checked+.slider:before {
+    transform: translateX(22px);
+}
+
+.slider.round {
+    border-radius: 28px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/* Actions */
+.settings-actions {
+    padding: 25px;
+    background: #f9fafb;
+    text-align: right;
+}
+
+/* Info Box */
+.info-box {
+    margin-top: 25px;
+    padding: 20px;
+    background: #eff6ff;
+    border-radius: 12px;
+    border: 1px solid #bfdbfe;
+}
+
+.info-box h3 {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    color: #1e40af;
+}
+
+.info-box ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.info-box li {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #1e40af;
+}
+
+.info-box li:last-child {
+    margin-bottom: 0;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #8B2252 0%, #a855f7 100%);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 34, 82, 0.3);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #8B2252;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Mode Section */
+.mode-section {
+    background: linear-gradient(135deg, #f0fdf4 0%, #d1fae5 100%);
+    border-bottom: 2px solid #a7f3d0 !important;
+}
+
+.mode-indicator {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mode-indicator.manual-mode .mode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #059669;
+    width: fit-content;
+    border: 1px solid #a7f3d0;
+}
+
+.mode-indicator p {
+    margin: 0;
+    color: #047857;
+    font-size: 0.9rem;
+}
+
+/* Disabled Section */
+.disabled-section {
+    opacity: 0.6;
+    position: relative;
+}
+
+.disabled-section input:disabled,
+.disabled-section select:disabled {
+    background: #f3f4f6;
+    cursor: not-allowed;
+}
+
+.disabled-toggle {
+    background: #f3f4f6 !important;
+    opacity: 0.7;
+}
+
+/* Coming Soon Badge */
+.coming-soon-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-left: 10px;
+    font-weight: 500;
+    vertical-align: middle;
+}
+
+/* Section Note */
+.section-note {
+    background: #f9fafb;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    color: #6b7280;
+    border-left: 3px solid #d1d5db;
+}
+
+.section-note.success-note {
+    background: #f0fdf4;
+    color: #166534;
+    border-left-color: #22c55e;
+}
+
+/* Active Badge */
+.active-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #047857;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-left: 10px;
+    font-weight: 500;
+    vertical-align: middle;
+}

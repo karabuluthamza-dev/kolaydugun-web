@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import DOMPurify from 'dompurify';
 
 const AdminGhostGenerator = () => {
     const [activeTab, setActiveTab] = useState('factory'); // 'factory', 'scenario'
@@ -357,7 +358,7 @@ const AdminGhostGenerator = () => {
                             <div className="space-y-4">
                                 <div className="bg-white p-4 rounded border l-4 border-blue-500">
                                     <h4 className="font-bold text-blue-800">{generatedScript.title}</h4>
-                                    <div className="text-sm text-gray-600 mt-2" dangerouslySetInnerHTML={{ __html: generatedScript.content }}></div>
+                                    <div className="text-sm text-gray-600 mt-2" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(generatedScript.content) }}></div>
                                 </div>
 
                                 <div className="pl-4 space-y-3 border-l-2 border-gray-200">

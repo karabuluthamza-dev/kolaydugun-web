@@ -1,0 +1,139 @@
+/* Social Share Buttons */
+.social-share-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 0;
+    border-top: 1px solid #f3f4f6;
+    margin-top: 15px;
+}
+
+.share-label {
+    font-size: 0.9rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.share-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.share-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* WhatsApp */
+.share-btn.whatsapp {
+    color: #25D366;
+    border-color: #25D366;
+}
+
+.share-btn.whatsapp:hover {
+    background: #25D366;
+    color: white;
+}
+
+/* Facebook */
+.share-btn.facebook {
+    color: #1877F2;
+    border-color: #1877F2;
+}
+
+.share-btn.facebook:hover {
+    background: #1877F2;
+    color: white;
+}
+
+/* Twitter/X */
+.share-btn.twitter {
+    color: #000;
+    border-color: #000;
+}
+
+.share-btn.twitter:hover {
+    background: #000;
+    color: white;
+}
+
+/* Copy Link */
+.share-btn.copy {
+    color: #8B2252;
+    border-color: #8B2252;
+}
+
+.share-btn.copy:hover {
+    background: #8B2252;
+    color: white;
+}
+
+.share-btn.copy.copied {
+    background: #10B981;
+    border-color: #10B981;
+    color: white;
+}
+
+/* Compact Mode */
+.social-share-compact {
+    display: flex;
+    gap: 6px;
+}
+
+.social-share-compact .share-btn {
+    padding: 8px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.social-share-compact .share-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .social-share-buttons {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .share-btns {
+        width: 100%;
+    }
+
+    .share-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 10px 12px;
+    }
+
+    .share-btn span {
+        display: none;
+    }
+
+    .share-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+}

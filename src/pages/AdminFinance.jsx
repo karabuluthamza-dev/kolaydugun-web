@@ -17,6 +17,8 @@ const AdminFinance = () => {
     const [recurringExpenses, setRecurringExpenses] = useState([]);
     const [recurringIncome, setRecurringIncome] = useState([]);
     const [budgetTargets, setBudgetTargets] = useState([]);
+    const [paypalTransactions, setPaypalTransactions] = useState([]);
+    const [affiliatePayouts, setAffiliatePayouts] = useState([]);
     const [filteredIncome, setFilteredIncome] = useState([]);
     const [filteredExpenses, setFilteredExpenses] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -107,7 +109,7 @@ const AdminFinance = () => {
     // Apply filters whenever dateFilter, customDateRange, or records change
     useEffect(() => {
         filterData();
-    }, [dateFilter, customDateRange, allIncomeRecords, allExpenseRecords]);
+    }, [dateFilter, customDateRange, allIncomeRecords, allExpenseRecords, paypalTransactions, affiliatePayouts]);
 
     const checkRecurringExpenses = async () => {
         const { error } = await supabase.rpc('process_recurring_expenses');
@@ -151,11 +153,27 @@ const AdminFinance = () => {
             .eq('year', selectedBudgetYear)
             .eq('month', selectedBudgetMonth);
 
+        // Fetch PayPal transactions (credit purchases from vendors)
+        const { data: paypalTxns } = await supabase
+            .from('transactions')
+            .select('*, vendors(business_name)')
+            .eq('type', 'credit_purchase')
+            .order('created_at', { ascending: false });
+
+        // Fetch affiliate payouts
+        const { data: affiliatePays } = await supabase
+            .from('shop_affiliate_earnings')
+            .select('*, shop_accounts(business_name)')
+            .eq('status', 'paid')
+            .order('paid_at', { ascending: false });
+
         setAllIncomeRecords(income || []);
         setAllExpenseRecords(expenses || []);
         setRecurringExpenses(recurring || []);
         setRecurringIncome(recurringInc || []);
         setBudgetTargets(budgets || []);
+        setPaypalTransactions(paypalTxns || []);
+        setAffiliatePayouts(affiliatePays || []);
         setLoading(false);
     };
 
@@ -462,36 +480,57 @@ const AdminFinance = () => {
         setFilteredIncome(filteredInc);
         setFilteredExpenses(filteredExp);
 
-        // Calculate summary based on filtered data
-        const totalIncome = filteredInc.reduce((sum, r) => sum + parseFloat(r.amount), 0);
-        const totalExpenses = filteredExp.reduce((sum, r) => sum + parseFloat(r.amount), 0);
+        // Calculate summary based on filtered data + PayPal data
+        const manualIncome = filteredInc.reduce((sum, r) => sum + parseFloat(r.amount), 0);
+        const manualExpenses = filteredExp.reduce((sum, r) => sum + parseFloat(r.amount), 0);
+
+        // Add PayPal income (credit purchases)
+        const paypalIncome = paypalTransactions.reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+
+        // Add affiliate payouts as expenses
+        const paypalExpenses = affiliatePayouts.reduce((sum, p) => sum + parseFloat(p.commission_amount || 0), 0);
+
+        const totalIncome = manualIncome + paypalIncome;
+        const totalExpenses = manualExpenses + paypalExpenses;
 
         setSummary({
             totalIncome,
             totalExpenses,
             netProfit: totalIncome - totalExpenses,
-            incomeCount: filteredInc.length,
-            expenseCount: filteredExp.length
+            incomeCount: filteredInc.length + paypalTransactions.length,
+            expenseCount: filteredExp.length + affiliatePayouts.length
         });
     };
 
     const prepareChartData = () => {
-        // Income by Category
+        // Income by Category (including PayPal)
         const incomeByCategory = filteredIncome.reduce((acc, curr) => {
             acc[curr.category] = (acc[curr.category] || 0) + parseFloat(curr.amount);
             return acc;
         }, {});
+
+        // Add PayPal income
+        if (paypalTransactions.length > 0) {
+            const paypalTotal = paypalTransactions.reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+            incomeByCategory['PayPal Kredi'] = paypalTotal;
+        }
 
         const incomeChartData = Object.keys(incomeByCategory).map(key => ({
             name: key,
             value: incomeByCategory[key]
         }));
 
-        // Expenses by Category
+        // Expenses by Category (including Affiliate)
         const expenseByCategory = filteredExpenses.reduce((acc, curr) => {
             acc[curr.category] = (acc[curr.category] || 0) + parseFloat(curr.amount);
             return acc;
         }, {});
+
+        // Add Affiliate payouts
+        if (affiliatePayouts.length > 0) {
+            const affiliateTotal = affiliatePayouts.reduce((sum, p) => sum + parseFloat(p.commission_amount || 0), 0);
+            expenseByCategory['Affiliate'] = affiliateTotal;
+        }
 
         const expenseChartData = Object.keys(expenseByCategory).map(key => ({
             name: key,
@@ -812,13 +851,13 @@ const AdminFinance = () => {
                     className={activeTab === 'income' ? 'active' : ''}
                     onClick={() => setActiveTab('income')}
                 >
-                    📥 Gelirler ({filteredIncome.length})
+                    📥 Gelirler ({filteredIncome.length + paypalTransactions.length})
                 </button>
                 <button
                     className={activeTab === 'expenses' ? 'active' : ''}
                     onClick={() => setActiveTab('expenses')}
                 >
-                    📤 Giderler ({filteredExpenses.length})
+                    📤 Giderler ({filteredExpenses.length + affiliatePayouts.length})
                 </button>
                 <button
                     className={activeTab === 'recurring' ? 'active' : ''}
@@ -838,6 +877,27 @@ const AdminFinance = () => {
                 >
                     🎯 Bütçe Hedefleri ({budgetTargets.length})
                 </button>
+                <button
+                    className={activeTab === 'paypal_income' ? 'active' : ''}
+                    onClick={() => setActiveTab('paypal_income')}
+                    style={{ backgroundColor: activeTab === 'paypal_income' ? '#ffc439' : undefined }}
+                >
+                    💳 PayPal Gelirleri ({paypalTransactions.length})
+                </button>
+                <button
+                    className={activeTab === 'paypal_expenses' ? 'active' : ''}
+                    onClick={() => setActiveTab('paypal_expenses')}
+                    style={{ backgroundColor: activeTab === 'paypal_expenses' ? '#FF6B9D' : undefined }}
+                >
+                    🤝 Affiliate Ödemeleri ({affiliatePayouts.length})
+                </button>
+                <button
+                    className={activeTab === 'help' ? 'active' : ''}
+                    onClick={() => setActiveTab('help')}
+                    style={{ backgroundColor: activeTab === 'help' ? '#e3f2fd' : undefined }}
+                >
+                    ❓ Yardım
+                </button>
             </div>
 
             {/* Content */}
@@ -846,21 +906,53 @@ const AdminFinance = () => {
                     <div className="overview-content">
                         <h2>Son İşlemler</h2>
                         <div className="recent-transactions">
-                            {[...filteredIncome.slice(0, 5), ...filteredExpenses.slice(0, 5)]
-                                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                                .slice(0, 10)
-                                .map(record => (
-                                    <div key={record.id} className="transaction-item">
-                                        <span className="date">{new Date(record.date).toLocaleDateString('tr-TR')}</span>
-                                        <span className="description">{record.description || record.category}</span>
-                                        <span className={`amount ${record.category ? 'income' : 'expense'}`}>
-                                            {allIncomeRecords.find(r => r.id === record.id) ? '+' : '-'}€{parseFloat(record.amount).toFixed(2)}
-                                        </span>
-                                    </div>
-                                ))}
-                            {filteredIncome.length === 0 && filteredExpenses.length === 0 && (
-                                <div className="no-data">Bu tarih aralığında işlem bulunamadı.</div>
-                            )}
+                            {/* Combine all sources: manual income, manual expenses, PayPal income, affiliate payouts */}
+                            {(() => {
+                                const allTransactions = [
+                                    ...filteredIncome.map(r => ({ ...r, type: 'income', source: 'manual' })),
+                                    ...filteredExpenses.map(r => ({ ...r, type: 'expense', source: 'manual' })),
+                                    ...paypalTransactions.map(t => ({
+                                        id: `paypal-${t.id}`,
+                                        date: t.created_at,
+                                        description: `💳 ${t.vendors?.business_name || 'Vendor'} - ${t.credits_added} Kredi`,
+                                        amount: t.amount,
+                                        type: 'income',
+                                        source: 'paypal'
+                                    })),
+                                    ...affiliatePayouts.map(p => ({
+                                        id: `affiliate-${p.id}`,
+                                        date: p.paid_at || p.created_at,
+                                        description: `🤝 Affiliate - ${p.shop_accounts?.business_name || 'Mağaza'}`,
+                                        amount: p.commission_amount,
+                                        type: 'expense',
+                                        source: 'affiliate'
+                                    }))
+                                ];
+
+                                return allTransactions
+                                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                                    .slice(0, 10)
+                                    .map(record => (
+                                        <div
+                                            key={record.id}
+                                            className="transaction-item"
+                                            style={{
+                                                backgroundColor: record.source === 'paypal' ? '#fef3c7' :
+                                                    record.source === 'affiliate' ? '#fce7f3' : 'transparent'
+                                            }}
+                                        >
+                                            <span className="date">{new Date(record.date).toLocaleDateString('tr-TR')}</span>
+                                            <span className="description">{record.description || record.category}</span>
+                                            <span className={`amount ${record.type === 'income' ? 'income' : 'expense'}`}>
+                                                {record.type === 'income' ? '+' : '-'}€{parseFloat(record.amount).toFixed(2)}
+                                            </span>
+                                        </div>
+                                    ));
+                            })()}
+                            {filteredIncome.length === 0 && filteredExpenses.length === 0 &&
+                                paypalTransactions.length === 0 && affiliatePayouts.length === 0 && (
+                                    <div className="no-data">Bu tarih aralığında işlem bulunamadı.</div>
+                                )}
                         </div>
                     </div>
                 )}
@@ -950,6 +1042,17 @@ const AdminFinance = () => {
                                         </td>
                                     </tr>
                                 ))}
+                                {/* PayPal Transactions (Read-only) */}
+                                {paypalTransactions.map(txn => (
+                                    <tr key={`paypal-${txn.id}`} style={{ backgroundColor: '#fef3c7' }}>
+                                        <td>{new Date(txn.created_at).toLocaleDateString('tr-TR')}</td>
+                                        <td><span className="category-badge" style={{ background: '#ffc439', color: '#000' }}>💳 PayPal</span></td>
+                                        <td>{txn.description || `${txn.credits_added} Kredi - ${txn.vendors?.business_name || 'Vendor'}`}</td>
+                                        <td>PayPal</td>
+                                        <td className="amount-cell" style={{ color: '#2e7d32', fontWeight: 'bold' }}>€{parseFloat(txn.amount).toFixed(2)}</td>
+                                        <td><span style={{ color: '#666', fontSize: '0.85rem' }}>Otomatik</span></td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
@@ -992,6 +1095,17 @@ const AdminFinance = () => {
                                                 </button>
                                             </div>
                                         </td>
+                                    </tr>
+                                ))}
+                                {/* Affiliate Payouts (Read-only) */}
+                                {affiliatePayouts.map(payout => (
+                                    <tr key={`affiliate-${payout.id}`} style={{ backgroundColor: '#fce7f3' }}>
+                                        <td>{payout.paid_at ? new Date(payout.paid_at).toLocaleDateString('tr-TR') : '-'}</td>
+                                        <td><span className="category-badge" style={{ background: '#FF6B9D', color: '#fff' }}>🤝 Affiliate</span></td>
+                                        <td>Komisyon ödemesi - {payout.shop_accounts?.business_name || 'Mağaza'}</td>
+                                        <td>PayPal</td>
+                                        <td className="amount-cell" style={{ color: '#c62828', fontWeight: 'bold' }}>€{parseFloat(payout.commission_amount).toFixed(2)}</td>
+                                        <td><span style={{ color: '#666', fontSize: '0.85rem' }}>Otomatik</span></td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -1667,6 +1781,325 @@ const AdminFinance = () => {
                             </div>
                         </form>
                     </div>
+                </div>
+            )}
+
+            {/* PayPal Gelirleri Tab */}
+            {activeTab === 'paypal_income' && (
+                <div className="paypal-income-content">
+                    <h2>💳 PayPal Gelirleri (Kredi Satın Alımları)</h2>
+                    <p style={{ color: '#666', marginBottom: '20px' }}>
+                        Tedarikçilerin PayPal ile satın aldığı kredi paketleri
+                    </p>
+
+                    {paypalTransactions.length === 0 ? (
+                        <div className="no-data">Henüz PayPal ile kredi satın alımı yok.</div>
+                    ) : (
+                        <div className="table-responsive">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tarih</th>
+                                        <th>Tedarikçi</th>
+                                        <th>Açıklama</th>
+                                        <th>Tutar</th>
+                                        <th>Durum</th>
+                                        <th>Payment ID</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {paypalTransactions.map(txn => (
+                                        <tr key={txn.id}>
+                                            <td>{new Date(txn.created_at).toLocaleDateString('tr-TR')}</td>
+                                            <td>{txn.vendors?.business_name || 'N/A'}</td>
+                                            <td>{txn.description || `${txn.credits_added} Kredi`}</td>
+                                            <td style={{ color: '#2e7d32', fontWeight: 'bold' }}>+€{parseFloat(txn.amount).toFixed(2)}</td>
+                                            <td>
+                                                <span className={`status-badge ${txn.status}`} style={{
+                                                    padding: '4px 8px',
+                                                    borderRadius: '12px',
+                                                    fontSize: '0.8rem',
+                                                    backgroundColor: txn.status === 'approved' ? '#e8f5e9' : '#fff3e0',
+                                                    color: txn.status === 'approved' ? '#2e7d32' : '#ef6c00'
+                                                }}>
+                                                    {txn.status === 'approved' ? 'Onaylandı' : txn.status}
+                                                </span>
+                                            </td>
+                                            <td style={{ fontSize: '0.8rem', color: '#666' }}>{txn.payment_id || '-'}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colSpan="3" style={{ textAlign: 'right', fontWeight: 'bold' }}>Toplam:</td>
+                                        <td style={{ color: '#2e7d32', fontWeight: 'bold' }}>
+                                            +€{paypalTransactions.reduce((sum, t) => sum + parseFloat(t.amount || 0), 0).toFixed(2)}
+                                        </td>
+                                        <td colSpan="2"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Affiliate Ödemeleri Tab */}
+            {activeTab === 'paypal_expenses' && (
+                <div className="affiliate-payouts-content">
+                    <h2>🤝 Affiliate Ödemeleri (Komisyon Ödemeleri)</h2>
+                    <p style={{ color: '#666', marginBottom: '20px' }}>
+                        Mağaza sahiplerine PayPal ile ödenen affiliate komisyonları
+                    </p>
+
+                    {affiliatePayouts.length === 0 ? (
+                        <div className="no-data">Henüz ödenen affiliate komisyonu yok.</div>
+                    ) : (
+                        <div className="table-responsive">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Ödeme Tarihi</th>
+                                        <th>Mağaza</th>
+                                        <th>Komisyon Tutarı</th>
+                                        <th>Payout Batch ID</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {affiliatePayouts.map(payout => (
+                                        <tr key={payout.id}>
+                                            <td>{payout.paid_at ? new Date(payout.paid_at).toLocaleDateString('tr-TR') : '-'}</td>
+                                            <td>{payout.shop_accounts?.business_name || 'N/A'}</td>
+                                            <td style={{ color: '#c62828', fontWeight: 'bold' }}>-€{parseFloat(payout.commission_amount).toFixed(2)}</td>
+                                            <td style={{ fontSize: '0.8rem', color: '#666' }}>{payout.payout_batch_id || '-'}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colSpan="2" style={{ textAlign: 'right', fontWeight: 'bold' }}>Toplam Ödenen:</td>
+                                        <td style={{ color: '#c62828', fontWeight: 'bold' }}>
+                                            -€{affiliatePayouts.reduce((sum, p) => sum + parseFloat(p.commission_amount || 0), 0).toFixed(2)}
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Yardım Tab */}
+            {activeTab === 'help' && (
+                <div className="help-content" style={{ maxWidth: '900px' }}>
+                    <h2>❓ Finans Modülü Yardım</h2>
+                    <p style={{ color: '#666', marginBottom: '30px' }}>
+                        Bu sayfadaki verilerin nereden geldiği ve nasıl çalıştığı hakkında bilgiler
+                    </p>
+
+                    {/* KATEGORI 1: Veri Kaynakları */}
+                    <div style={{ marginBottom: '32px' }}>
+                        <h3 style={{ color: '#1e40af', marginBottom: '16px', borderBottom: '2px solid #3b82f6', paddingBottom: '8px' }}>📊 Veri Kaynakları</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <details className="faq-item" style={{ background: '#f8fafc', borderRadius: '12px', padding: '16px', border: '1px solid #e2e8f0' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#1e40af' }}>Finans panelindeki veriler nereden geliyor?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <p><strong>4 farklı kaynak:</strong></p>
+                                    <ul style={{ paddingLeft: '20px', marginTop: '8px' }}>
+                                        <li><strong>Gelirler</strong> (income_records): Manuel gelir kayıtları</li>
+                                        <li><strong>Giderler</strong> (expense_records): Manuel gider kayıtları</li>
+                                        <li><strong>PayPal Gelirleri</strong> (transactions): Vendor kredi satın alımları</li>
+                                        <li><strong>Affiliate Ödemeleri</strong> (shop_affiliate_earnings): Mağaza komisyonları</li>
+                                    </ul>
+                                </div>
+                            </details>
+                            <details className="faq-item" style={{ background: '#f1f5f9', borderRadius: '12px', padding: '16px', border: '1px solid #cbd5e1' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#334155' }}>🗄️ Hangi veritabanı tabloları önemli?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <p><strong>Manuel:</strong> income_records, expense_records, recurring_income, recurring_expenses, budget_vs_actual</p>
+                                    <p><strong>PayPal:</strong> transactions (kredi alımları), shop_affiliate_earnings (komisyonlar)</p>
+                                    <p><strong>İlişkili:</strong> vendors (credit_balance), shop_accounts (paypal_email)</p>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
+                    {/* KATEGORI 2: PayPal Entegrasyonu */}
+                    <div style={{ marginBottom: '32px' }}>
+                        <h3 style={{ color: '#92400e', marginBottom: '16px', borderBottom: '2px solid #f59e0b', paddingBottom: '8px' }}>💳 PayPal Entegrasyonu</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <details className="faq-item" style={{ background: '#fef3c7', borderRadius: '12px', padding: '16px', border: '1px solid #fcd34d' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#92400e' }}>PayPal Gelirleri tab'ında ne görüyorum?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <p>Vendor'ların PayPal ile satın aldığı kredi paketleri.</p>
+                                    <p><strong>Bilgiler:</strong> Tarih, Tedarikçi, Kredi, Tutar, Durum, Order ID</p>
+                                    <p><strong>Kaynak:</strong> <code>transactions</code> (type = 'credit_purchase')</p>
+                                </div>
+                            </details>
+                            <details className="faq-item" style={{ background: '#fce7f3', borderRadius: '12px', padding: '16px', border: '1px solid #f9a8d4' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#9d174d' }}>Affiliate Ödemeleri tab'ında ne görüyorum?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <p>Mağaza sahiplerine ödenen affiliate komisyonları.</p>
+                                    <p><strong>Kaynak:</strong> <code>shop_affiliate_earnings</code> (status = 'paid')</p>
+                                </div>
+                            </details>
+                            <details className="faq-item" style={{ background: '#dbeafe', borderRadius: '12px', padding: '16px', border: '1px solid #93c5fd' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#1e40af' }}>🔄 PayPal Sandbox vs Live farkı nedir?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <p><strong>Sandbox:</strong> Test ortamı, gerçek para yok</p>
+                                    <p><strong>Live:</strong> Gerçek para transferi</p>
+                                    <p style={{ marginTop: '8px', background: '#fff', padding: '8px', borderRadius: '6px' }}>
+                                        <strong>Ayarlar:</strong> .env → VITE_PAYPAL_CLIENT_ID | Supabase Secrets → PAYPAL_* değişkenleri
+                                    </p>
+                                </div>
+                            </details>
+                            <details className="faq-item" style={{ background: '#ecfdf5', borderRadius: '12px', padding: '16px', border: '1px solid #6ee7b7' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#065f46' }}>🚀 Live PayPal'a nasıl geçilir?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <ol style={{ paddingLeft: '20px' }}>
+                                        <li>PayPal Developer Portal → Live tab → App bilgilerini al</li>
+                                        <li><code>.env</code> → VITE_PAYPAL_CLIENT_ID = Live Client ID</li>
+                                        <li>Supabase → Edge Functions → Secrets:
+                                            <ul style={{ marginTop: '4px' }}>
+                                                <li>PAYPAL_CLIENT_ID = Live Client ID</li>
+                                                <li>PAYPAL_CLIENT_SECRET = Live Secret</li>
+                                                <li>PAYPAL_MODE = live</li>
+                                            </ul>
+                                        </li>
+                                        <li>Edge function'ı redeploy et: <code>supabase functions deploy paypal-payout</code></li>
+                                    </ol>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
+                    {/* KATEGORI 3: Akış Diyagramları */}
+                    <div style={{ marginBottom: '32px' }}>
+                        <h3 style={{ color: '#065f46', marginBottom: '16px', borderBottom: '2px solid #10b981', paddingBottom: '8px' }}>💰 Para Akışları</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <details className="faq-item" style={{ background: '#d1fae5', borderRadius: '12px', padding: '16px', border: '1px solid #6ee7b7' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#065f46' }}>Affiliate komisyon akışı nasıl işliyor?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <ol style={{ paddingLeft: '20px' }}>
+                                        <li>Referral link tıklanır → Başvuru oluşur</li>
+                                        <li>Admin onaylar → Komisyon "pending" olur</li>
+                                        <li>/admin/shop-commissions → PayPal butonuna bas</li>
+                                        <li>Ödeme yapılır → Status "paid" olur → Burada görünür</li>
+                                    </ol>
+                                </div>
+                            </details>
+                            <details className="faq-item" style={{ background: '#ede9fe', borderRadius: '12px', padding: '16px', border: '1px solid #c4b5fd' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#5b21b6' }}>🛒 Vendor kredi satın alma akışı nasıl?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <ol style={{ paddingLeft: '20px' }}>
+                                        <li>/vendor/dashboard → Cüzdan → Kredi Paketleri</li>
+                                        <li>PayPal ile ödeme → transactions tablosuna kayıt</li>
+                                        <li>credit_balance güncellenir → PayPal Gelirleri'nde görünür</li>
+                                    </ol>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
+                    {/* KATEGORI 4: Kullanım Rehberi */}
+                    <div style={{ marginBottom: '32px' }}>
+                        <h3 style={{ color: '#7c3aed', marginBottom: '16px', borderBottom: '2px solid #8b5cf6', paddingBottom: '8px' }}>📚 Kullanım Rehberi</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <details className="faq-item" style={{ background: '#f5f3ff', borderRadius: '12px', padding: '16px', border: '1px solid #c4b5fd' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#7c3aed' }}>📈 Grafikler tab'ında ne görülür?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <p><strong>İki pasta grafiği:</strong></p>
+                                    <ul style={{ paddingLeft: '20px' }}>
+                                        <li><strong>Gelir Dağılımı:</strong> Kategorilere göre gelir yüzdeleri</li>
+                                        <li><strong>Gider Dağılımı:</strong> Kategorilere göre gider yüzdeleri</li>
+                                    </ul>
+                                    <p style={{ marginTop: '8px' }}>Tarih filtresi seçimine göre veriler güncellenir.</p>
+                                </div>
+                            </details>
+                            <details className="faq-item" style={{ background: '#fef3c7', borderRadius: '12px', padding: '16px', border: '1px solid #fcd34d' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#92400e' }}>🔄 Düzenli gelir/gider nasıl eklenir?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <ol style={{ paddingLeft: '20px' }}>
+                                        <li>"Düzenli Giderler" veya "Düzenli Gelirler" tab'ına git</li>
+                                        <li>Sağ üstteki "+ Düzenli Gider/Gelir Ekle" butonuna bas</li>
+                                        <li>Kategori, tutar, açıklama ve ödeme gününü gir</li>
+                                        <li>Her ay otomatik olarak işlenir</li>
+                                    </ol>
+                                </div>
+                            </details>
+                            <details className="faq-item" style={{ background: '#fce7f3', borderRadius: '12px', padding: '16px', border: '1px solid #f9a8d4' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#9d174d' }}>🎯 Bütçe hedefleri nasıl belirlenir?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <ol style={{ paddingLeft: '20px' }}>
+                                        <li>"Bütçe Hedefleri" tab'ına git</li>
+                                        <li>Ay ve yıl seç (üstteki dropdown'lardan)</li>
+                                        <li>"+ Bütçe Hedefi Ekle" ile kategori bazlı limit belirle</li>
+                                        <li>Gerçekleşen vs hedef karşılaştırması görüntülenir</li>
+                                    </ol>
+                                </div>
+                            </details>
+                            <details className="faq-item" style={{ background: '#e0f2fe', borderRadius: '12px', padding: '16px', border: '1px solid #7dd3fc' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#0369a1' }}>📤 Excel/PDF'e nasıl export edilir?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <ul style={{ paddingLeft: '20px' }}>
+                                        <li><strong>PDF:</strong> Sağ üstteki "🖨️ Yazdır / PDF" butonuna bas → Tarayıcı yazdırma ekranından PDF kaydet</li>
+                                        <li><strong>Excel:</strong> Her tab'daki tablolar kopyalanıp Excel'e yapıştırılabilir</li>
+                                    </ul>
+                                    <p style={{ marginTop: '8px', color: '#666', fontSize: '0.9rem' }}>
+                                        <em>Not: Gelecekte otomatik Excel export özelliği eklenebilir.</em>
+                                    </p>
+                                </div>
+                            </details>
+                            <details className="faq-item" style={{ background: '#dcfce7', borderRadius: '12px', padding: '16px', border: '1px solid #86efac' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#166534' }}>🧾 Vergi indirilebilir giderler nedir?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <p>Gider eklerken "Vergi İndirilebilir" checkbox'ı işaretlenebilir:</p>
+                                    <ul style={{ paddingLeft: '20px', marginTop: '8px' }}>
+                                        <li><strong>Evet:</strong> Hosting, yazılım, reklam, muhasebe vb.</li>
+                                        <li><strong>Hayır:</strong> Kişisel harcamalar, cezalar vb.</li>
+                                    </ul>
+                                    <p style={{ marginTop: '8px' }}>Bu işaretleme vergi beyanında kullanılabilir.</p>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
+                    {/* KATEGORI 5: Sorun Giderme */}
+                    <div style={{ marginBottom: '32px' }}>
+                        <h3 style={{ color: '#b91c1c', marginBottom: '16px', borderBottom: '2px solid #ef4444', paddingBottom: '8px' }}>⚠️ Sorun Giderme</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <details className="faq-item" style={{ background: '#fee2e2', borderRadius: '12px', padding: '16px', border: '1px solid #fca5a5' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#b91c1c' }}>PayPal ödemesi başarısız olursa ne yapmalıyım?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <p><strong>Kontrol Listesi:</strong></p>
+                                    <ul style={{ paddingLeft: '20px' }}>
+                                        <li>Credentials doğru mu? → Supabase &gt; Edge Functions &gt; Secrets</li>
+                                        <li>Mağazanın paypal_email'i var mı? → shop_accounts</li>
+                                        <li>Edge Function deploy edildi mi?</li>
+                                    </ul>
+                                    <p style={{ marginTop: '8px' }}><strong>Sık Hatalar:</strong></p>
+                                    <ul style={{ paddingLeft: '20px' }}>
+                                        <li>"Client Authentication failed" → Credentials yanlış</li>
+                                        <li>"Shop not found" → Mağaza yok veya RLS sorunu</li>
+                                        <li>"PayPal email not found" → paypal_email boş</li>
+                                    </ul>
+                                </div>
+                            </details>
+                            <details className="faq-item" style={{ background: '#fef3c7', borderRadius: '12px', padding: '16px', border: '1px solid #fcd34d' }}>
+                                <summary style={{ fontWeight: '600', cursor: 'pointer', color: '#92400e' }}>Veriler neden güncel değil?</summary>
+                                <div style={{ marginTop: '12px', lineHeight: '1.8', color: '#4a5568' }}>
+                                    <ul style={{ paddingLeft: '20px' }}>
+                                        <li>Sayfayı yenileyini (F5)</li>
+                                        <li>Tarih filtrelerini kontrol edin (Bu Ay, Bu Yıl vb.)</li>
+                                        <li>PayPal transaction status "approved" mı kontrol edin</li>
+                                        <li>Affiliate ödemesi "paid" statüsünde mi kontrol edin</li>
+                                    </ul>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
                 </div>
             )}
         </div>

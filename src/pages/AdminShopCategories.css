@@ -1,0 +1,431 @@
+/* ===========================================
+   ADMIN SHOP CATEGORIES - Premium Design
+   Soft tonlar, gölgeler, modern kartlar
+   =========================================== */
+
+.admin-shop-categories {
+    padding: 0;
+}
+
+/* ========================================
+   PAGE HEADER
+   ======================================== */
+.admin-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.admin-page-header h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1F2937;
+}
+
+.admin-page-header p {
+    margin: 6px 0 0;
+    color: #6B7280;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #D4AF37 0%, #B8962E 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
+}
+
+/* ========================================
+   CATEGORIES GRID
+   ======================================== */
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 24px;
+}
+
+/* ========================================
+   CATEGORY CARD - Premium Design
+   ======================================== */
+.category-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid #F3F4F6;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+    border-color: #E5E7EB;
+}
+
+.category-card.inactive {
+    opacity: 0.55;
+    background: #FAFAFA;
+}
+
+.category-card.parent {
+    border-left: 4px solid #D4AF37;
+}
+
+.category-card.child {
+    border-left: 4px solid #8BA888;
+    margin-left: 24px;
+}
+
+/* Category Image */
+.category-image {
+    height: 160px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #F7F4EF 0%, #E7EFE8 100%);
+}
+
+.category-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.category-card:hover .category-image img {
+    transform: scale(1.05);
+}
+
+/* Category Info */
+.category-info {
+    padding: 20px;
+}
+
+.category-info h3 {
+    margin: 0 0 8px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #1F2937;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.category-icon {
+    font-size: 1.3rem;
+}
+
+.child-indicator {
+    color: #8BA888;
+    font-weight: 400;
+    font-size: 1.2rem;
+}
+
+.category-slug {
+    color: #9CA3AF;
+    font-size: 0.8rem;
+    margin: 0 0 12px;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+}
+
+.category-description {
+    color: #6B7280;
+    font-size: 0.88rem;
+    margin: 0 0 14px;
+    line-height: 1.5;
+}
+
+/* Meta Badges */
+.category-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.order-badge {
+    background: #F3F4F6;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge.active {
+    background: #ECFDF5;
+    color: #059669;
+}
+
+.status-badge.inactive {
+    background: #FEF2F2;
+    color: #DC2626;
+}
+
+.status-badge.homepage {
+    background: #EEF2FF;
+    color: #4F46E5;
+}
+
+/* ========================================
+   ACTION BUTTONS
+   ======================================== */
+.category-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 20px;
+    background: #FAFAFA;
+    border-top: 1px solid #F3F4F6;
+}
+
+.btn-icon {
+    background: white;
+    border: 1px solid #E5E7EB;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background: #D4AF37;
+    border-color: #D4AF37;
+    transform: scale(1.08);
+}
+
+.btn-icon.danger:hover {
+    background: #FEE2E2;
+    border-color: #FECACA;
+}
+
+/* ========================================
+   MODAL - Premium Design
+   ======================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 28px;
+    border-bottom: 1px solid #F3F4F6;
+    background: #FAFAFA;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1F2937;
+}
+
+.modal-close {
+    background: white;
+    border: 1px solid #E5E7EB;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6B7280;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: #FEE2E2;
+    border-color: #FECACA;
+    color: #DC2626;
+}
+
+.modal-content form {
+    padding: 28px;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: #374151;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 6px;
+    color: #9CA3AF;
+    font-size: 0.8rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.checkbox-label {
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-weight: 500 !important;
+}
+
+.checkbox-label input {
+    width: auto !important;
+    accent-color: #D4AF37;
+}
+
+/* Modal Actions */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+    padding-top: 20px;
+    border-top: 1px solid #F3F4F6;
+    margin-top: 20px;
+}
+
+.btn-secondary {
+    background: #F3F4F6;
+    color: #374151;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #E5E7EB;
+}
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 24px;
+    background: white;
+    border-radius: 16px;
+    border: 2px dashed #E5E7EB;
+}
+
+.empty-state p {
+    color: #6B7280;
+    margin-bottom: 20px;
+    font-size: 1rem;
+}
+
+/* ========================================
+   LOADING
+   ======================================== */
+.admin-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    color: #6B7280;
+    font-size: 1rem;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+    .admin-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .category-card.child {
+        margin-left: 12px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}

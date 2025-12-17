@@ -54,14 +54,12 @@ const FAQSection = () => {
                     <p>{t('faq.subtitle') || 'Merak ettiğiniz soruların cevapları'}</p>
                 </div>
 
-                <div className="faq-grid">
-                    {faqs.map((faq, index) => (
+                <div className="faq-grid" data-aos="fade-up">
+                    {faqs.map((faq) => (
                         <div
                             key={faq.id}
                             className={`faq-card ${expandedFaq === faq.id ? 'active' : ''}`}
                             onClick={() => setExpandedFaq(expandedFaq === faq.id ? null : faq.id)}
-                            data-aos="fade-up"
-                            data-aos-delay={index * 100}
                         >
                             <div className="faq-card-question">
                                 <h3>{getQuestionByLanguage(faq)}</h3>

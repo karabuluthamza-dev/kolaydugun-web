@@ -1,7 +1,22 @@
 User-agent: *
 Allow: /
+
+# Admin & Dashboard areas
 Disallow: /admin/
-Disallow: /vendor-dashboard/
+Disallow: /vendor/dashboard/
+Disallow: /dashboard/
 Disallow: /tools/
+
+# User private areas
+Disallow: /shop-panel/
+Disallow: /profile/
+Disallow: /messages/
+Disallow: /notifications/
+
+# Auth pages
+Disallow: /login/
+Disallow: /register/
+Disallow: /forgot-password/
+Disallow: /update-password/
 
 Sitemap: https://kolaydugun.de/sitemap.xml

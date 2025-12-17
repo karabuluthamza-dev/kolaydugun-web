@@ -1,0 +1,476 @@
+/* ============================================
+   KOLAYDUGUN VISUAL ENHANCEMENTS - Phase 1
+   Sadece görsel iyileştirmeler, fonksiyon değişikliği yok
+   ============================================ */
+
+/* ============================================
+   1. KART HOVER EFEKTLERİ
+   ============================================ */
+
+/* Genel kart hover efekti */
+.vendor-card,
+.blog-card,
+.product-card,
+.shop-card,
+.category-card,
+.service-card,
+.feature-card,
+[class*="-card"]:not(.stat-card):not(.plan-card) {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.vendor-card:hover,
+.blog-card:hover,
+.product-card:hover,
+.shop-card:hover,
+.category-card:hover,
+.service-card:hover,
+.feature-card:hover,
+[class*="-card"]:not(.stat-card):not(.plan-card):hover {
+    transform: translateY(-8px) scale(1.02) !important;
+    box-shadow: 0 20px 40px rgba(255, 107, 157, 0.2) !important;
+}
+
+/* Resimli kartlar için özel efekt */
+.vendor-card img,
+.blog-card img,
+.product-card img {
+    transition: transform 0.4s ease !important;
+}
+
+.vendor-card:hover img,
+.blog-card:hover img,
+.product-card:hover img {
+    transform: scale(1.05) !important;
+}
+
+/* ============================================
+   2. SECTION SPACING ARTIRMA
+   ============================================ */
+
+/* Ana bölümler arası boşluk artırma */
+.section,
+section,
+[class*="section"] {
+    padding-top: clamp(3rem, 6vw, 5rem) !important;
+    padding-bottom: clamp(3rem, 6vw, 5rem) !important;
+}
+
+/* Hero sonrası ilk section için ekstra boşluk */
+.hero+section,
+.hero+.section,
+.hero-section+section {
+    margin-top: 2rem;
+}
+
+/* Bölüm başlıkları için alt boşluk */
+.section-title,
+.section h2,
+section>h2 {
+    margin-bottom: 2.5rem !important;
+}
+
+/* Grid ve kart container'ları için gap artırma */
+.vendors-grid,
+.products-grid,
+.blog-grid,
+.categories-grid,
+[class*="-grid"] {
+    gap: 1.5rem !important;
+}
+
+@media (min-width: 768px) {
+
+    .vendors-grid,
+    .products-grid,
+    .blog-grid,
+    .categories-grid,
+    [class*="-grid"] {
+        gap: 2rem !important;
+    }
+}
+
+/* ============================================
+   3. SCROLL REVEAL ANIMASYONLARI
+   ============================================ */
+
+/* Genel reveal animasyonu tanımı */
+@keyframes revealUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes revealLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes revealRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Animasyonlu elementler */
+.animate-reveal {
+    animation: revealUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Staggered animasyonlar için delay */
+.animate-delay-1 {
+    animation-delay: 0.1s;
+}
+
+.animate-delay-2 {
+    animation-delay: 0.2s;
+}
+
+.animate-delay-3 {
+    animation-delay: 0.3s;
+}
+
+.animate-delay-4 {
+    animation-delay: 0.4s;
+}
+
+.animate-delay-5 {
+    animation-delay: 0.5s;
+}
+
+/* Page load animasyonları */
+.hero-content,
+.hero h1,
+.hero-title {
+    animation: revealUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.hero-subtitle,
+.hero p {
+    animation: revealUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+    opacity: 0;
+}
+
+.hero-cta,
+.hero .btn,
+.hero button {
+    animation: revealUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards;
+    opacity: 0;
+}
+
+/* Section başlıkları için animasyon */
+.section-title,
+section h2,
+.section>h2 {
+    animation: revealUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ============================================
+   4. BUTON HOVER GEÇİŞLERİ
+   ============================================ */
+
+/* Tüm butonlar için yumuşak geçiş */
+button,
+.btn,
+[class*="btn-"],
+a[class*="btn"] {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hover efekti - yukarı kayma ve gölge */
+button:hover:not(:disabled),
+.btn:hover:not(:disabled),
+[class*="btn-"]:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+/* Primary buton parlama efekti */
+.btn-primary::after,
+button[class*="primary"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.2),
+            transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-primary:hover::after,
+button[class*="primary"]:hover::after {
+    left: 100%;
+}
+
+/* Secondary butonlar için hafif renk geçişi */
+.btn-secondary:hover,
+.btn-outline:hover {
+    background-color: rgba(255, 107, 157, 0.1) !important;
+    border-color: var(--color-primary, #FF6B9D) !important;
+}
+
+/* Icon butonlar için döndürme efekti */
+button svg,
+.btn svg {
+    transition: transform 0.3s ease !important;
+}
+
+button:hover svg,
+.btn:hover svg {
+    transform: scale(1.1);
+}
+
+/* ============================================
+   5. FOOTER İYİLEŞTİRMESİ
+   ============================================ */
+
+/* Footer genel stil iyileştirmesi */
+footer,
+.footer {
+    padding-top: 4rem !important;
+    padding-bottom: 2rem !important;
+    border-top: 1px solid rgba(255, 107, 157, 0.1);
+}
+
+/* Footer sosyal ikonlar için hover */
+footer a,
+.footer a {
+    transition: all 0.3s ease !important;
+}
+
+footer a:hover,
+.footer a:hover {
+    color: var(--color-primary, #FF6B9D) !important;
+    transform: translateY(-2px);
+}
+
+/* Sosyal medya ikonları için özel stil */
+.social-links a,
+.footer-social a,
+[class*="social"] a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 107, 157, 0.1);
+    transition: all 0.3s ease !important;
+}
+
+.social-links a:hover,
+.footer-social a:hover,
+[class*="social"] a:hover {
+    background: var(--color-primary, #FF6B9D) !important;
+    color: white !important;
+    transform: translateY(-4px) scale(1.1);
+    box-shadow: 0 8px 20px rgba(255, 107, 157, 0.4);
+}
+
+/* Footer link grupları için spacing */
+.footer-links,
+.footer-column,
+footer ul {
+    margin-bottom: 1.5rem;
+}
+
+/* Footer başlıkları için stil */
+footer h4,
+.footer h4,
+.footer-title {
+    margin-bottom: 1.25rem !important;
+    font-weight: 600;
+    color: var(--color-primary, #FF6B9D);
+}
+
+/* ============================================
+   6. EK GÖRSEL İYİLEŞTİRMELER
+   ============================================ */
+
+/* Gradyan text efekti - başlıklar için */
+.gradient-text,
+.hero h1,
+.section-title strong {
+    background: linear-gradient(135deg, #FF6B9D 0%, #c084fc 50%, #FF6B9D 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+
+    0%,
+    100% {
+        background-position: 0% center;
+    }
+
+    50% {
+        background-position: 100% center;
+    }
+}
+
+/* Sayfa geçişi için fade efekti */
+.page-content,
+main {
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Loading state için pulsing efekti */
+.loading,
+[class*="loading"],
+.skeleton {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Focus state iyileştirmesi - erişilebilirlik */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--color-primary, #FF6B9D);
+    outline-offset: 2px;
+}
+
+/* Smooth scroll davranışı */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Selection rengi */
+::selection {
+    background: rgba(255, 107, 157, 0.3);
+    color: inherit;
+}
+
+/* ============================================
+   7. MOBİL OPTİMİZASYON
+   ============================================ */
+
+@media (max-width: 768px) {
+
+    /* Mobilde hover efektlerini azalt (performans) */
+    .vendor-card:hover,
+    .blog-card:hover,
+    .product-card:hover {
+        transform: translateY(-4px) !important;
+    }
+
+    /* Mobilde section spacing azalt */
+    .section,
+    section {
+        padding-top: 2.5rem !important;
+        padding-bottom: 2.5rem !important;
+    }
+
+    /* Mobilde animasyonları basitleştir */
+    @media (prefers-reduced-motion: reduce) {
+
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+}
+
+/* ============================================
+   8. BACK TO TOP BUTONU STİLİ
+   ============================================ */
+
+.back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF6B9D 0%, #c084fc 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.back-to-top:hover {
+    transform: translateY(-4px) scale(1.1);
+    box-shadow: 0 8px 25px rgba(255, 107, 157, 0.5);
+}

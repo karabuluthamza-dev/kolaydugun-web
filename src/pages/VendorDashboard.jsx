@@ -7,12 +7,13 @@ import ProfileEditor from '../components/VendorDashboard/ProfileEditor';
 import GalleryManager from '../components/VendorDashboard/GalleryManager';
 import LeadsViewer from '../components/VendorDashboard/LeadsViewer';
 import VendorMessages from '../components/VendorDashboard/VendorMessages';
+import VendorShop from '../components/VendorDashboard/VendorShop';
 import VendorWallet from './VendorWallet';
 import './VendorDashboard.css';
 
 const VendorDashboard = () => {
     const { user } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -133,6 +134,8 @@ const VendorDashboard = () => {
                 return <LeadsViewer vendor={vendor} highlightLeadId={searchParams.get('leadId')} />;
             case 'messages':
                 return <VendorMessages vendor={vendor} />;
+            case 'shop':
+                return <VendorShop />;
             case 'wallet':
                 return <VendorWallet />;
             default:
@@ -140,9 +143,102 @@ const VendorDashboard = () => {
         }
     };
 
+    // 3-language promo texts
+    const promoTexts = {
+        tr: {
+            title: '🛍️ Yeni! Kendi Mağazanızı Açın',
+            desc: 'KolayDugun Shop Marketplace\'te kendi ürünlerinizi satın. İlk 10 tedarikçiye özel avantajlar!',
+            viewDemo: '🎨 Demo Mağazayı İncele',
+            viewPanel: '⚙️ Demo Paneli Gör',
+            apply: 'Hemen Başvur →'
+        },
+        de: {
+            title: '🛍️ Neu! Eröffnen Sie Ihren Shop',
+            desc: 'Verkaufen Sie Ihre Produkte im KolayDugun Shop Marketplace. Exklusive Vorteile für die ersten 10 Anbieter!',
+            viewDemo: '🎨 Demo-Shop ansehen',
+            viewPanel: '⚙️ Demo-Panel ansehen',
+            apply: 'Jetzt bewerben →'
+        },
+        en: {
+            title: '🛍️ New! Open Your Own Shop',
+            desc: 'Sell your products in KolayDugun Shop Marketplace. Exclusive benefits for first 10 vendors!',
+            viewDemo: '🎨 View Demo Shop',
+            viewPanel: '⚙️ View Demo Panel',
+            apply: 'Apply Now →'
+        }
+    };
+    const promo = promoTexts[language] || promoTexts.tr;
+
     return (
         <div className="section container dashboard-layout">
             <aside className="dashboard-sidebar">
+                {/* Shop Marketplace Promo Card - Compact */}
+                <div className="shop-promo-card" style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    padding: '16px',
+                    borderRadius: '12px',
+                    marginBottom: '16px',
+                    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+                }}>
+                    <h4 style={{
+                        color: 'white',
+                        margin: '0 0 8px',
+                        fontSize: '1rem',
+                        fontWeight: 'bold'
+                    }}>
+                        {promo.title}
+                    </h4>
+                    <p style={{
+                        color: 'rgba(255,255,255,0.85)',
+                        margin: '0 0 10px',
+                        fontSize: '0.8rem',
+                        lineHeight: '1.4'
+                    }}>
+                        {promo.desc}
+                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+                        <a
+                            href="/shop/magaza/wedding-essentials-demo-mj7uva80"
+                            target="_blank"
+                            style={{
+                                color: 'rgba(255,255,255,0.95)',
+                                fontSize: '0.8rem',
+                                textDecoration: 'underline'
+                            }}
+                        >
+                            {promo.viewDemo}
+                        </a>
+                        <a
+                            href="/shop-panel/demo"
+                            target="_blank"
+                            style={{
+                                color: 'rgba(255,255,255,0.95)',
+                                fontSize: '0.8rem',
+                                textDecoration: 'underline'
+                            }}
+                        >
+                            {promo.viewPanel}
+                        </a>
+                    </div>
+                    <button
+                        onClick={() => navigate('/shop/basvuru')}
+                        style={{
+                            width: '100%',
+                            background: 'white',
+                            color: '#667eea',
+                            padding: '10px 16px',
+                            borderRadius: '8px',
+                            border: 'none',
+                            fontWeight: 'bold',
+                            fontSize: '0.85rem',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                        }}
+                    >
+                        {promo.apply}
+                    </button>
+                </div>
+
                 <div className="sidebar-header">
                     <h3>{t('dashboard.panel')}</h3>
                 </div>
@@ -187,6 +283,13 @@ const VendorDashboard = () => {
                         disabled={!vendor}
                     >
                         💰 {t('dashboard.wallet')}
+                    </button>
+                    <button
+                        className={activeTab === 'shop' ? 'active' : ''}
+                        onClick={() => setActiveTab('shop')}
+                        disabled={!vendor}
+                    >
+                        🛍️ {t('shop.vendorShop.title', 'Mağazam')}
                     </button>
                     <hr style={{ margin: '10px 0', border: 'none', borderTop: '1px solid #eee' }} />
                     <button
