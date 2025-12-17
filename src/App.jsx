@@ -7,6 +7,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import SessionTracker from './components/SessionTracker';
 import MaintenanceCheck from './components/MaintenanceCheck';
 import FaviconManager from './components/FaviconManager';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -143,6 +144,7 @@ function App() {
           <VendorProvider>
             <PlanningProvider>
               <Router>
+                <ScrollToTop />
                 <div className="flex flex-col min-h-screen">
                   <Navbar />
                   <div className="flex-grow">
