@@ -73,18 +73,28 @@
     }
 
     .vendor-hero-title {
-        font-size: 2.5rem;
+        font-size: 2rem;
     }
 
     .vendor-hero-subtitle {
-        font-size: 1rem;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
     }
 
     .vendor-hero-stats {
-        gap: 1.5rem;
+        gap: 2.5rem;
+    }
+
+    .stat-item {
+        min-width: 80px;
     }
 
     .stat-number {
         font-size: 1.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
     }
 }
