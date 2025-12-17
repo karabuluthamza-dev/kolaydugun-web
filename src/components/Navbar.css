@@ -34,6 +34,14 @@
     text-decoration: none;
     letter-spacing: -0.5px;
     margin-right: 1rem;
+    transition: font-size 0.3s ease;
+}
+
+@media (max-width: 992px) {
+    .navbar-logo {
+        font-size: 1.85rem;
+        /* Increased from 1.6rem for better mobile brand visibility */
+    }
 }
 
 .navbar-links {
