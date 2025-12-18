@@ -4,8 +4,8 @@
     "description": "Almanya'daki en iyi düğün mekanlarını, fotoğrafçıları ve organizasyon firmalarını keşfedin.",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#8B2252",
+    "background_color": "#FFF9F5",
+    "theme_color": "#FF6B9D",
     "orientation": "portrait-primary",
     "icons": [
         {

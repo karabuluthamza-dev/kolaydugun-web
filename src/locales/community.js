@@ -85,6 +85,16 @@ export const community = {
         de: "Mitglied",
         tr: "Topluluk Üyesi"
     },
+    vendor: {
+        en: "Vendor",
+        de: "Anbieter",
+        tr: "Tedarikçi"
+    },
+    someone: {
+        en: "Someone",
+        de: "Jemand",
+        tr: "Biri"
+    },
     search: {
         en: "Search topics...",
         de: "Themen suchen...",
@@ -99,6 +109,7 @@ export const community = {
         postedBy: { en: "Posted by", de: "Gepostet von", tr: "Gönderen" },
         answers: { en: "Answers", de: "Antworten", tr: "Cevap" },
         replyPlaceholder: { en: "Write your reply here...", de: "Schreiben Sie hier Ihre Antwort...", tr: "Cevabınızı buraya yazın..." },
+        replyTitle: { en: "Write a Reply", de: "Eine Antwort schreiben", tr: "Cevap Yaz" },
         replyButton: { en: "Reply", de: "Antworten", tr: "Cevapla" },
         report: { en: "Report", de: "Melden", tr: "Şikayet Et" },
         reportDescription: {
@@ -154,7 +165,24 @@ export const community = {
         submitting: { en: "Posting...", de: "Wird gepostet...", tr: "Paylaşılıyor..." },
         loginRequired: { en: "You must be logged in to post.", de: "Sie müssen angemeldet sein.", tr: "Konu açmak için giriş yapmalısınız." },
         loginMessage: { en: "Please log in to start a topic.", de: "Bitte melden Sie sich an, um ein Thema zu starten.", tr: "Konu açmak için lütfen giriş yapın." },
-        loginButton: { en: "Log In", de: "Anmelden", tr: "Giriş Yap" }
+        loginButton: { en: "Log In", de: "Anmelden", tr: "Giriş Yap" },
+        fillAllFields: { en: "Please fill in all fields.", de: "Bitte füllen Sie alle Felder aus.", tr: "Lütfen tüm alanları doldurun." },
+        topicCreateError: { en: "Topic could not be created: ", de: "Thema konnte nicht erstellt werden: ", tr: "Konu açılamadı: " }
+    },
+    media: {
+        addImage: { en: "Add Image", de: "Bild hinzufügen", tr: "Resim Ekle" },
+        addVideo: { en: "Add Video", de: "Video hinzufügen", tr: "Video Ekle" },
+        imageTitle: { en: "Project Content / Image", de: "Inhalt / Bild", tr: "İçerik / Resim" },
+        videoTitle: { en: "Project Content / Video", de: "Inhalt / Video", tr: "İçerik / Video" },
+        add: { en: "Add", de: "Hinzufügen", tr: "Ekle" },
+        uploading: { en: "Uploading...", de: "Wird hochgeladen...", tr: "Yükleniyor..." },
+        videoPlaceholder: { en: "Paste YouTube or TikTok link...", de: "YouTube- oder TikTok-Link einfügen...", tr: "YouTube veya TikTok linkini yapıştırın..." },
+        imagePlaceholder: { en: "Paste image URL (Imgur, Google Drive, etc.)...", de: "Bild-URL einfügen (Imgur, Google Drive, usw.)...", tr: "Resim linkini yapıştırın (Imgur, Google Drive, vb.)..." },
+        imageHelp: { en: "Upload to imgur.com and paste the link here", de: "Laden Sie auf imgur.com hoch und fügen Sie den Link hier ein", tr: "imgur.com'a yükleyip linki buraya yapıştırın" },
+        videoHelp: { en: "Paste YouTube or TikTok link.", de: "YouTube- oder TikTok-Link einfügen.", tr: "YouTube veya TikTok linkini yapıştırın." },
+        autoMediaActive: { en: "Auto Media Detection Active ✅", de: "Auto-Medienerkennung aktiv ✅", tr: "Otomatik Medya Tanıma Aktif ✅" },
+        image: { en: "Image", de: "Bild", tr: "Resim" },
+        video: { en: "Video", de: "Video", tr: "Video" }
     },
     newTopics: { en: "New Topics", de: "Neue Themen", tr: "Yeni Konular" }
 };

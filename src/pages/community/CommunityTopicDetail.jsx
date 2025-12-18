@@ -7,6 +7,103 @@ import { adminNotifications } from '../../utils/adminNotifications';
 import DOMPurify from 'dompurify';
 import * as LucideIcons from 'lucide-react';
 
+const RichContentRenderer = ({ content }) => {
+    if (!content) return null;
+
+    // 1. Sanitize HTML (protect against XSS)
+    const sanitizedHTML = DOMPurify.sanitize(content);
+
+    // 2. Split content to detect standalone media links
+    const lines = sanitizedHTML.split('\n');
+
+    return (
+        <div className="rich-content-wrapper space-y-4">
+            {lines.map((line, index) => {
+                const trimmedLine = line.trim();
+                if (!trimmedLine) return <div key={index} className="h-2"></div>;
+
+                // --- IMAGE DETECTION ---
+                // Support: Direct links, Imgur links (including without extension)
+                const isImgur = /imgur\.com\/(a\/|gallery\/)?([a-zA-Z0-9]+)$/i.test(trimmedLine);
+                const isDirectImage = /\.(jpeg|jpg|gif|png|webp|svg|avif)$/i.test(trimmedLine);
+
+                if (isDirectImage || isImgur) {
+                    let imgSrc = trimmedLine;
+                    if (isImgur && !isDirectImage) {
+                        // Extract ID and force .jpg for direct rendering
+                        const match = trimmedLine.match(/imgur\.com\/(?:a\/|gallery\/)?([a-zA-Z0-9]+)$/i);
+                        if (match) imgSrc = `https://i.imgur.com/${match[1]}.jpg`;
+                    }
+
+                    return (
+                        <div key={index} className="flex justify-center my-6 group">
+                            <div className="relative overflow-hidden rounded-xl shadow-lg transition-transform duration-300 hover:scale-[1.01]">
+                                <img
+                                    src={imgSrc}
+                                    alt="Forum content"
+                                    className="max-w-full h-auto object-cover border border-gray-100"
+                                    onError={(e) => {
+                                        // Fallback if i.imgur.com trick fails or link is broken
+                                        e.target.style.display = 'none';
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    );
+                }
+
+                // --- YOUTUBE DETECTION ---
+                const ytMatch = trimmedLine.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|shorts\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+                if (ytMatch) {
+                    return (
+                        <div key={index} className="flex justify-center my-6">
+                            <div className="w-full max-w-2xl aspect-video rounded-xl overflow-hidden shadow-lg border border-gray-100">
+                                <iframe
+                                    width="100%"
+                                    height="100%"
+                                    src={`https://www.youtube.com/embed/${ytMatch[1]}`}
+                                    title="YouTube video player"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                ></iframe>
+                            </div>
+                        </div>
+                    );
+                }
+
+                // --- TIKTOK DETECTION ---
+                const tiktokMatch = trimmedLine.match(/tiktok\.com\/(?:@[\w.-]+\/video\/|v\/|embed\/v2\/)?(\d+)/i);
+                if (tiktokMatch) {
+                    return (
+                        <div key={index} className="flex justify-center my-6">
+                            <div className="tiktok-embed-container w-full max-w-[325px] rounded-xl overflow-hidden shadow-lg border border-gray-100 bg-black">
+                                <iframe
+                                    src={`https://www.tiktok.com/embed/v2/${tiktokMatch[1]}`}
+                                    width="100%"
+                                    height="580"
+                                    frameBorder="0"
+                                    allowFullScreen
+                                ></iframe>
+                            </div>
+                        </div>
+                    );
+                }
+
+                // --- REGULAR TEXT ---
+                return (
+                    <p
+                        key={index}
+                        className="text-gray-700 leading-relaxed text-[1.1rem]"
+                        style={{ wordBreak: 'break-word' }}
+                        dangerouslySetInnerHTML={{ __html: line }}
+                    />
+                );
+            })}
+        </div>
+    );
+};
+
 const CommunityTopicDetail = () => {
     const { slug } = useParams();
     const { t, language } = useLanguage();
@@ -36,6 +133,26 @@ const CommunityTopicDetail = () => {
     const [savingTopicEdit, setSavingTopicEdit] = useState(false);
     const [showDeleteTopicConfirm, setShowDeleteTopicConfirm] = useState(false);
     const [deletingTopic, setDeletingTopic] = useState(false);
+
+    // Reply Media State
+    const [showReplyImageInput, setShowReplyImageInput] = useState(false);
+    const [showReplyVideoInput, setShowReplyVideoInput] = useState(false);
+    const [replyImageUrl, setReplyImageUrl] = useState('');
+    const [replyVideoUrl, setReplyVideoUrl] = useState('');
+
+    const handleAddReplyImage = () => {
+        if (!replyImageUrl.trim()) return;
+        setNewComment(prev => prev + (prev ? '\n' : '') + replyImageUrl.trim() + '\n');
+        setReplyImageUrl('');
+        // setShowReplyImageInput(false); // Keep open for multi-add
+    };
+
+    const handleAddReplyVideo = () => {
+        if (!replyVideoUrl.trim()) return;
+        setNewComment(prev => prev + (prev ? '\n' : '') + replyVideoUrl.trim() + '\n');
+        setReplyVideoUrl('');
+        // setShowReplyVideoInput(false); // Keep open for multi-add
+    };
 
     useEffect(() => {
         fetchPostAndComments();
@@ -168,7 +285,7 @@ const CommunityTopicDetail = () => {
 
                 // Konu sahibine beğeni bildirimi gönder (kendi beğenisine bildirim gönderme)
                 if (post.user_id && post.user_id !== user.id) {
-                    const likerName = user.user_metadata?.first_name || user.email?.split('@')[0] || 'Biri';
+                    const likerName = user.user_metadata?.first_name || user.email?.split('@')[0] || t('community.someone');
                     await supabase.from('user_notifications').insert({
                         user_id: post.user_id,
                         type: 'forum_like',
@@ -212,7 +329,7 @@ const CommunityTopicDetail = () => {
 
             // Konu sahibine bildirim gönder (kendi yorumuna bildirim gönderme)
             if (post.user_id && post.user_id !== user.id) {
-                const commenterName = user.user_metadata?.first_name || user.email?.split('@')[0] || 'Biri';
+                const commenterName = user.user_metadata?.first_name || user.email?.split('@')[0] || t('community.someone');
                 await supabase.from('user_notifications').insert({
                     user_id: post.user_id,
                     type: 'forum_comment',
@@ -332,7 +449,7 @@ const CommunityTopicDetail = () => {
                 setEditContent('');
             } catch (error) {
                 console.error('Edit error:', error);
-                alert('Düzenleme hatası: ' + error.message);
+                alert(t('community.topic.editError') + error.message);
             } finally {
                 setSavingEdit(false);
             }
@@ -361,7 +478,7 @@ const CommunityTopicDetail = () => {
                 setDeletingCommentId(null);
             } catch (error) {
                 console.error('Delete error:', error);
-                alert('Silme hatası: ' + error.message);
+                alert(t('community.topic.deleteError') + error.message);
             }
         } else {
             // Ask for confirmation
@@ -445,7 +562,13 @@ const CommunityTopicDetail = () => {
         }
     };
 
-    if (loading) return <div className="p-12 text-center text-gray-400 italic bg-gray-50 rounded-2xl animate-pulse">{t('community.loading')}</div>;
+
+    if (loading) return (
+        <div className="flex flex-col items-center justify-center p-20 space-y-4">
+            <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+            <div className="text-gray-400 font-bold animate-pulse">{t('community.loading')}</div>
+        </div>
+    );
 
     // Removed Debug Box, standard 404
     if (!post) {
@@ -520,7 +643,7 @@ const CommunityTopicDetail = () => {
                                 )}
                             </h1>
                             <div className="prose prose-purple max-w-none text-gray-600 leading-relaxed mb-8">
-                                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
+                                <RichContentRenderer content={post.content} />
                             </div>
                         </>
                     )}
@@ -542,7 +665,7 @@ const CommunityTopicDetail = () => {
                                     {post.effectiveDisplayName || `${post.profile?.first_name || ''} ${post.profile?.last_name || ''}`.trim() || 'Anonim'}
                                     {post.isVendor && (
                                         <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold">
-                                            🏢 Tedarikçi
+                                            🏢 {t('community.vendor')}
                                         </span>
                                     )}
                                 </div>
@@ -783,7 +906,9 @@ const CommunityTopicDetail = () => {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="text-gray-700 text-sm leading-relaxed whitespace-pre-line" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(comment.content) }}></div>
+                                    <div className="text-gray-700 text-sm leading-relaxed">
+                                        <RichContentRenderer content={comment.content} />
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -791,35 +916,171 @@ const CommunityTopicDetail = () => {
                 ))}
 
                 {/* Reply Box */}
-                <div className="bg-white rounded-3xl p-1.5 shadow-lg shadow-purple-900/5 border border-purple-100 mt-8">
+                <div className="bg-white rounded-[32px] p-4 sm:p-6 shadow-xl shadow-purple-900/5 border border-purple-50 mt-8 sm:mt-12 transition-all hover:shadow-2xl hover:shadow-purple-900/10">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+                        <h4 className="font-black text-gray-800 flex items-center gap-2">
+                            <span className="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center text-sm">💬</span>
+                            {t('community.topic.replyTitle')}
+                        </h4>
+                        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                            <button
+                                type="button"
+                                onClick={() => { setShowReplyImageInput(!showReplyImageInput); setShowReplyVideoInput(false); }}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer bg-purple-100 text-purple-700 hover:bg-purple-200"
+                            >
+                                <LucideIcons.Image size={14} />
+                                {t('community.media.image')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => { setShowReplyVideoInput(!showReplyVideoInput); setShowReplyImageInput(false); }}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-red-100 text-red-700 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-red-200 transition-all"
+                            >
+                                <LucideIcons.PlayCircle size={14} />
+                                {t('community.media.video')}
+                            </button>
+                        </div>
+                    </div>
+
+                    {showReplyImageInput && (
+                        <div className="mb-6 p-6 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-[24px] border border-purple-100 animate-fade-in shadow-inner relative overflow-hidden group">
+                            <a
+                                href="https://imgur.com/upload"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-all hover:scale-110 cursor-pointer"
+                                title="Imgur'da Resim Yükle"
+                            >
+                                <LucideIcons.Image size={64} />
+                            </a>
+                            <div className="relative z-10">
+                                <div className="text-sm font-bold text-purple-800 mb-1 flex items-center gap-2">
+                                    <span className="w-6 h-6 bg-purple-200 rounded-lg flex items-center justify-center text-[10px]">1</span>
+                                    {t('community.media.imageTitle') || "Resim Ekle"}
+                                </div>
+                                <a
+                                    href="https://imgur.com/upload"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 text-[11px] text-purple-600 hover:text-purple-800 mb-4 font-bold bg-purple-100/50 px-3 py-1 rounded-full border border-purple-200/50 transition-colors"
+                                >
+                                    <span>✨ {t('community.media.imageHelp')}</span>
+                                    <LucideIcons.ExternalLink size={10} />
+                                </a>
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <div className="relative flex-1 group/input">
+                                        <input
+                                            type="text"
+                                            className="w-full bg-white border-2 border-purple-100 rounded-2xl px-5 py-3 text-xs outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-400 transition-all font-medium text-gray-700 placeholder:text-gray-300"
+                                            placeholder={t('community.media.imagePlaceholder')}
+                                            value={replyImageUrl}
+                                            onChange={(e) => setReplyImageUrl(e.target.value)}
+                                        />
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-purple-300">
+                                            <LucideIcons.Link size={14} />
+                                        </div>
+
+                                        {/* Canlı Ön İzleme */}
+                                        {replyImageUrl.trim() && (
+                                            <div className="absolute -top-32 left-0 w-32 h-32 bg-white rounded-2xl shadow-2xl border-2 border-purple-200 p-1 animate-bounce-subtle overflow-hidden z-20 pointer-events-none">
+                                                <img
+                                                    src={/imgur\.com\/(?:a\/|gallery\/)?([a-zA-Z0-9]+)$/i.test(replyImageUrl) && !/\.(jpeg|jpg|gif|png|webp)$/i.test(replyImageUrl)
+                                                        ? `https://i.imgur.com/${replyImageUrl.match(/imgur\.com\/(?:a\/|gallery\/)?([a-zA-Z0-9]+)$/i)[1]}.jpg`
+                                                        : replyImageUrl
+                                                    }
+                                                    alt="Preview"
+                                                    className="w-full h-full object-cover rounded-xl"
+                                                    onError={(e) => e.target.parentElement.style.display = 'none'}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleAddReplyImage}
+                                        className="bg-purple-600 text-white px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-wider hover:bg-purple-700 transition shadow-lg shadow-purple-200 active:scale-95"
+                                    >
+                                        {t('community.media.add')}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {showReplyVideoInput && (
+                        <div className="mb-6 p-6 bg-gradient-to-br from-red-50 to-rose-50 rounded-[24px] border border-red-100 animate-fade-in shadow-inner relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <LucideIcons.PlayCircle size={64} />
+                            </div>
+                            <div className="relative z-10">
+                                <div className="text-sm font-bold text-red-800 mb-1 flex items-center gap-2">
+                                    <span className="w-6 h-6 bg-red-200 rounded-lg flex items-center justify-center text-[10px]">2</span>
+                                    {t('community.media.videoTitle') || "Video Ekle"}
+                                </div>
+                                <div className="text-[11px] text-red-600/80 mb-4 font-medium leading-relaxed">
+                                    🎬 {t('community.media.videoHelp') || "YouTube veya TikTok linkini yapıştırın."}
+                                </div>
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <div className="relative flex-1 group/input">
+                                        <input
+                                            type="text"
+                                            className="w-full bg-white border-2 border-red-100 rounded-2xl px-5 py-3 text-xs outline-none focus:ring-4 focus:ring-red-200 focus:border-red-400 transition-all font-medium text-gray-700 placeholder:text-gray-300"
+                                            placeholder={t('community.media.videoPlaceholder')}
+                                            value={replyVideoUrl}
+                                            onChange={(e) => setReplyVideoUrl(e.target.value)}
+                                        />
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-red-300">
+                                            <LucideIcons.Youtube size={14} />
+                                        </div>
+
+                                        {/* Video Ön İzleme */}
+                                        {replyVideoUrl.trim() && (
+                                            <div className="absolute -top-40 left-0 w-64 aspect-video bg-white rounded-2xl shadow-2xl border-2 border-red-200 p-1 animate-bounce-subtle overflow-hidden z-20 pointer-events-none">
+                                                {(() => {
+                                                    const ytMatch = replyVideoUrl.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|shorts\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+                                                    if (ytMatch) {
+                                                        return <img src={`https://img.youtube.com/vi/${ytMatch[1]}/mqdefault.jpg`} alt="Preview" className="w-full h-full object-cover rounded-xl" />;
+                                                    }
+                                                    const ttMatch = replyVideoUrl.match(/tiktok\.com\/(?:@[\w.-]+\/video\/|v\/|embed\/v2\/)?(\d+)/i);
+                                                    if (ttMatch) {
+                                                        return <div className="w-full h-full flex items-center justify-center bg-gray-900 text-white font-bold text-xs gap-2">
+                                                            <LucideIcons.Music size={16} /> TikTok Video
+                                                        </div>;
+                                                    }
+                                                    return <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-[10px]">{replyVideoUrl ? 'Desteklenmeyen Medya' : ''}</div>;
+                                                })()}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleAddReplyVideo}
+                                        className="bg-red-600 text-white px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-wider hover:bg-red-700 transition shadow-lg shadow-red-200 active:scale-95"
+                                    >
+                                        {t('community.media.add')}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {user ? (
-                        <form onSubmit={handleCommentSubmit} className="relative group">
+                        <form onSubmit={handleCommentSubmit} className="relative">
                             <textarea
-                                className="w-full rounded-[20px] p-5 pr-32 focus:outline-none resize-none text-gray-700 min-h-[120px] bg-gray-50/50 focus:bg-white transition-colors placeholder-gray-400 text-sm"
+                                className="w-full bg-gray-50 border-2 border-transparent focus:border-purple-300 focus:bg-white rounded-[24px] p-6 pr-32 transition-all outline-none text-gray-700 min-h-[140px] leading-relaxed font-medium placeholder-gray-400"
                                 rows="3"
                                 placeholder={t('community.topic.replyPlaceholder')}
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
                             ></textarea>
-                            <div className="absolute bottom-4 right-4 flex items-center gap-2">
-                                <button
-                                    type="submit"
-                                    disabled={submitting || !newComment.trim()}
-                                    className="bg-gray-900 text-white px-6 py-2.5 rounded-full font-bold text-sm hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex items-center gap-2"
-                                >
-                                    {submitting ? (
-                                        <>
-                                            <LucideIcons.Loader2 size={16} className="animate-spin" />
-                                            {t('community.newTopic.submitting')}
-                                        </>
-                                    ) : (
-                                        <>
-                                            <LucideIcons.Send size={16} />
-                                            {t('community.topic.replyButton')}
-                                        </>
-                                    )}
-                                </button>
-                            </div>
+                            <button
+                                type="submit"
+                                disabled={submitting || !newComment.trim()}
+                                className="w-full sm:w-auto sm:absolute sm:bottom-4 sm:right-4 mt-3 sm:mt-0 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-3 rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg hover:shadow-purple-200 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {submitting ? <LucideIcons.Loader2 size={16} className="animate-spin" /> : <LucideIcons.Send size={16} />}
+                                {t('community.topic.replyButton') || t('community.topic.submitReply')}
+                            </button>
                         </form>
                     ) : (
                         <div className="text-center py-10 text-gray-500 text-sm bg-gray-50/30 rounded-[20px] border border-dashed border-gray-200">
