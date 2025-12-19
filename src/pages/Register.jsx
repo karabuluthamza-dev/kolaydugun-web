@@ -32,9 +32,19 @@ const Register = () => {
     const [submitError, setSubmitError] = useState('');
     const [submitted, setSubmitted] = useState(false);
 
-    const { register, loginWithGoogle } = useAuth();
+    const { register, loginWithGoogle, user: currentUser, loading: authLoading } = useAuth();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+
+    // Auto-redirect if already logged in
+    useEffect(() => {
+        if (!authLoading && currentUser) {
+            let role = currentUser?.role || currentUser?.user_metadata?.role;
+            if (role === 'admin') navigate('/admin');
+            else if (role === 'vendor') navigate('/vendor/dashboard');
+            else navigate('/user-dashboard');
+        }
+    }, [currentUser, authLoading, navigate]);
 
     useEffect(() => {
         const type = searchParams.get('type');

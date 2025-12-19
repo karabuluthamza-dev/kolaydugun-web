@@ -16,27 +16,41 @@ const VendorReviews = ({ vendorId }) => {
 
     return (
         <div className="vendor-reviews">
-            <div className="reviews-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h3>{t('reviews.title') || 'Reviews'} ({reviews.length})</h3>
+            {user && !userReview && (
+                <div style={{ marginBottom: '2rem' }}>
+                    {!showForm ? (
+                        <div style={{ textAlign: 'center', padding: '2rem', border: '2px dashed #e2e8f0', borderRadius: '12px' }}>
+                            <p style={{ marginBottom: '1rem', color: '#64748b' }}>
+                                {t('reviews.shareExperience') || 'Bu tedarikçi hakkında ne düşünüyorsunuz?'}
+                            </p>
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => setShowForm(true)}
+                            >
+                                {t('reviews.writeFirstReview') || 'Değerlendirme Yap'}
+                            </button>
+                        </div>
+                    ) : (
+                        <ReviewForm
+                            onSubmit={async (rating, comment) => {
+                                await addReview(rating, comment);
+                                setShowForm(false);
+                            }}
+                            onCancel={() => setShowForm(false)}
+                        />
+                    )}
+                </div>
+            )}
 
-                {user && !userReview && !showForm && (
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => setShowForm(true)}
-                    >
-                        {t('reviews.writeReview') || 'Write a Review'}
-                    </button>
-                )}
-            </div>
-
-            {showForm && (
-                <ReviewForm
-                    onSubmit={async (rating, comment) => {
-                        await addReview(rating, comment);
-                        setShowForm(false);
-                    }}
-                    onCancel={() => setShowForm(false)}
-                />
+            {!user && (
+                <div style={{ textAlign: 'center', padding: '2rem', background: '#f8fafc', borderRadius: '12px', marginBottom: '2rem' }}>
+                    <p style={{ marginBottom: '1rem' }}>
+                        {t('reviews.loginToReview') || 'Yorum yapmak için giriş yapmalısınız.'}
+                    </p>
+                    <a href="/login" className="btn btn-secondary">
+                        {t('common.login') || 'Giriş Yap'}
+                    </a>
+                </div>
             )}
 
             <ReviewList

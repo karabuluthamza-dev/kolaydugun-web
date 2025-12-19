@@ -181,193 +181,35 @@
     border-top: 1px solid #f1f5f9;
 }
 
-.vendor-card {
-    background: white;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    position: relative;
-    border: 1px solid rgba(0, 0, 0, 0.02);
-}
-
-.vendor-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.15);
-}
-
-.vendor-card-image-wrapper {
-    position: relative;
-    height: 260px;
-    overflow: hidden;
-}
-
-.vendor-card-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.8s ease;
-}
-
-.vendor-card:hover .vendor-card-image {
-    transform: scale(1.08);
-}
-
-/* Gradient Overlay for better contrast if needed, though we keep text below for now */
-.vendor-card-image-wrapper::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 30%;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
-    pointer-events: none;
-}
-
-.vendor-card-badge {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    background: rgba(255, 255, 255, 0.95);
-    color: var(--primary-color);
-    padding: 6px 14px;
-    border-radius: 30px;
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    z-index: 2;
-    backdrop-filter: blur(4px);
-}
-
-.vendor-card-favorite {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: rgba(255, 255, 255, 0.95);
-    border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    font-size: 1.2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    z-index: 2;
-    backdrop-filter: blur(4px);
-}
-
-.vendor-card-favorite:hover {
-    background: white;
-    transform: scale(1.15);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-.vendor-card-content {
-    padding: 1.75rem;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    gap: 0.5rem;
-}
-
-.vendor-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.25rem;
-}
-
-.vendor-card-category {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    /* Slate 400 */
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.vendor-card-rating {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    background: #fffbeb;
-    padding: 4px 8px;
-    border-radius: 8px;
-}
-
-.star {
-    color: #fbbf24;
-    font-size: 1rem;
-}
-
-.reviews {
-    color: #94a3b8;
-    font-weight: 500;
-    font-size: 0.8rem;
-    margin-left: 2px;
-}
-
-.vendor-card-title {
-    font-size: 1.4rem;
-    font-weight: 800;
-    margin: 0;
-    line-height: 1.3;
-    color: #1e293b;
-    /* Slate 800 */
-}
-
-.vendor-card-title a {
-    color: inherit;
-    text-decoration: none;
-    transition: color 0.2s;
-    background-image: linear-gradient(var(--primary-color), var(--primary-color));
-    background-size: 0% 2px;
-    background-position: left bottom;
-    background-repeat: no-repeat;
-    transition: background-size 0.3s;
-}
-
-.vendor-card-title a:hover {
-    color: var(--primary-color);
-    background-size: 100% 2px;
-}
-
-.vendor-card-location {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #64748b;
-    /* Slate 500 */
-    font-size: 0.95rem;
-    margin-bottom: 1rem;
-    font-weight: 500;
-}
-
-.vendor-card-footer {
-    margin-top: auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 1.25rem;
-    border-top: 1px solid #f1f5f9;
-}
-
 .vendor-card-price {
     font-weight: 700;
     color: #334155;
     font-size: 1.1rem;
+}
+
+/* Claim Badge Specifics */
+.vendor-card-badge.claim-badge {
+    top: 10px;
+    left: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #e91e63;
+    border: 1px solid #e91e63;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    text-transform: none !important;
+}
+
+.vendor-card-badge.claim-badge:hover {
+    background: #e91e63;
+    color: white;
+    transform: scale(1.05);
 }
 
 /* Admin Shortcut - Visible but subtle */

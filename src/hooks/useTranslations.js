@@ -7,15 +7,20 @@ export const useTranslations = () => {
     const flattenDictionary = useCallback((dict) => {
         const flat = {};
         const traverse = (obj, path = []) => {
+            if (!obj || typeof obj !== 'object') return;
+
             for (const key in obj) {
-                if (typeof obj[key] === 'object' && !obj[key].en) {
-                    traverse(obj[key], [...path, key]);
-                } else if (typeof obj[key] === 'object' && obj[key].en) {
+                const value = obj[key];
+                if (value === null || value === undefined) continue;
+
+                if (typeof value === 'object' && !value.en) {
+                    traverse(value, [...path, key]);
+                } else if (typeof value === 'object' && value.en) {
                     const flatKey = [...path, key].join('.');
-                    flat[flatKey] = obj[key];
-                } else if (typeof obj[key] === 'string') {
+                    flat[flatKey] = value;
+                } else if (typeof value === 'string') {
                     const flatKey = [...path, key].join('.');
-                    flat[flatKey] = { en: obj[key], de: obj[key], tr: obj[key] };
+                    flat[flatKey] = { en: value, de: value, tr: value };
                 }
             }
         };

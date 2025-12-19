@@ -1,9 +1,30 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const ProtectedRoute = ({ children, allowedTypes = ['couple', 'vendor'], requireAdmin = false }) => {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
+    const { t } = useLanguage();
+
+    console.log('[DEBUG] ProtectedRoute render:', { authLoading, hasUser: !!user });
+
+    if (authLoading) {
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100vh',
+                background: '#fff'
+            }}>
+                <div style={{ textAlign: 'center' }}>
+                    <div className="spinner"></div>
+                    <p style={{ marginTop: '1rem', color: '#666' }}>{t('common.loading') || 'Yükleniyor...'}</p>
+                </div>
+            </div>
+        );
+    }
 
     console.log('ProtectedRoute Check:', JSON.stringify({
         userRole: user?.role,

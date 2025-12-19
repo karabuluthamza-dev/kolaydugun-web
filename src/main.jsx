@@ -2,10 +2,16 @@ import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { HelmetProvider } from 'react-helmet-async';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
+import { PWAInstallProvider } from './context/PWAInstallContext';
+import { SiteSettingsProvider } from './context/SiteSettingsContext';
+import { VendorProvider } from './context/VendorContext';
+import { PlanningProvider } from './context/PlanningContext';
 import App from './App';
 import './index.css';
 import './i18n'; // Import i18n configuration
-import { LanguageProvider } from './context/LanguageContext';
 import LoadingSpinner from './components/LoadingSpinner';
 
 class ErrorBoundary extends React.Component {
@@ -155,19 +161,31 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ErrorBoundary>
       <PayPalScriptProvider options={paypalOptions}>
         <HelmetProvider>
-          <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><LoadingSpinner /></div>}>
+          <AuthProvider>
             <LanguageProvider>
-              <App />
+              <PWAInstallProvider>
+                <SiteSettingsProvider>
+                  <VendorProvider>
+                    <PlanningProvider>
+                      <Router>
+                        <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><LoadingSpinner /></div>}>
+                          <App />
+                        </Suspense>
+                      </Router>
+                    </PlanningProvider>
+                  </VendorProvider>
+                </SiteSettingsProvider>
+              </PWAInstallProvider>
             </LanguageProvider>
-          </Suspense>
+          </AuthProvider>
         </HelmetProvider>
       </PayPalScriptProvider>
     </ErrorBoundary>
   </React.StrictMode>,
 );
 
-// Register Service Worker for PWA support
-if ('serviceWorker' in navigator) {
+// Register Service Worker for PWA support (only in non-DEV)
+if ('serviceWorker' in navigator && !import.meta.env.DEV) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {

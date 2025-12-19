@@ -1,122 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { dictionary } from '../locales/dictionary';
+import LanguageSwitcher from './LanguageSwitcher';
 import './AdminLayout.css';
 
 // Her modül için açıklama metinleri
-const menuDescriptions = {
-    '/admin': 'Genel istatistikler ve hızlı erişim kartları. Tüm paneli buradan yönetin.',
-    '/admin/translations': 'Site içeriklerinin Türkçe, Almanca ve İngilizce çevirilerini yönetin.',
-    '/admin/blog': 'Blog yazıları oluşturun, düzenleyin ve yayınlayın. SEO ayarlarını yapın.',
-    '/admin/comments': 'Blog yazılarına gelen yorumları onaylayın, düzenleyin veya silin.',
-    '/admin/pages': 'Hakkımızda, Gizlilik Politikası gibi statik sayfaları düzenleyin.',
-    '/admin/faq': 'Sıkça Sorulan Sorular bölümünü güncelleyin.',
-    '/admin/notifications': 'Kullanıcılara ve tedarikçilere toplu bildirim gönderin.',
-    '/admin/categories': 'Tedarikçi kategorilerini (DJ, Fotoğrafçı, Mekan vb.) yönetin.',
-    '/admin/vendors': 'Tüm tedarikçileri görüntüleyin, profillerini düzenleyin ve onaylayın.',
-    '/admin/leads': 'Çiftlerden gelen teklif taleplerini görüntüleyin ve yönetin.',
-    '/admin/users': 'Kayıtlı kullanıcıları (çiftler) görüntüleyin ve hesaplarını yönetin.',
-    '/admin/reviews': 'Tedarikçilere yapılan değerlendirmeleri onaylayın veya reddedin.',
-    '/admin/credit-approval': 'Tedarikçilerin kredi satın alma taleplerini onaylayın.',
-    '/admin/config': 'Site ayarları, logo, sosyal medya linkleri ve genel konfigürasyonlar.',
-    '/admin/pricing': 'Kredi paketleri ve fiyatlandırma seçeneklerini düzenleyin.',
-    '/admin/finance': 'Gelir raporları, ödeme geçmişi ve finansal istatistikler.',
-    '/admin/messaging': 'Kullanıcılardan gelen destek taleplerini yanıtlayın.',
-    '/admin/messages': 'Platform içi mesajlaşma - tedarikçi ve çift arasındaki iletişim.',
-    '/admin/forum': 'Forum genel ayarları - kurallar, açıklama ve temel yapılandırma.',
-    '/admin/avatars': 'Kullanıcıların seçebileceği varsayılan avatar koleksiyonunu yönetin.',
-    '/admin/forum-categories': 'Forum kategorilerini (Mekan Tavsiyeleri, Düğün Hikayeleri vb.) yönetin.',
-    '/admin/forum-ghosts': 'Hayalet kullanıcılar - foruma gerçekçi görünüm katmak için sahte hesaplar.',
-    '/admin/forum-bots': 'Bot kullanıcılar oluşturun, konu açtırın ve yorum yaptırın.',
-    '/admin/forum-moderation': 'Forum içeriklerini denetleyin, şikayetleri yönetin, kullanıcıları yasaklayın.',
-    '/admin/shop': 'Shop modülü genel yönetimi - kategoriler ve ürünler.',
-    '/admin/shop-accounts': 'Bağımsız shop marketplace mağaza hesaplarını yönetin, plan ve affiliate kodları.',
-    '/admin/shop-categories': 'Shop kategorilerini ekleyin, düzenleyin ve sıralayın.',
-    '/admin/shop-products': 'Boutique ve tedarikçi ürünlerini onaylayın, düzenleyin veya reddedin.',
-    '/admin/shop-inquiries': 'Boutique ürünleri için gelen iletişim taleplerini yanıtlayın.',
-    '/admin/shop-applications': 'Yeni mağaza başvurularını inceleyin, onaylayın veya reddedin.',
-    '/admin/shop-settings': 'Shop marketplace plan fiyatları, affiliate oranları ve genel ayarlar.',
-    '/admin/shop-commissions': 'Affiliate komisyonlarını yönetin, bekleyen ödemeleri onaylayın.',
-    '/admin/shop-plans': 'Starter, Business, Premium paket özelliklerini ve fiyatlarını düzenleyin.',
-    '/admin/shop-faqs': 'Tedarikçilerin göreceği sık sorulan soruları yönetin.',
-    '/admin/shop-announcements': 'Tüm mağaza sahiplerine duyuru ve bildirim gönderin.',
-    '/admin/shop-product-requests': 'Tedarikçilerin ana shop\'ta yayınlanma taleplerini onayla veya reddet.',
-    // Amazon Affiliate
-    '/admin/amazon': 'Amazon affiliate dashboard - AI önerileri, günlük görevler ve performans.',
-    '/admin/amazon/products': 'Amazon ürünlerini listele, düzenle ve yönet.',
-    '/admin/amazon/add': 'Amazon linkinden otomatik ürün bilgisi çekip ekle.',
-    '/admin/amazon/settings': 'Affiliate tag, Gemini API ve otomatik kontrol ayarları.'
-};
+const menuDescriptions = dictionary.adminPanel.sidebar.menuDescriptions;
 
 // Sayfa başlıkları
-const pageTitles = {
-    '/admin': 'Başlangıç',
-    '/admin/leads': 'Talepler',
-    '/admin/credit-approval': 'Kredi Onayları',
-    '/admin/reviews': 'Yorumlar',
-    '/admin/messaging': 'Destek Hattı',
-    '/admin/vendors': 'Tedarikçiler',
-    '/admin/users': 'Kullanıcılar',
-    '/admin/categories': 'Kategoriler',
-    '/admin/messages': 'Platform Mesajları',
-    '/admin/blog': 'Blog',
-    '/admin/comments': 'Blog Yorumları',
-    '/admin/pages': 'Sayfalar',
-    '/admin/faq': 'S.S.S.',
-    '/admin/notifications': 'Bildirimler',
-    '/admin/pricing': 'Fiyatlandırma',
-    '/admin/finance': 'Finans',
-    '/admin/config': 'Genel Ayarlar',
-    '/admin/translations': 'Çeviriler',
-    '/admin/forum': 'Forum Ayarları',
-    '/admin/forum-categories': 'Forum Kategorileri',
-    '/admin/avatars': 'Avatarlar',
-    '/admin/forum-ghosts': 'Hayalet Modu',
-    '/admin/forum-bots': 'Bot Yönetimi',
-    '/admin/forum-moderation': 'Moderasyon',
-    '/admin/shop': 'Mağaza',
-    '/admin/shop-accounts': 'Mağaza Hesapları',
-    '/admin/shop-categories': 'Shop Kategorileri',
-    '/admin/shop-products': 'Shop Ürünleri',
-    '/admin/shop-inquiries': 'İletişim Talepleri',
-    '/admin/shop-applications': 'Başvurular',
-    '/admin/shop-settings': 'Shop Ayarları',
-    '/admin/shop-plans': 'Shop Paketleri',
-    '/admin/shop-faqs': 'Tedarikçi SSS',
-    '/admin/shop-announcements': 'Tedarikçi Duyuruları',
-    '/admin/shop-product-requests': 'Ürün Başvuruları',
-    '/admin/shop-commissions': 'Komisyonlar',
-    '/admin/analytics': 'Analitikler',
-    // Amazon Affiliate
-    '/admin/amazon': '💰 Para Makinesi',
-    '/admin/amazon/products': 'Amazon Ürünleri',
-    '/admin/amazon/add': 'Ürün Ekle',
-    '/admin/amazon/settings': 'Amazon Ayarları'
-};
+const pageTitles = dictionary.adminPanel.sidebar.pageTitles;
 
 // NavItem komponenti - tooltip ile
-const NavItem = ({ to, icon, label, end = false }) => {
-    const description = menuDescriptions[to] || '';
-
+const NavItem = ({ to, icon, label, end = false, description = '' }) => {
+    const { language } = useLanguage();
     return (
         <NavLink
             to={to}
             end={end}
             className={({ isActive }) => isActive ? 'admin-nav-item active' : 'admin-nav-item'}
-            title={description}
+            title={description && typeof description === 'object' ? description[language] : description}
         >
             <span className="icon">{icon}</span>
             <span className="nav-label">{label}</span>
-            {description && <span className="nav-tooltip">{description}</span>}
+            {description && <span className="nav-tooltip">{typeof description === 'object' ? description[language] : description}</span>}
         </NavLink>
     );
 };
 
 const AdminLayout = () => {
     const { logout, user } = useAuth();
+    const { t, language } = useLanguage();
     const navigate = useNavigate();
     const location = useLocation();
     const [currentTime, setCurrentTime] = useState(new Date());
+
+    const strings = dictionary.adminPanel.sidebar;
 
     // 🔒 SECURITY: Double-check admin role (defense-in-depth)
     useEffect(() => {
@@ -153,7 +73,20 @@ const AdminLayout = () => {
     // Breadcrumb için sayfa başlığı
     const getCurrentPageTitle = () => {
         const path = location.pathname;
-        return pageTitles[path] || 'Yönetim Paneli';
+        // Search in menu items for matching label
+        const menuKeys = Object.keys(strings.menu);
+        const match = menuKeys.find(key => {
+            const itemPath = `/admin${key === 'dashboard' ? '' : '/' + key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+            return path === itemPath;
+        });
+
+        if (match) return strings.menu[match][language];
+
+        // Try dictionary pageTitles first
+        const pathSuffix = path === '/admin' ? 'dashboard' : path.split('/').pop().replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+        if (pageTitles[pathSuffix]) return pageTitles[pathSuffix][language];
+
+        return language === 'tr' ? 'Yönetim Paneli' : 'Admin Panel';
     };
 
     // Non-admin user check - show nothing while redirecting
@@ -168,82 +101,84 @@ const AdminLayout = () => {
             <aside className="admin-sidebar">
                 <div className="admin-sidebar-header">
                     <h2>KolayDugun</h2>
-                    <span className="admin-badge">Yönetim</span>
+                    <span className="admin-badge">{dictionary.adminPanel.badge[language]}</span>
                 </div>
 
                 <nav className="admin-nav">
-                    <NavItem to="/admin" icon="📊" label="Başlangıç" end={true} />
+                    <NavItem to="/admin" icon="📊" label={strings.menu.dashboard[language]} end={true} description={menuDescriptions.dashboard} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">Günlük İşler</div>
-                    <NavItem to="/admin/leads" icon="📨" label="Talepler" />
-                    <NavItem to="/admin/credit-approval" icon="✅" label="Kredi Onayları" />
-                    <NavItem to="/admin/reviews" icon="⭐" label="Yorumlar" />
-                    <NavItem to="/admin/messaging" icon="🆘" label="Destek Hattı" />
+                    <div className="admin-nav-label">{strings.labels.daily[language]}</div>
+                    <NavItem to="/admin/leads" icon="📨" label={strings.menu.leads[language]} />
+                    <NavItem to="/admin/credit-approval" icon="✅" label={strings.menu.creditApproval[language]} />
+                    <NavItem to="/admin/reviews" icon="⭐" label={strings.menu.reviews[language]} />
+                    <NavItem to="/admin/messaging" icon="🆘" label={strings.menu.support[language]} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">Pazaryeri</div>
-                    <NavItem to="/admin/vendors" icon="🏪" label="Tedarikçiler" />
-                    <NavItem to="/admin/users" icon="👥" label="Kullanıcılar" />
-                    <NavItem to="/admin/categories" icon="🖼️" label="Kategoriler" />
-                    <NavItem to="/admin/messages" icon="💬" label="Platform Mesajları" />
+                    <div className="admin-nav-label">{strings.labels.marketplace[language]}</div>
+                    <NavItem to="/admin/vendors" icon="🏪" label={strings.menu.vendors[language]} description={menuDescriptions.vendors} />
+                    <NavItem to="/admin/users" icon="👥" label={strings.menu.users[language]} description={menuDescriptions.users} />
+                    <NavItem to="/admin/categories" icon="🖼️" label={strings.menu.categories[language]} />
+                    <NavItem to="/admin/messages" icon="💬" label={strings.menu.messages[language]} />
+                    <NavItem to="/admin/claims" icon="🛡️" label={strings.menu.claims[language]} description={menuDescriptions.claims} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">İçerik</div>
-                    <NavItem to="/admin/blog" icon="📝" label="Blog" />
-                    <NavItem to="/admin/comments" icon="💬" label="Blog Yorumları" />
-                    <NavItem to="/admin/pages" icon="📄" label="Sayfalar" />
-                    <NavItem to="/admin/faq" icon="❓" label="S.S.S." />
-                    <NavItem to="/admin/notifications" icon="📢" label="Bildirimler" />
+                    <div className="admin-nav-label">{strings.labels.content[language]}</div>
+                    <NavItem to="/admin/blog" icon="📝" label={strings.menu.blog[language]} />
+                    <NavItem to="/admin/comments" icon="💬" label={strings.menu.blogComments[language]} />
+                    <NavItem to="/admin/pages" icon="📄" label={strings.menu.pages[language]} />
+                    <NavItem to="/admin/faq" icon="❓" label={strings.menu.faq[language]} />
+                    <NavItem to="/admin/notifications" icon="📢" label={strings.menu.notifications[language]} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">Finans</div>
-                    <NavItem to="/admin/pricing" icon="💰" label="Fiyatlandırma" />
-                    <NavItem to="/admin/finance" icon="📊" label="Finans" />
+                    <div className="admin-nav-label">{strings.labels.finance[language]}</div>
+                    <NavItem to="/admin/pricing" icon="💰" label={strings.menu.pricing[language]} />
+                    <NavItem to="/admin/finance" icon="📊" label={strings.menu.finance[language]} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">Mağaza</div>
-                    <NavItem to="/admin/shop-applications" icon="📋" label="Başvurular" />
-                    <NavItem to="/admin/shop-accounts" icon="🏪" label="Mağaza Hesapları" />
-                    <NavItem to="/admin/shop-categories" icon="🏷️" label="Shop Kategorileri" />
-                    <NavItem to="/admin/shop-products" icon="🛍️" label="Shop Ürünleri" />
-                    <NavItem to="/admin/shop-product-requests" icon="📥" label="Ürün Başvuruları" />
-                    <NavItem to="/admin/shop-inquiries" icon="📩" label="İletişim Talepleri" />
-                    <NavItem to="/admin/shop-plans" icon="💎" label="Shop Paketleri" />
-                    <NavItem to="/admin/shop-faqs" icon="❓" label="Tedarikçi SSS" />
-                    <NavItem to="/admin/shop-announcements" icon="📢" label="Tedarikçi Duyuruları" />
-                    <NavItem to="/admin/shop-commissions" icon="💸" label="Komisyonlar" />
-                    <NavItem to="/admin/shop-settings" icon="⚙️" label="Shop Ayarları" />
+                    <div className="admin-nav-label">{strings.labels.shop[language]}</div>
+                    <NavItem to="/admin/shop-applications" icon="📋" label={strings.menu.shopApplications[language]} />
+                    <NavItem to="/admin/shop-accounts" icon="🏪" label={strings.menu.shopAccounts[language]} />
+                    <NavItem to="/admin/shop-categories" icon="🏷️" label={strings.menu.shopCategories[language]} />
+                    <NavItem to="/admin/shop-products" icon="🛍️" label={strings.menu.shopProducts[language]} />
+                    <NavItem to="/admin/shop-product-requests" icon="📥" label={strings.menu.shopProductRequests[language]} />
+                    <NavItem to="/admin/shop-inquiries" icon="📩" label={strings.menu.shopInquiries[language]} />
+                    <NavItem to="/admin/shop-plans" icon="💎" label={strings.menu.shopPlans[language]} />
+                    <NavItem to="/admin/shop-faqs" icon="❓" label={strings.menu.shopFaq[language]} />
+                    <NavItem to="/admin/shop-announcements" icon="📢" label={strings.menu.shopAnnouncements[language]} />
+                    <NavItem to="/admin/shop-commissions" icon="💸" label={strings.menu.shopCommissions[language]} />
+                    <NavItem to="/admin/shop-settings" icon="⚙️" label={strings.menu.shopSettings[language]} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">💰 Para Makinesi</div>
-                    <NavItem to="/admin/amazon" icon="💰" label="Dashboard" />
-                    <NavItem to="/admin/amazon/products" icon="📦" label="Amazon Ürünleri" />
-                    <NavItem to="/admin/amazon/add" icon="➕" label="Ürün Ekle" />
-                    <NavItem to="/admin/amazon/settings" icon="⚙️" label="Amazon Ayarları" />
+                    <div className="admin-nav-label">{strings.labels.amazon[language]}</div>
+                    <NavItem to="/admin/amazon" icon="💰" label={strings.menu.amazonDashboard[language]} />
+                    <NavItem to="/admin/amazon/products" icon="📦" label={strings.menu.amazonProducts[language]} />
+                    <NavItem to="/admin/amazon/add" icon="➕" label={strings.menu.amazonAdd[language]} />
+                    <NavItem to="/admin/amazon/settings" icon="⚙️" label={strings.menu.amazonSettings[language]} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">Ayarlar</div>
-                    <NavItem to="/admin/config" icon="⚙️" label="Genel Ayarlar" />
-                    <NavItem to="/admin/translations" icon="🌍" label="Çeviriler" />
+                    <div className="admin-nav-label">{strings.labels.settings[language]}</div>
+                    <NavItem to="/admin/config" icon="⚙️" label={strings.menu.globalSettings[language]} />
+                    <NavItem to="/admin/translations" icon="🌍" label={strings.menu.translations[language]} />
+                    <NavItem to="/admin/help" icon="❓" label={strings.menu.helpGuide[language]} description={menuDescriptions.helpGuide} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">Topluluk</div>
-                    <NavItem to="/admin/forum" icon="🎮" label="Forum Ayarları" />
-                    <NavItem to="/admin/forum-categories" icon="📂" label="Forum Kategorileri" />
-                    <NavItem to="/admin/avatars" icon="🎨" label="Avatarlar" />
-                    <NavItem to="/admin/forum-ghosts" icon="👻" label="Hayalet Modu" />
-                    <NavItem to="/admin/forum-bots" icon="🤖" label="Bot Yönetimi" />
-                    <NavItem to="/admin/forum-moderation" icon="🛡️" label="Moderasyon" />
+                    <div className="admin-nav-label">{strings.labels.community[language]}</div>
+                    <NavItem to="/admin/forum" icon="🎮" label={strings.menu.forumSettings[language]} />
+                    <NavItem to="/admin/forum-categories" icon="📂" label={strings.menu.forumCategories[language]} />
+                    <NavItem to="/admin/avatars" icon="🎨" label={strings.menu.avatars[language]} />
+                    <NavItem to="/admin/forum-ghosts" icon="👻" label={strings.menu.ghostMode[language]} />
+                    <NavItem to="/admin/forum-bots" icon="🤖" label={strings.menu.botManagement[language]} />
+                    <NavItem to="/admin/forum-moderation" icon="🛡️" label={strings.menu.moderation[language]} />
                 </nav>
 
                 <div className="admin-sidebar-footer">
                     <button onClick={handleLogout} className="admin-logout-btn">
                         <span className="icon">🚪</span>
-                        Çıkış Yap
+                        {strings.menu.logout[language]}
                     </button>
                     <a href="/" className="back-to-site">
-                        ← Siteye Dön
+                        ← {strings.menu.backToSite[language]}
                     </a>
                 </div>
             </aside>
@@ -252,13 +187,14 @@ const AdminLayout = () => {
             <main className="admin-content">
                 <header className="admin-topbar">
                     <div className="admin-breadcrumbs">
-                        <span className="breadcrumb-home">🏠 Admin</span>
+                        <span className="breadcrumb-home">🏠 {dictionary.adminPanel.topbar.admin[language]}</span>
                         <span className="breadcrumb-separator">›</span>
                         <span className="breadcrumb-current">{getCurrentPageTitle()}</span>
                     </div>
                     <div className="admin-user-menu">
+                        <LanguageSwitcher />
                         <span className="admin-time">
-                            🕐 {currentTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                            🕐 {currentTime.toLocaleTimeString(language === 'tr' ? 'tr-TR' : language === 'de' ? 'de-DE' : 'en-GB', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                         <span className="admin-user-info">
                             👤 {user?.email?.split('@')[0] || 'Admin'}

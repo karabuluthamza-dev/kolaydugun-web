@@ -9,7 +9,7 @@ import { supabase } from '../supabaseClient';
 import { formatDistance } from '../utils/geoUtils';
 import './VendorCard.css';
 
-const VendorCard = ({ id, name, slug, category, location, price, image, rating, reviews, isFeatured, gallery, categoryImage, distance }) => {
+const VendorCard = ({ id, name, slug, category, location, price, image, rating, reviews, isFeatured, gallery, categoryImage, distance, ai_performance_score, is_claimed, is_verified, user_id }) => {
     const { t, language } = useLanguage();
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -147,6 +147,22 @@ const VendorCard = ({ id, name, slug, category, location, price, image, rating, 
                         {t('vendorDetail.topRated') || 'En İyiler'}
                     </span>
                 )}
+                {ai_performance_score >= 90 && (
+                    <span className="vendor-card-badge perfect-service" style={{
+                        background: 'linear-gradient(45deg, #FFD700, #FFA500)',
+                        color: '#000',
+                        fontWeight: 'bold',
+                        boxShadow: '0 2px 8px rgba(255, 215, 0, 0.4)',
+                        padding: '4px 10px',
+                        borderRadius: '20px',
+                        fontSize: '0.75rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                    }}>
+                        🏆 {t('vendorCard.perfectService', 'Mükemmel Hizmet')}
+                    </span>
+                )}
                 <button
                     className={`vendor-card-favorite ${isFavorite ? 'active' : ''}`}
                     aria-label={isFavorite ? "Remove from favorites" : "Save vendor"}
@@ -162,6 +178,33 @@ const VendorCard = ({ id, name, slug, category, location, price, image, rating, 
                         ⚙️ Yönet
                     </Link>
                 )}
+
+                {/* Claim Indicator for Unclaimed Profiles */}
+                {!is_claimed && !is_verified && !user_id ? (
+                    <Link
+                        to={`/vendors/${slug || id}`}
+                        className="vendor-card-badge claim-badge"
+                    >
+                        🛡️ {t('common.vendorClaim.badge')}
+                    </Link>
+                ) : (is_claimed || is_verified) ? (
+                    <span className="vendor-card-badge claimed-badge" style={{
+                        background: '#4caf50',
+                        color: 'white',
+                        top: '10px',
+                        left: '10px',
+                        fontSize: '0.7rem',
+                        fontWeight: '800',
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)'
+                    }}>
+                        ✓ {t('common.claimed')}
+                    </span>
+                ) : null}
             </div>
 
             <div className="vendor-card-content">

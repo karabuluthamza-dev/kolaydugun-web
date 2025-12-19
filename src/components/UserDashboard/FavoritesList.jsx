@@ -31,6 +31,7 @@ const FavoritesList = ({ userId }) => {
                         city,
                         rating,
                         image_url,
+                        gallery,
                         deleted_at
                     )
                 `)
@@ -77,7 +78,7 @@ const FavoritesList = ({ userId }) => {
                     {favorites.map(fav => {
                         const vendor = fav.vendor;
                         const categoryDefault = categoryImages[vendor.category] || defaultImage;
-                        const imageUrl = vendor.image_url || categoryDefault;
+                        const imageUrl = vendor.image_url || (vendor.gallery && vendor.gallery[0]) || categoryDefault;
 
                         return (
                             <div

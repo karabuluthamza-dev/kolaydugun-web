@@ -30,7 +30,7 @@ const Navbar = () => {
                         .select('id, slug, business_name')
                         .eq('email', user.email)
                         .eq('is_active', true)
-                        .single();
+                        .maybeSingle();
                     if (data) {
                         setShopAccount(data);
                     }

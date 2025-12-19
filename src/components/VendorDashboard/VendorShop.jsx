@@ -104,7 +104,7 @@ const VendorShop = () => {
                 .select('id, slug, business_name')
                 .eq('email', user.email)
                 .eq('is_active', true)
-                .single();
+                .maybeSingle();
             if (data) {
                 setShopAccount(data);
             }
@@ -119,7 +119,7 @@ const VendorShop = () => {
                 .from('vendors')
                 .select('id, company_name, shop_enabled, shop_product_limit, shop_plan, shop_plan_expires_at')
                 .eq('user_id', user.id)
-                .single();
+                .maybeSingle();
 
             if (error) throw error;
             setVendorId(data.id);

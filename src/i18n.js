@@ -12,11 +12,16 @@ const generateResources = (dict) => {
     };
 
     const traverse = (obj, path = []) => {
+        if (!obj || typeof obj !== 'object') return;
+
         for (const key in obj) {
-            if (typeof obj[key] === 'object' && !obj[key].en) {
+            const value = obj[key];
+            if (value === null || value === undefined) continue;
+
+            if (typeof value === 'object' && !value.en) {
                 // Nested object, recurse
-                traverse(obj[key], [...path, key]);
-            } else if (typeof obj[key] === 'object' && obj[key].en) {
+                traverse(value, [...path, key]);
+            } else if (typeof value === 'object' && value.en) {
                 // Leaf node with translations
                 const currentPath = [...path, key];
 
@@ -27,11 +32,8 @@ const generateResources = (dict) => {
                         if (!current[currentPath[i]]) current[currentPath[i]] = {};
                         current = current[currentPath[i]];
                     }
-                    current[currentPath[currentPath.length - 1]] = obj[key][lang];
+                    current[currentPath[currentPath.length - 1]] = value[lang] || value.en || value.de || '';
                 });
-            } else if (typeof obj[key] === 'string') {
-                // Direct string (fallback or legacy structure), skip or handle as needed
-                // In our strict dictionary, this shouldn't happen for leaf nodes
             }
         }
     };

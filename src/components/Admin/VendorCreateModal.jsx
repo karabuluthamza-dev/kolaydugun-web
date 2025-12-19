@@ -24,11 +24,13 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
         category: 'Wedding Venues',
         city: 'Berlin',
         price: '',
-        capacity: 0
+        capacity: 0,
+        isClaimable: false // New: if true, no auth user is created
     });
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+        setFormData({ ...formData, [e.target.name]: value });
     };
 
     const handleSubmit = async (e) => {
@@ -36,26 +38,29 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
         setLoading(true);
 
         try {
-            // 1. Create Auth User
-            const { data: authData, error: authError } = await tempClient.auth.signUp({
-                email: formData.email,
-                password: formData.password,
-                options: {
-                    data: {
-                        full_name: formData.businessName,
-                        role: 'vendor'
+            let userId = null;
+
+            if (!formData.isClaimable) {
+                // 1. Create Auth User
+                const { data: authData, error: authError } = await tempClient.auth.signUp({
+                    email: formData.email,
+                    password: formData.password,
+                    options: {
+                        data: {
+                            full_name: formData.businessName,
+                            role: 'vendor'
+                        }
                     }
-                }
-            });
+                });
 
-            if (authError) throw authError;
-            if (!authData.user) throw new Error('Kullanıcı oluşturulamadı.');
+                if (authError) throw authError;
+                if (!authData.user) throw new Error('Kullanıcı oluşturulamadı.');
 
-            const userId = authData.user.id;
+                userId = authData.user.id;
 
-            // 2. Create Vendor Profile (in 'vendors' table)
-            // First, let's wait a bit for any triggers to fire (if any).
-            await new Promise(r => setTimeout(r, 1000));
+                // Wait for triggers
+                await new Promise(r => setTimeout(r, 1000));
+            }
 
             // Check if vendor entry exists
             const { data: existingVendor } = await supabase
@@ -69,15 +74,14 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
                 const { error: vendorError } = await supabase
                     .from('vendors')
                     .insert([{
-                        id: userId,
-                        user_id: userId,
                         business_name: formData.businessName,
+                        user_id: userId,
                         category: formData.category,
                         city: formData.city,
                         price_range: formData.price,
                         capacity: parseInt(formData.capacity) || 0,
-                        subscription_tier: 'free', // Default to free
-                        is_claimed: true // Admin created, so it's claimed/verified
+                        subscription_tier: 'free',
+                        is_claimed: !formData.isClaimable
                     }]);
 
                 if (vendorError) throw vendorError;
@@ -98,11 +102,13 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
                 if (updateError) throw updateError;
             }
 
-            // 3. Update Profile Role (just in case)
-            await supabase
-                .from('profiles')
-                .update({ role: 'vendor' })
-                .eq('id', userId);
+            if (userId) {
+                // 3. Update Profile Role (just in case)
+                await supabase
+                    .from('profiles')
+                    .update({ role: 'vendor' })
+                    .eq('id', userId);
+            }
 
             alert('✅ Tedarikçi başarıyla oluşturuldu!');
             onCreated();
@@ -124,27 +130,46 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
                     <button onClick={onClose} className="close-btn">&times;</button>
                 </div>
                 <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>E-posta</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                        />
+                    <div className="form-group" style={{ marginBottom: '15px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                            <input
+                                type="checkbox"
+                                name="isClaimable"
+                                checked={formData.isClaimable}
+                                onChange={handleChange}
+                            />
+                            <strong>Sahibi Yok (Claim Edilebilir)</strong>
+                        </label>
+                        <p style={{ fontSize: '0.8rem', color: '#6B7280', marginTop: '4px' }}>
+                            Bu seçenek aktifse, kullanıcı hesabı oluşturulmaz ve profil "Sahiplen" butonu ile yayında görünür.
+                        </p>
                     </div>
-                    <div className="form-group">
-                        <label>Şifre</label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                            minLength={6}
-                        />
-                    </div>
+
+                    {!formData.isClaimable && (
+                        <>
+                            <div className="form-group">
+                                <label>E-posta</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Şifre</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
+                                    minLength={6}
+                                />
+                            </div>
+                        </>
+                    )}
                     <div className="form-group">
                         <label>İşletme Adı</label>
                         <input

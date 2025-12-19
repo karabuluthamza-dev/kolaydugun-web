@@ -20,6 +20,8 @@ const VendorList = () => {
     const { vendors, loading } = useVendors();
     const [searchParams, setSearchParams] = useSearchParams();
     const { location: userLocation, loading: locationLoading, error: locationError, getLocation } = useGeolocation();
+    const [topVendors, setTopVendors] = useState([]);
+    const [topLoading, setTopLoading] = useState(false);
 
     const filters = useMemo(() => ({
         search: searchParams.get('search') || '',
@@ -40,6 +42,30 @@ const VendorList = () => {
         });
         setSearchParams(params);
     };
+
+    // Fetch Top 5 "Stars of Category"
+    useEffect(() => {
+        const fetchTopStars = async () => {
+            if (!filters.category) {
+                setTopVendors([]);
+                return;
+            }
+            setTopLoading(true);
+            try {
+                const { data, error } = await supabase.rpc('get_top_vendors', {
+                    p_category: filters.category,
+                    p_city: filters.city || null,
+                    p_limit: 5
+                });
+                if (!error) setTopVendors(data || []);
+            } catch (err) {
+                console.error('Error fetching top stars:', err);
+            } finally {
+                setTopLoading(false);
+            }
+        };
+        fetchTopStars();
+    }, [filters.category, filters.city]);
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 6;
@@ -224,6 +250,31 @@ const VendorList = () => {
                     />
 
                     <div className="vendor-grid-container">
+                        {/* TOP 5 STARS SECTION */}
+                        {filters.category && topVendors.length > 0 && (
+                            <div className="top-stars-section" style={{
+                                marginBottom: '40px',
+                                background: 'linear-gradient(135deg, #fffbeb 0%, #fff 100%)',
+                                padding: '24px',
+                                borderRadius: '16px',
+                                border: '1px solid #fde68a'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                                    <span style={{ fontSize: '1.5rem' }}>✨</span>
+                                    <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', color: '#92400e' }}>
+                                        {language === 'tr' ? 'Kategorinin Yıldızları (Top 5)' : 'Stars of Category (Top 5)'}
+                                    </h3>
+                                    <span style={{ background: '#f59e0b', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold' }}>PREMIUM</span>
+                                </div>
+                                <div className="vendor-grid">
+                                    {topVendors.map(vendor => (
+                                        <VendorCard key={`top-${vendor.id}`} {...vendor} />
+                                    ))}
+                                </div>
+                                <hr style={{ marginTop: '30px', border: 'none', borderTop: '1px solid #fde68a' }} />
+                            </div>
+                        )}
+
                         <div className="vendor-grid">
                             {loading ? (
                                 // Show skeletons while loading

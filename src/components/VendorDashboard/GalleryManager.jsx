@@ -22,7 +22,7 @@ const GalleryManager = ({ vendor, onUpdate }) => {
         if (!file) return;
 
         if (currentCount >= currentLimit) {
-            alert(t('vendorDashboard.alerts.limitReached') + ` (${currentLimit})`);
+            alert(t('dashboard.alerts.limitReached') + ` (${currentLimit})`);
             return;
         }
 
@@ -53,7 +53,7 @@ const GalleryManager = ({ vendor, onUpdate }) => {
 
             if (updateError) throw updateError;
 
-            alert(t('vendorDashboard.alerts.saved'));
+            alert(t('dashboard.alerts.saved'));
             onUpdate();
         } catch (error) {
             console.error('Upload error:', error);
@@ -109,7 +109,7 @@ const GalleryManager = ({ vendor, onUpdate }) => {
 
             <div className="tier-badge-container" style={{ marginBottom: '20px' }}>
                 <span className={`badge badge-${currentTier}`}>
-                    {t(`vendorDashboard.tiers.${currentTier}.name`)}
+                    {t(`dashboard.tiers.${currentTier}.name`)}
                 </span>
                 <span style={{ marginLeft: '10px' }}>
                     {currentCount} / {currentLimit}
@@ -129,11 +129,11 @@ const GalleryManager = ({ vendor, onUpdate }) => {
                     htmlFor="gallery-upload"
                     className={`btn btn-secondary ${currentCount >= currentLimit ? 'disabled' : ''}`}
                 >
-                    {uploading ? t('vendorDashboard.alerts.uploading') : '➕ ' + t('services.add')}
+                    {uploading ? t('dashboard.alerts.uploading') : '➕ ' + t('services.add')}
                 </label>
                 {currentCount >= currentLimit && (
                     <p className="text-danger mt-2">
-                        {t('vendorDashboard.alerts.limitReached')} - <a href="#">Upgrade</a>
+                        {t('dashboard.alerts.limitReached')} - <a href="#">Upgrade</a>
                     </p>
                 )}
             </div>

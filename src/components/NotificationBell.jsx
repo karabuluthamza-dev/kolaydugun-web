@@ -40,7 +40,7 @@ const NotificationBell = () => {
                 .from('vendors')
                 .select('id')
                 .eq('user_id', user.id)
-                .single();
+                .maybeSingle();
             setIsVendor(!!data);
         } catch (error) {
             setIsVendor(false);

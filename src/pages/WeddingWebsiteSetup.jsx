@@ -252,7 +252,7 @@ const WeddingWebsiteSetup = () => {
                                 className="form-control"
                             />
                         </div>
-                        <small>Sadece harf, rakam ve tire (-) kullanın.</small>
+                        <small>{t('weddingWebsite.slugHint')}</small>
                     </div>
 
                     <div className="form-group">
@@ -369,13 +369,13 @@ const WeddingWebsiteSetup = () => {
                             <div className="guest-stats">
                                 <div className="stat-item">
                                     <span className="stat-value">{guests.length}</span>
-                                    <span className="stat-label">Yanıt</span>
+                                    <span className="stat-label">{t('weddingWebsite.guestList.responses')}</span>
                                 </div>
                                 <div className="stat-item">
                                     <span className="stat-value">
                                         {guests.filter(g => g.status === 'confirmed').reduce((acc, curr) => acc + 1 + (curr.plus_ones || 0), 0)}
                                     </span>
-                                    <span className="stat-label">Toplam Kişi</span>
+                                    <span className="stat-label">{t('weddingWebsite.guestList.totalGuests')}</span>
                                 </div>
                             </div>
 
@@ -383,17 +383,17 @@ const WeddingWebsiteSetup = () => {
                                 <table className="table guest-table">
                                     <thead>
                                         <tr>
-                                            <th>İsim</th>
-                                            <th>Durum</th>
-                                            <th>Kişi Sayısı</th>
-                                            <th>Mesaj</th>
-                                            <th>Tarih</th>
+                                            <th>{t('weddingWebsite.guestList.name')}</th>
+                                            <th>{t('weddingWebsite.guestList.status')}</th>
+                                            <th>{t('weddingWebsite.guestList.guestCount')}</th>
+                                            <th>{t('weddingWebsite.guestList.message')}</th>
+                                            <th>{t('weddingWebsite.guestList.date')}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {guests.length === 0 ? (
                                             <tr>
-                                                <td colSpan="5" className="text-center">Henüz yanıt yok.</td>
+                                                <td colSpan="5" className="text-center">{t('weddingWebsite.guestList.noResponses')}</td>
                                             </tr>
                                         ) : (
                                             guests.map(guest => (
@@ -401,7 +401,7 @@ const WeddingWebsiteSetup = () => {
                                                     <td>{guest.name}</td>
                                                     <td>
                                                         <span className={`status-badge ${guest.status}`}>
-                                                            {guest.status === 'confirmed' ? '✅ Geliyor' : '❌ Gelmiyor'}
+                                                            {guest.status === 'confirmed' ? '✅ ' + t('weddingWebsite.guestList.attending') : '❌ ' + t('weddingWebsite.guestList.notAttending')}
                                                         </span>
                                                     </td>
                                                     <td>

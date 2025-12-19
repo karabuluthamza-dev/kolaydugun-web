@@ -10,16 +10,19 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         // Check active session
         supabase.auth.getSession().then(({ data: { session } }) => {
+            console.log('[DEBUG] AuthContext getSession:', { hasSession: !!session, userId: session?.user?.id });
             if (session) {
                 fetchProfile(session.user);
             } else {
+                console.log('[DEBUG] AuthContext no session found, setting loading to false');
                 setLoading(false);
             }
         });
 
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (session) {
+            console.log('[DEBUG] AuthContext onAuthStateChange:', { event: _event, hasSession: !!session });
+            if (session?.user?.id) {
                 fetchProfile(session.user);
             } else {
                 setUser(null);
@@ -31,14 +34,22 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const fetchProfile = async (authUser) => {
+        console.log('[DEBUG] AuthContext fetchProfile start for:', authUser.id);
+        setLoading(true); // Ensure loading is true while fetching
         try {
             let { data, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', authUser.id)
-                .single();
+                .maybeSingle();
 
-            if (error) throw error;
+            if (error) {
+                console.error('[DEBUG] AuthContext fetchProfile database error:', error);
+                throw error;
+            }
+
+            console.log('[DEBUG] AuthContext fetchProfile success:', { role: data?.role });
+            // ... (rest of logic same)
 
             // EMERGENCY FIX: Force admin role for specific user
             if (authUser.id === '13e2508f-e520-4bb3-bd3d-e1f4eee59024' || authUser.email === 'karabulut.hamza@gmail.com') {
@@ -48,9 +59,7 @@ export const AuthProvider = ({ children }) => {
             // CHECK FOR PENDING GOOGLE ROLE
             const pendingRole = localStorage.getItem('pending_google_role');
             if (pendingRole) {
-                // If user intended to be a vendor but is currently a couple (default)
                 if (pendingRole === 'vendor' && data.role !== 'vendor') {
-                    // Update profile role
                     const { error: updateError } = await supabase
                         .from('profiles')
                         .update({ role: 'vendor' })
@@ -58,10 +67,9 @@ export const AuthProvider = ({ children }) => {
 
                     if (!updateError) {
                         data.role = 'vendor';
-                        // Ensure vendor record exists
                         await createVendorRecord(authUser.id, {
                             name: authUser.user_metadata?.full_name || authUser.email,
-                            category: 'Other', // Default, user can update later
+                            category: 'Other',
                             location: 'Unknown'
                         });
                     }
@@ -69,20 +77,19 @@ export const AuthProvider = ({ children }) => {
                 localStorage.removeItem('pending_google_role');
             }
 
-            // Fallback to 'couple' if role is missing
             if (!data.role) {
                 data.role = authUser.user_metadata?.role || 'couple';
             }
 
             setUser({ ...authUser, ...data });
         } catch (error) {
-            console.error('Error fetching profile:', error);
-            // Fallback if profile doesn't exist yet (e.g. just registered)
+            console.error('[DEBUG] AuthContext fetchProfile catch block:', error);
             setUser({
                 ...authUser,
                 role: authUser.user_metadata?.role || 'couple'
             });
         } finally {
+            console.log('[DEBUG] AuthContext fetchProfile complete, setting loading to false');
             setLoading(false);
         }
     };
@@ -196,7 +203,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={{ user, login, loginWithGoogle, register, logout, loading }}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 };

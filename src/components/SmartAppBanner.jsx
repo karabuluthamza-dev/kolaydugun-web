@@ -6,7 +6,9 @@ import './SmartAppBanner.css';
 
 const SmartAppBanner = () => {
     const { isInstallable, isInstalled, installPWA } = usePWAInstall();
-    const { t } = useLanguage();
+    const languageContext = useLanguage();
+    console.log('[DEBUG] SmartAppBanner useLanguage() returned:', languageContext);
+    const { t } = languageContext;
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {

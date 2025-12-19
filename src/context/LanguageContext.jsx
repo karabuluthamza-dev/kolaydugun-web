@@ -109,6 +109,8 @@ export const LanguageProvider = ({ children }) => {
         loading
     };
 
+    console.log('[DEBUG] LanguageProvider rendering with value:', { language, loading });
+
     return (
         <LanguageContext.Provider value={value}>
             {children}
@@ -119,7 +121,13 @@ export const LanguageProvider = ({ children }) => {
 export const useLanguage = () => {
     const context = useContext(LanguageContext);
     if (!context) {
-        throw new Error('useLanguage must be used within a LanguageProvider');
+        console.warn('[CRITICAL] useLanguage was called outside of a LanguageProvider! Returning fallback to prevent crash.');
+        return {
+            language: 'tr',
+            changeLanguage: () => { },
+            t: (key) => key,
+            loading: false
+        };
     }
     return context;
 };

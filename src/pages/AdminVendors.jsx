@@ -11,9 +11,9 @@ import { Brain, Layout, BarChart, TrendingUp, X, Sparkles } from 'lucide-react';
 import './AdminVendors.css';
 
 const AdminVendors = () => {
-    usePageTitle('Vendor Yönetimi');
+    const { t, language } = useLanguage();
+    usePageTitle(t('adminPanel.vendors.title', 'Vendor Yönetimi'));
     const { user } = useAuth();
-    const { t } = useLanguage();
     const [vendors, setVendors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all'); // all, premium, free
@@ -41,6 +41,59 @@ const AdminVendors = () => {
     const [aiInsightVendor, setAiInsightVendor] = useState(null);
     const [aiReport, setAiReport] = useState(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [isPublishing, setIsPublishing] = useState(false);
+    const [isBulkGenerating, setIsBulkGenerating] = useState(false);
+    const [sortConfig, setSortConfig] = useState({ column: 'created_at', direction: 'desc' });
+
+    const handleSort = (column) => {
+        let direction = 'desc';
+        if (sortConfig.column === column && sortConfig.direction === 'desc') {
+            direction = 'asc';
+        }
+        setSortConfig({ column, direction });
+        setPage(1); // Reset to first page when sorting changes
+    };
+
+    useEffect(() => {
+        fetchVendors();
+    }, [filter]);
+
+    // Fetch existing AI insight when a vendor is selected
+    useEffect(() => {
+        const fetchExistingInsight = async () => {
+            if (!aiInsightVendor) return;
+
+            setIsAnalyzing(true);
+            try {
+                const { data, error } = await supabase
+                    .from('vendor_insights')
+                    .select('*')
+                    .eq('vendor_id', aiInsightVendor.id)
+                    .order('updated_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+
+                if (error) {
+                    console.error('Error fetching insight:', error);
+                    setAiReport(null);
+                } else if (data) {
+                    setAiReport({
+                        summary: data.summary,
+                        recommendations: data.recommendations,
+                        visibility_score: data.performance_score,
+                        conversion_rate: data.metrics?.conversion_rate || 0,
+                        is_published: data.is_published
+                    });
+                }
+            } catch (err) {
+                console.error('Insight fetch error:', err);
+            } finally {
+                setIsAnalyzing(false);
+            }
+        };
+
+        fetchExistingInsight();
+    }, [aiInsightVendor]);
 
     useEffect(() => {
         window.supabase = supabase; // DEBUG: Expose for console access
@@ -51,16 +104,26 @@ const AdminVendors = () => {
             }, 300);
             return () => clearTimeout(timer);
         }
-    }, [user, filter, searchTerm, page]);
+    }, [user, filter, searchTerm, page, sortConfig]);
 
     const fetchVendors = async () => {
         setLoading(true);
+        console.log('🔍 FETCH VENDORS START - Filter:', filter, 'Search:', searchTerm);
 
         let query = supabase
             .from('vendors')
-            .select('*', { count: 'exact' })
-            .is('deleted_at', null)
-            .order('created_at', { ascending: false });
+            .select('*, vendor_insights(performance_score, updated_at)', { count: 'exact' })
+            .is('deleted_at', null);
+
+        // Apply Ordering
+        if (sortConfig.column === 'ai_performance_score') {
+            query = query.order('ai_performance_score', {
+                ascending: sortConfig.direction === 'asc',
+                nullsFirst: false
+            });
+        } else {
+            query = query.order(sortConfig.column, { ascending: sortConfig.direction === 'asc' });
+        }
 
         if (filter !== 'all') {
             query = query.eq('subscription_tier', filter);
@@ -80,6 +143,7 @@ const AdminVendors = () => {
 
         if (vendorsError) {
             console.error('Error fetching vendors:', vendorsError);
+            alert(t('common.error', 'Hata: ') + vendorsError.message);
             setLoading(false);
             return;
         }
@@ -125,12 +189,12 @@ const AdminVendors = () => {
                 selectedVendors.has(v.id) ? { ...v, is_verified: true } : v
             ));
 
-            alert('✅ Seçilen tedarikçiler onaylandı.');
+            alert('✅ ' + t('adminPanel.vendors.feedback.successVerify', 'Seçilen tedarikçiler onaylandı.'));
             setSelectedVendors(new Set());
             setShowBulkConfirm(false);
         } catch (err) {
             console.error('Bulk verify error:', err);
-            alert('Hata: ' + err.message);
+            alert(t('common.error', 'Hata: ') + err.message);
         }
     };
 
@@ -150,13 +214,13 @@ const AdminVendors = () => {
             }
 
             console.log('✅ Bulk Delete Başarılı');
-            alert('✅ Seçilen tedarikçiler silindi.');
+            alert('✅ ' + t('adminPanel.vendors.feedback.successDelete', 'Seçilen tedarikçiler silindi.'));
             setSelectedVendors(new Set());
             setShowBulkConfirm(false);
             fetchVendors();
         } catch (err) {
             console.error('Bulk delete catch:', err);
-            alert('Hata: ' + err.message);
+            alert(t('common.error', 'Hata: ') + err.message);
         }
     };
 
@@ -224,7 +288,7 @@ const AdminVendors = () => {
 
         } catch (err) {
             console.error('Toggle featured error:', err);
-            alert('Hata: ' + err.message);
+            alert(t('common.error', 'Hata: ') + err.message);
         }
     };
 
@@ -244,7 +308,7 @@ const AdminVendors = () => {
 
         } catch (err) {
             console.error('Toggle verified error:', err);
-            alert('Hata: ' + err.message);
+            alert(t('common.error', 'Hata: ') + err.message);
         }
     };
 
@@ -264,7 +328,7 @@ const AdminVendors = () => {
                     .from('subscription_plans')
                     .select('id')
                     .eq('name', newTier === 'premium' ? 'pro_monthly' : 'free')
-                    .single();
+                    .maybeSingle();
 
                 if (plan) {
                     // Check for active subscription
@@ -273,7 +337,7 @@ const AdminVendors = () => {
                         .select('id')
                         .eq('vendor_id', vendorId)
                         .eq('status', 'active')
-                        .single();
+                        .maybeSingle();
 
                     if (activeSub) {
                         await supabase
@@ -302,7 +366,7 @@ const AdminVendors = () => {
             fetchVendors();
         } catch (err) {
             console.error('Update error:', err);
-            alert('Hata: ' + err.message);
+            alert(t('common.error', 'Hata: ') + err.message);
         }
     };
 
@@ -311,59 +375,93 @@ const AdminVendors = () => {
     const handleGenerateInsight = async (vendor) => {
         setIsAnalyzing(true);
         try {
-            // 1. Fetch Lead Data
-            const { data: leads } = await supabase
-                .from('vendor_leads')
-                .select('id')
-                .eq('vendor_id', vendor.id);
-
-            // 2. Mock Google Analytics Data (In real world, fetch from google_analytics_snapshots)
-            // For now, we simulate finding the vendor's page in top_pages
-            const mockPageViews = Math.floor(Math.random() * 500) + 50;
-            const leadCount = leads?.length || 0;
-            const conversionRate = mockPageViews > 0 ? ((leadCount / mockPageViews) * 100).toFixed(1) : 0;
-
-            // 3. AI logic "Interpretation" (Simulated)
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Suspense
-
-            let summary = "";
-            let recommendations = [];
-            let visibility_score = Math.min(100, (mockPageViews / 5));
-
-            if (conversionRate < 1) {
-                summary = `${vendor.business_name} sayfanızın trafiği iyi (${mockPageViews} izlenme) ancak satış dönüşümü çok düşük (%${conversionRate}). Kullanıcılar sayfanıza geliyor ama teklif istemeden ayrılıyorlar.`;
-                recommendations = [
-                    "Fotoğraf galerisini güncelleyin, ilk 3 fotoğraf çok kritik.",
-                    "Hizmet paketlerinizin fiyatlarını daha şeffaf hale getirin.",
-                    "Müşteri yorumlarını (varsa) öne çıkarın."
-                ];
-            } else if (mockPageViews < 30) {
-                summary = `Sayfanızın dönüşüm oranı fena değil (%${conversionRate}) ancak toplam görünürlük çok düşük. İnsanlar sayfanızı Google'da veya site içinde bulamıyorlar.`;
-                recommendations = [
-                    "Business name ve açıklama kısımlarına anahtar kelimeleri ekleyin.",
-                    "Vitrin (Featured) özelliğini kullanarak üst sıralara çıkın.",
-                    "Sosyal medya hesaplarınızdan sitemizdeki profilinize link verin."
-                ];
-            } else {
-                summary = `Tebrikler! ${vendor.business_name} dengeli bir performans sergiliyor. %${conversionRate} dönüşüm oranı sektör ortalamasının üzerinde.`;
-                recommendations = [
-                    "Mevcut paketlerinizi 'Erken Rezervasyon' indirimleri ile destekleyin.",
-                    "Yeni eklediğiniz işlerin fotoğraflarını 'En Yeni' albümüne ekleyin.",
-                    "Premium üyeliğinizi yenileyerek bu ivmeyi koruyun."
-                ];
-            }
-
-            setAiReport({
-                summary,
-                recommendations,
-                visibility_score: Math.round(visibility_score),
-                conversion_rate: conversionRate
+            // Call the upgraded SQL RPC (V2)
+            const { data: rpcData, error: rpcError } = await supabase.rpc('generate_vendor_performance_report', {
+                target_vendor_id: vendor.id
             });
+
+            if (rpcError) throw rpcError;
+
+            // Fetch the updated insight record
+            const { data: insight, error: fetchError } = await supabase
+                .from('vendor_insights')
+                .select('*')
+                .eq('vendor_id', vendor.id)
+                .maybeSingle();
+
+            if (fetchError) throw fetchError;
+
+            if (insight) {
+                setAiReport({
+                    summary: insight.summary,
+                    recommendations: insight.recommendations,
+                    visibility_score: insight.performance_score,
+                    conversion_rate: insight.metrics?.conversion_rate || 0,
+                    review_count: insight.metrics?.review_count || 0,
+                    favorite_count: insight.metrics?.favorite_count || 0,
+                    avg_rating: insight.metrics?.avg_rating || 0
+                });
+            }
 
         } catch (err) {
             console.error('Insight error:', err);
         } finally {
             setIsAnalyzing(false);
+        }
+    };
+
+    const handlePublishInsight = async () => {
+        if (!aiInsightVendor || !aiReport) return;
+        setIsPublishing(true);
+        try {
+            // Use the centralized RPC function for consistency
+            const { error } = await supabase.rpc('generate_vendor_performance_report', {
+                target_vendor_id: aiInsightVendor.id
+            });
+
+            if (error) throw error;
+            alert('✅ ' + t('adminPanel.vendors.feedback.successPublish', 'Rapor başarıyla yayınlandı ve işletmeciye gönderildi.'));
+            setAiInsightVendor(null);
+            fetchVendors(); // Refresh status in table
+        } catch (err) {
+            console.error('Publish error:', err);
+            alert(t('common.error', 'Hata: ') + err.message);
+        } finally {
+            setIsPublishing(false);
+        }
+    };
+
+    const handleBulkGenerateInsights = async () => {
+        console.log('🚀 Bulk AI Update: Start attempt');
+
+        // Use a more modern confirmation check or ensure it's not being blocked
+        const confirmed = window.confirm(t('adminPanel.vendors.feedback.bulkAiConfirm', 'Tüm aktif tedarikçiler için AI raporlarını toplu olarak güncellemek istediğinize emin misiniz? Bu işlem birkaç dakika sürebilir.'));
+
+        if (!confirmed) {
+            console.log('❌ Bulk update: Explicitly cancelled by user via dialog');
+            return;
+        }
+
+        console.log('⏳ Bulk update: Commencing generation...');
+        setIsBulkGenerating(true);
+        try {
+            console.log('📡 Bulk update: Calling RPC generate_all_active_vendor_reports');
+            const { data, error } = await supabase.rpc('generate_all_active_vendor_reports');
+
+            if (error) {
+                console.error('📡 Bulk update: RPC Error:', error);
+                throw error;
+            }
+
+            console.log('✅ Bulk update: Success! Processed count:', data);
+            alert('✅ ' + t('adminPanel.vendors.feedback.successBulkAi', 'Tüm tedarikçiler için AI raporu başarıyla oluşturuldu.') + ` (${data} ${t('adminPanel.vendors.ai.reportTitle', 'rapor')} ${t('adminPanel.leads.status.contacted', 'işlendi')})`);
+            fetchVendors(); // Refresh the score status in the table
+        } catch (err) {
+            console.error('❌ Bulk update: Fatal error:', err);
+            alert(t('common.error', 'Hata: ') + err.message);
+        } finally {
+            setIsBulkGenerating(false);
+            console.log('🏁 Bulk update: Process finished.');
         }
     };
 
@@ -383,17 +481,17 @@ const AdminVendors = () => {
 
             if (error) {
                 console.error('🔴 DELETE HATASI:', error);
-                alert(`SİLME HATASI:\n${error.message}`);
+                alert(t('common.error', 'Hata: ') + error.message);
                 return;
             }
 
             console.log('✅ SİLME BAŞARILI');
-            alert('✅ Tedarikçi ve ilişkili tüm veriler başarıyla silindi.');
+            alert('✅ ' + t('adminPanel.vendors.feedback.hardDeleteSuccess', 'Tedarikçi ve ilişkili tüm veriler başarıyla silindi.'));
             setVendorToDelete(null);
             fetchVendors();
         } catch (err) {
             console.error('Beklenmeyen hata:', err);
-            alert('Hata: ' + err.message);
+            alert(t('common.error', 'Hata: ') + err.message);
         }
     };
 
@@ -411,15 +509,23 @@ const AdminVendors = () => {
         <div className="section container admin-vendors-container">
             <div className="admin-vendors-header">
                 <div>
-                    <h1>Vendor Yönetimi</h1>
-                    <p>Tüm tedarikçileri görüntüleyin ve yönetin</p>
+                    <h1>{t('adminPanel.vendors.title', 'Vendor Yönetimi')}</h1>
+                    <p>{t('adminPanel.vendors.subtitle', 'Tüm tedarikçileri görüntüleyin ve yönetin')}</p>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <button className="btn btn-secondary" onClick={() => setShowImportModal(true)}>
-                        📥 Import CSV
-                    </button>
                     <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
-                        + Yeni Tedarikçi
+                        ➕ {t('adminPanel.vendors.actions.addNew', 'Yeni Tedarikçi')}
+                    </button>
+                    <button className="btn btn-success" onClick={() => setShowImportModal(true)}>
+                        📥 {t('adminPanel.vendors.actions.import', 'Excel İçe Aktar')}
+                    </button>
+                    <button
+                        className="btn btn-secondary"
+                        onClick={handleBulkGenerateInsights}
+                        disabled={isBulkGenerating}
+                        style={{ background: '#1e1b4b', borderColor: '#1e1b4b', display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                        {isBulkGenerating ? t('adminPanel.vendors.ai.updating', '⌛ Güncelleniyor...') : <><Brain size={16} /> {t('adminPanel.vendors.ai.bulkUpdate', 'Toplu AI Güncelle')}</>}
                     </button>
                 </div>
             </div>
@@ -443,19 +549,19 @@ const AdminVendors = () => {
                         className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
                         onClick={() => { setFilter('all'); setPage(1); }}
                     >
-                        📋 Tümü
+                        📋 {t('adminPanel.vendors.filters.all', 'Tümü')}
                     </button>
                     <button
                         className={`filter-tab ${filter === 'premium' ? 'active' : ''}`}
                         onClick={() => { setFilter('premium'); setPage(1); }}
                     >
-                        👑 Premium
+                        👑 {t('adminPanel.vendors.filters.premium', 'Premium')}
                     </button>
                     <button
                         className={`filter-tab ${filter === 'free' ? 'active' : ''}`}
                         onClick={() => { setFilter('free'); setPage(1); }}
                     >
-                        🆓 Free
+                        🆓 {t('adminPanel.vendors.filters.free', 'Free')}
                     </button>
                 </div>
 
@@ -465,7 +571,7 @@ const AdminVendors = () => {
                         <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px' }}>🔍</span>
                         <input
                             type="text"
-                            placeholder="Tedarikçi ara (işletme adı)..."
+                            placeholder={t('adminPanel.vendors.filters.searchPlaceholder', 'Tedarikçi ara (işletme adı)...')}
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
@@ -497,7 +603,7 @@ const AdminVendors = () => {
                     border: '1px solid #ffcdd2'
                 }}>
                     <span style={{ color: '#c62828', fontWeight: 'bold' }}>
-                        {selectedVendors.size} tedarikçi seçildi
+                        {selectedVendors.size} {t('adminPanel.vendors.bulk.selected', 'tedarikçi seçildi')}
                     </span>
 
                     <div style={{ display: 'flex', gap: '10px' }}>
@@ -505,23 +611,23 @@ const AdminVendors = () => {
                             className="btn btn-success"
                             onClick={handleBulkVerify}
                         >
-                            ✅ Seçilenleri Onayla
+                            ✅ {t('adminPanel.vendors.bulk.verify', 'Seçilenleri Onayla')}
                         </button>
 
                         {showBulkConfirm ? (
                             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                <span style={{ fontWeight: 'bold', color: '#d32f2f' }}>Silmek istediğine emin misin?</span>
+                                <span style={{ fontWeight: 'bold', color: '#d32f2f' }}>{t('adminPanel.vendors.bulk.confirmDelete', 'Silmek istediğine emin misin?')}</span>
                                 <button
                                     className="btn btn-danger"
                                     onClick={handleBulkDelete}
                                 >
-                                    Evet, Sil
+                                    {t('common.yes', 'Evet')}, {t('common.delete', 'Sil')}
                                 </button>
                                 <button
                                     className="btn btn-secondary"
                                     onClick={() => setShowBulkConfirm(false)}
                                 >
-                                    İptal
+                                    {t('common.cancel', 'İptal')}
                                 </button>
                             </div>
                         ) : (
@@ -529,7 +635,7 @@ const AdminVendors = () => {
                                 className="btn btn-danger"
                                 onClick={() => setShowBulkConfirm(true)}
                             >
-                                🗑️ Seçilenleri Sil
+                                🗑️ {t('adminPanel.vendors.bulk.delete', 'Seçilenleri Sil')}
                             </button>
                         )}
                     </div>
@@ -540,8 +646,8 @@ const AdminVendors = () => {
             {vendors.length === 0 ? (
                 <div className="empty-state">
                     <div style={{ fontSize: '40px', marginBottom: '10px' }}>🔍</div>
-                    <h3>Tedarikçi bulunamadı</h3>
-                    <p>Bu filtreye veya aramaya uygun tedarikçi yok.</p>
+                    <h3>{t('adminPanel.vendors.feedback.noVendors', 'Tedarikçi bulunamadı')}</h3>
+                    <p>{t('adminPanel.vendors.feedback.noVendorsDesc', 'Bu filtreye veya aramaya uygun tedarikçi yok.')}</p>
                 </div>
             ) : (
                 <>
@@ -557,13 +663,28 @@ const AdminVendors = () => {
                                         />
                                     </th>
                                     <th style={{ width: '50px', textAlign: 'center', color: '#888' }}>#</th>
-                                    <th>İşletme Adı</th>
-                                    <th>Kategori</th>
-                                    <th>Şehir</th>
-                                    <th>Üyelik</th>
-                                    <th>Vitrin Durumu</th>
-                                    <th>Durum</th>
-                                    <th>İşlemler</th>
+                                    <th onClick={() => handleSort('business_name')} style={{ cursor: 'pointer' }}>
+                                        {t('adminPanel.vendors.table.businessName', 'İşletme Adı')} {sortConfig.column === 'business_name' && (sortConfig.direction === 'asc' ? '🔼' : '🔽')}
+                                    </th>
+                                    <th onClick={() => handleSort('category')} style={{ cursor: 'pointer' }}>
+                                        {t('adminPanel.vendors.table.category', 'Kategori')} {sortConfig.column === 'category' && (sortConfig.direction === 'asc' ? '🔼' : '🔽')}
+                                    </th>
+                                    <th onClick={() => handleSort('city')} style={{ cursor: 'pointer' }}>
+                                        {t('adminPanel.vendors.table.city', 'Şehir')} {sortConfig.column === 'city' && (sortConfig.direction === 'asc' ? '🔼' : '🔽')}
+                                    </th>
+                                    <th onClick={() => handleSort('subscription_tier')} style={{ cursor: 'pointer' }}>
+                                        {t('adminPanel.vendors.table.membership', 'Üyelik')} {sortConfig.column === 'subscription_tier' && (sortConfig.direction === 'asc' ? '🔼' : '🔽')}
+                                    </th>
+                                    <th onClick={() => handleSort('ai_performance_score')} style={{ cursor: 'pointer' }}>
+                                        {t('adminPanel.vendors.table.aiReport', 'AI Rapor')} {sortConfig.column === 'ai_performance_score' && (sortConfig.direction === 'asc' ? '🔼' : '🔽')}
+                                    </th>
+                                    <th onClick={() => handleSort('is_featured')} style={{ cursor: 'pointer' }}>
+                                        {t('adminPanel.vendors.table.showcase', 'Vitrin')} {sortConfig.column === 'is_featured' && (sortConfig.direction === 'asc' ? '🔼' : '🔽')}
+                                    </th>
+                                    <th onClick={() => handleSort('is_verified')} style={{ cursor: 'pointer' }}>
+                                        {t('adminPanel.vendors.table.status', 'Durum')} {sortConfig.column === 'is_verified' && (sortConfig.direction === 'asc' ? '🔼' : '🔽')}
+                                    </th>
+                                    <th>{t('adminPanel.vendors.table.actions', 'İşlemler')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -599,27 +720,50 @@ const AdminVendors = () => {
                                             </select>
                                         </td>
                                         <td>
+                                            {(() => {
+                                                const insight = Array.isArray(vendor.vendor_insights)
+                                                    ? vendor.vendor_insights[0]
+                                                    : vendor.vendor_insights;
+
+                                                return insight ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', fontSize: '0.8rem' }}>
+                                                        <span style={{
+                                                            color: insight.performance_score > 70 ? '#10b981' : '#f59e0b',
+                                                            fontWeight: 'bold'
+                                                        }}>
+                                                            🌟 {insight.performance_score} {t('adminPanel.vendors.ai.score', 'Puan')}
+                                                        </span>
+                                                        <span style={{ fontSize: '0.7rem', color: '#888' }}>
+                                                            {new Date(insight.updated_at).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'de-DE')}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <span style={{ fontSize: '0.8rem', color: '#ccc' }}>{t('adminPanel.vendors.ai.noReport', 'Henüz yok')}</span>
+                                                );
+                                            })()}
+                                        </td>
+                                        <td>
                                             {vendor.is_featured ? (
                                                 <div>
-                                                    <span className="badge badge-success">Vitrinde</span>
+                                                    <span className="badge badge-success">{t('adminPanel.vendors.status.featured', 'Vitrinde')}</span>
                                                     {vendor.featured_expires_at && (
                                                         <div style={{ fontSize: '0.7rem', color: '#666', marginTop: '4px' }}>
-                                                            Bitiş: {new Date(vendor.featured_expires_at).toLocaleDateString()}
+                                                            {t('adminPanel.vendors.table.expires', 'Bitiş')}: {new Date(vendor.featured_expires_at).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'de-DE')}
                                                         </div>
                                                     )}
                                                     {vendor.featured_sort_order > 0 && (
                                                         <div style={{ fontSize: '0.7rem', color: '#666' }}>
-                                                            Sıra: {vendor.featured_sort_order}
+                                                            {t('adminPanel.vendors.modals.order', 'Sıra')}: {vendor.featured_sort_order}
                                                         </div>
                                                     )}
                                                 </div>
                                             ) : (
-                                                <span className="badge badge-secondary">Pasif</span>
+                                                <span className="badge badge-secondary">{t('adminPanel.vendors.status.passive', 'Pasif')}</span>
                                             )}
                                         </td>
                                         <td>
                                             <span className={`status-badge ${vendor.is_verified ? 'status-verified' : 'status-pending'}`}>
-                                                {vendor.is_verified ? 'Onaylı' : 'Bekliyor'}
+                                                {vendor.is_verified ? t('adminPanel.vendors.status.verified', 'Onaylı') : t('adminPanel.vendors.status.pending', 'Bekliyor')}
                                             </span>
                                         </td>
                                         <td>
@@ -656,7 +800,7 @@ const AdminVendors = () => {
                                                     <button
                                                         className="btn-sm btn-secondary"
                                                         onClick={() => updateSubscription(vendor.id, 'free')}
-                                                        title="Free Yap"
+                                                        title={t('adminPanel.vendors.actions.makeFree', 'Free Yap')}
                                                     >
                                                         📉
                                                     </button>
@@ -664,7 +808,7 @@ const AdminVendors = () => {
                                                     <button
                                                         className="btn-sm btn-premium"
                                                         onClick={() => updateSubscription(vendor.id, 'premium')}
-                                                        title="Premium Yap"
+                                                        title={t('adminPanel.vendors.actions.makePremium', 'Premium Yap')}
                                                     >
                                                         👑
                                                     </button>
@@ -672,21 +816,21 @@ const AdminVendors = () => {
                                                 <button
                                                     className="btn-sm btn-info"
                                                     onClick={() => setAiInsightVendor(vendor)}
-                                                    title="AI Analiz"
+                                                    title={t('adminPanel.vendors.actions.aiAnalysis', 'AI Analiz')}
                                                 >
                                                     <Brain size={14} />
                                                 </button>
                                                 <button
                                                     className="btn-sm btn-primary"
                                                     onClick={() => setEditingVendor(vendor)}
-                                                    title="Düzenle"
+                                                    title={t('adminPanel.vendors.actions.edit', 'Düzenle')}
                                                 >
                                                     ✏️
                                                 </button>
                                                 <button
                                                     className="btn-sm btn-danger"
                                                     onClick={() => handleDeleteClick(vendor)}
-                                                    title="Sil"
+                                                    title={t('adminPanel.vendors.actions.delete', 'Sil')}
                                                 >
                                                     🗑️
                                                 </button>
@@ -713,10 +857,10 @@ const AdminVendors = () => {
                                     cursor: page === 1 ? 'not-allowed' : 'pointer'
                                 }}
                             >
-                                ← Önceki
+                                ← {t('adminPanel.vendors.pagination.previous', 'Önceki')}
                             </button>
                             <span style={{ fontSize: '14px', color: '#4b5563' }}>
-                                Sayfa <strong>{page}</strong> / {totalPages}
+                                {t('adminPanel.vendors.pagination.page', 'Sayfa')} <strong>{page}</strong> / {totalPages}
                             </span>
                             <button
                                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
@@ -730,7 +874,7 @@ const AdminVendors = () => {
                                     cursor: page === totalPages ? 'not-allowed' : 'pointer'
                                 }}
                             >
-                                Sonraki →
+                                {t('adminPanel.vendors.pagination.next', 'Sonraki')} →
                             </button>
                         </div>
                     )}
@@ -773,26 +917,26 @@ const AdminVendors = () => {
             {showShowcaseModal && (
                 <div className="modal-overlay">
                     <div className="modal-content" style={{ maxWidth: '400px' }}>
-                        <h3>Vitrine Ekle: {showcaseVendor?.business_name}</h3>
+                        <h3>{t('adminPanel.vendors.modals.showcaseTitle', 'Vitrine Ekle')}: {showcaseVendor?.business_name}</h3>
 
                         <div className="form-group">
-                            <label>Süre</label>
+                            <label>{t('adminPanel.vendors.modals.duration', 'Süre')}</label>
                             <select
                                 value={showcaseDuration}
                                 onChange={(e) => setShowcaseDuration(e.target.value)}
                                 className="form-control"
                             >
-                                <option value="1_week">1 Hafta</option>
-                                <option value="1_month">1 Ay</option>
-                                <option value="3_months">3 Ay</option>
-                                <option value="unlimited">Süresiz</option>
-                                <option value="custom">Özel Tarih</option>
+                                <option value="1_week">{t('adminPanel.vendors.modals.durations.week', '1 Hafta')}</option>
+                                <option value="1_month">{t('adminPanel.vendors.modals.durations.month', '1 Ay')}</option>
+                                <option value="3_months">{t('adminPanel.vendors.modals.durations.threeMonths', '3 Ay')}</option>
+                                <option value="unlimited">{t('adminPanel.vendors.modals.durations.unlimited', 'Süresiz')}</option>
+                                <option value="custom">{t('adminPanel.vendors.modals.durations.custom', 'Özel Tarih')}</option>
                             </select>
                         </div>
 
                         {showcaseDuration === 'custom' && (
                             <div className="form-group">
-                                <label>Bitiş Tarihi</label>
+                                <label>{t('adminPanel.vendors.modals.expiryDate', 'Bitiş Tarihi')}</label>
                                 <input
                                     type="date"
                                     value={showcaseCustomDate}
@@ -803,7 +947,7 @@ const AdminVendors = () => {
                         )}
 
                         <div className="form-group">
-                            <label>Sıralama Önceliği (1 = En Üst)</label>
+                            <label>{t('adminPanel.vendors.modals.order', 'Sıralama Önceliği (1 = En Üst)')}</label>
                             <input
                                 type="number"
                                 value={showcaseOrder}
@@ -811,12 +955,12 @@ const AdminVendors = () => {
                                 className="form-control"
                                 min="0"
                             />
-                            <small className="text-muted">Düşük numara daha üstte görünür.</small>
+                            <small className="text-muted">{t('adminPanel.vendors.modals.orderHint', 'Düşük numara daha üstte görünür.')}</small>
                         </div>
 
                         <div className="modal-actions">
-                            <button className="btn btn-secondary" onClick={() => setShowShowcaseModal(false)}>İptal</button>
-                            <button className="btn btn-primary" onClick={handleShowcaseSubmit}>Kaydet ve Ekle</button>
+                            <button className="btn btn-secondary" onClick={() => setShowShowcaseModal(false)}>{t('common.cancel', 'İptal')}</button>
+                            <button className="btn btn-primary" onClick={handleShowcaseSubmit}>{t('adminPanel.vendors.modals.saveAndAdd', 'Kaydet ve Ekle')}</button>
                         </div>
                     </div>
                 </div>
@@ -828,7 +972,7 @@ const AdminVendors = () => {
                     <div className="sidebar-header">
                         <div className="header-title">
                             <Brain className="brain-icon" />
-                            <h3>{aiInsightVendor.business_name} - AI Analiz</h3>
+                            <h3>{aiInsightVendor.business_name} - {t('adminPanel.vendors.ai.reportTitle', 'AI Analiz')}</h3>
                         </div>
                         <button className="close-btn" onClick={() => { setAiInsightVendor(null); setAiReport(null); }}>
                             <X size={20} />
@@ -839,31 +983,41 @@ const AdminVendors = () => {
                         {isAnalyzing ? (
                             <div className="sidebar-loading">
                                 <div className="loading-spinner"></div>
-                                <p>Veriler analiz ediliyor...</p>
+                                <p>{t('adminPanel.vendors.ai.analyzing', 'Veriler analiz ediliyor...')}</p>
                                 <span className="scanning-line"></span>
                             </div>
                         ) : aiReport ? (
                             <div className="ai-report-body fade-in">
                                 <div className="report-card primary">
-                                    <h4><Sparkles size={16} /> Performans Özeti</h4>
+                                    <h4><Sparkles size={16} /> {t('adminPanel.vendors.ai.summary', 'Performans Özeti')}</h4>
                                     <p>{aiReport.summary}</p>
                                 </div>
 
                                 <div className="metrics-grid">
                                     <div className="mini-card">
                                         <TrendingUp size={14} />
-                                        <span>Görünürlük</span>
+                                        <span>{t('adminPanel.vendors.ai.visibility', 'Görünürlük')}</span>
                                         <strong>{aiReport.visibility_score}/100</strong>
                                     </div>
                                     <div className="mini-card">
                                         <BarChart size={14} />
-                                        <span>Dönüşüm</span>
+                                        <span>{t('adminPanel.vendors.ai.conversion', 'Dönüşüm')}</span>
                                         <strong>{aiReport.conversion_rate}%</strong>
+                                    </div>
+                                    <div className="mini-card">
+                                        <Sparkles size={14} style={{ color: '#f59e0b' }} />
+                                        <span>{t('adminPanel.vendors.ai.rating', 'Puan / Yorum')}</span>
+                                        <strong>{aiReport.avg_rating} / {aiReport.review_count}</strong>
+                                    </div>
+                                    <div className="mini-card">
+                                        <Layout size={14} style={{ color: '#ec4899' }} />
+                                        <span>{t('adminPanel.vendors.ai.favorites', 'Favoriler')}</span>
+                                        <strong>{aiReport.favorite_count}</strong>
                                     </div>
                                 </div>
 
                                 <div className="report-card">
-                                    <h4>🎯 Tavsiyeler</h4>
+                                    <h4>🎯 {t('adminPanel.vendors.ai.recommendations', 'Tavsiyeler')}</h4>
                                     <ul>
                                         {aiReport.recommendations.map((rec, i) => (
                                             <li key={i}>{rec}</li>
@@ -871,18 +1025,27 @@ const AdminVendors = () => {
                                     </ul>
                                 </div>
 
-                                <button className="btn btn-primary w-full" onClick={() => setAiInsightVendor(null)}>
-                                    Anladım
-                                </button>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button
+                                        className="btn btn-success flex-1"
+                                        onClick={handlePublishInsight}
+                                        disabled={isPublishing || aiReport.is_published}
+                                    >
+                                        {isPublishing ? t('adminPanel.vendors.ai.publishing', 'Yayınlanıyor...') : aiReport.is_published ? '✅ ' + t('adminPanel.vendors.ai.published', 'Yayında') : '🚀 ' + t('adminPanel.vendors.ai.publish', 'Yayınla ve Paylaş')}
+                                    </button>
+                                    <button className="btn btn-secondary" onClick={() => setAiInsightVendor(null)}>
+                                        {t('common.close', 'Kapat')}
+                                    </button>
+                                </div>
                             </div>
                         ) : (
                             <div className="sidebar-start">
-                                <p>Bu tedarikçinin son 30 günlük verileri (Google Trafik + Local Talepler) harmanlanarak bir rapor oluşturulacaktır.</p>
+                                <p>{t('adminPanel.vendors.ai.sidebarDesc', 'Bu tedarikçinin son 30 günlük verileri (Google Trafik + Local Talepler) harmanlanarak bir rapor oluşturulacaktır.')}</p>
                                 <button
                                     className="btn btn-primary w-full"
                                     onClick={() => handleGenerateInsight(aiInsightVendor)}
                                 >
-                                    Analizi Başlat
+                                    {t('adminPanel.vendors.ai.startAnalysis', 'Analizi Başlat')}
                                 </button>
                             </div>
                         )}
@@ -895,25 +1058,25 @@ const AdminVendors = () => {
             {vendorToDelete && (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <h3>Tedarikçiyi Sil?</h3>
+                        <h3>{t('adminPanel.vendors.modals.deleteTitle', 'Tedarikçiyi Sil?')}</h3>
                         <p>
-                            <strong>{vendorToDelete.business_name}</strong> isimli tedarikçiyi silmek istediğinize emin misiniz?
+                            <strong>{vendorToDelete.business_name}</strong> {t('adminPanel.vendors.modals.deleteConfirm', 'isimli tedarikçiyi silmek istediğinize emin misiniz?')}
                         </p>
                         <div className="alert alert-danger">
-                            ⚠️ Bu işlem geri alınamaz! Tedarikçiye ait tüm veriler (abonelikler, leadler, vb.) silinecektir.
+                            ⚠️ {t('adminPanel.vendors.modals.deleteWarning', 'Bu işlem geri alınamaz!')} {t('adminPanel.vendors.modals.deleteWarningExtra', 'Tedarikçiye ait tüm veriler (abonelikler, leadler, vb.) silinecektir.')}
                         </div>
                         <div className="modal-actions">
                             <button
                                 className="btn btn-secondary"
                                 onClick={() => setVendorToDelete(null)}
                             >
-                                İptal
+                                {t('common.cancel', 'İptal')}
                             </button>
                             <button
                                 className="btn btn-danger"
                                 onClick={() => confirmDelete(vendorToDelete.id)}
                             >
-                                Evet, Sil
+                                {t('common.yes', 'Evet')}, {t('common.delete', 'Sil')}
                             </button>
                         </div>
                     </div>

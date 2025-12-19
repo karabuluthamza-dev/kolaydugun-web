@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../supabaseClient';
+import { getCategoryTranslationKey } from '../constants/vendorData';
 import ProfileEditor from '../components/VendorDashboard/ProfileEditor';
 import GalleryManager from '../components/VendorDashboard/GalleryManager';
 import LeadsViewer from '../components/VendorDashboard/LeadsViewer';
@@ -12,7 +13,7 @@ import VendorWallet from './VendorWallet';
 import './VendorDashboard.css';
 
 const VendorDashboard = () => {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const { t, language } = useLanguage();
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -41,6 +42,8 @@ const VendorDashboard = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (authLoading) return; // Wait for session to recover
+
         if (!user) {
             navigate('/login');
             return;
@@ -56,6 +59,43 @@ const VendorDashboard = () => {
         }
         fetchVendorProfile();
     }, [user, navigate]);
+
+    const [recentInsight, setRecentInsight] = useState(null);
+    const [rankInfo, setRankInfo] = useState(null);
+
+    const fetchRecentInsight = useCallback(async (vId) => {
+        if (!vId) return;
+        try {
+            const { data, error } = await supabase
+                .from('vendor_insights')
+                .select('*')
+                .eq('vendor_id', vId)
+                .eq('is_published', true)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            if (data && !error) {
+                setRecentInsight(data);
+            }
+
+            // Fetch Gamification Ranking Info
+            const { data: rankData, error: rankError } = await supabase.rpc('get_vendor_rank_info', {
+                target_vendor_id: vId
+            });
+            if (rankData && !rankError) {
+                setRankInfo(rankData);
+            }
+        } catch (err) {
+            console.error('Error fetching insight/rank:', err);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (vendor?.id) {
+            fetchRecentInsight(vendor.id);
+        }
+    }, [vendor?.id, fetchRecentInsight]);
 
     const fetchVendorProfile = async () => {
         try {
@@ -90,7 +130,7 @@ const VendorDashboard = () => {
         }
     };
 
-    if (loading) return <div className="dashboard-loading">{t('login.loading')}</div>;
+    if (loading || authLoading) return <div className="dashboard-loading">{t('login.loading')}</div>;
 
     if (!vendor && activeTab !== 'profile') {
         return (
@@ -106,24 +146,248 @@ const VendorDashboard = () => {
         );
     }
 
+
     const renderContent = () => {
         switch (activeTab) {
             case 'overview':
                 return (
                     <div className="dashboard-overview">
-                        <h2>{t('dashboard.overview')}</h2>
-                        <div className="stats-grid">
-                            <div className="stat-card">
-                                <h3>{t('dashboard.package')}</h3>
-                                <span className={`badge badge-${vendor?.subscription_tier || 'free'}`}>
-                                    {t(`vendorDashboard.tiers.${vendor?.subscription_tier || 'free'}.name`)}
-                                </span>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2>{t('dashboard.overview')}</h2>
+                            <div className="flex gap-4">
+                                <div className="stat-pill">
+                                    <span className={`badge badge-${vendor?.subscription_tier || 'free'}`}>
+                                        {t(`dashboard.tiers.${vendor?.subscription_tier || 'free'}`)}
+                                    </span>
+                                </div>
                             </div>
+                        </div>
+
+                        {/* PREMIUM AI INSIGHT CARD */}
+                        <div className="ai-insight-section mb-8">
+                            {/* Ranking Motivation Card */}
+                            {rankInfo && (
+                                <div className="rank-motivation-card mb-4" style={{
+                                    background: 'rgba(255, 255, 255, 0.05)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: '16px',
+                                    padding: '16px 24px',
+                                    marginBottom: '16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    color: 'white'
+                                }}>
+                                    <div className="flex items-center gap-4">
+                                        <div style={{ fontSize: '2rem' }}>🏆</div>
+                                        <div>
+                                            <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '600' }}>
+                                                {t('dashboard.gamification.rankCard.congrats', {
+                                                    rank: rankInfo.rank,
+                                                    category: t(`categories.${getCategoryTranslationKey(rankInfo.category || 'wedding_venues')}`),
+                                                    city: rankInfo.city || (language === 'tr' ? 'Genel' : (language === 'de' ? 'Allgemein' : 'General'))
+                                                })}
+                                            </h4>
+                                            {rankInfo.rank > 1 && (
+                                                <p style={{ margin: '4px 0 0', fontSize: '0.85rem', opacity: 0.8 }}>
+                                                    {t('dashboard.gamification.rankCard.motivation', {
+                                                        points: rankInfo.points_to_next || 0
+                                                    })}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {rankInfo.rank > 1 && (
+                                        <button
+                                            onClick={() => setActiveTab('gallery')}
+                                            className="btn btn-sm"
+                                            style={{ background: '#f43f5e', color: 'white', border: 'none' }}
+                                        >
+                                            {t('dashboard.gamification.rankCard.boostAction')}
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Top 3 Reward Badge */}
+                            {rankInfo && rankInfo.rank <= 3 && (
+                                <div className="reward-eligible-badge mb-4" style={{
+                                    background: 'linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%)',
+                                    borderRadius: '12px',
+                                    padding: '12px 20px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    color: 'white',
+                                    boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)'
+                                }}>
+                                    <span style={{ fontSize: '1.4rem' }}>🎁</span>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>
+                                        {t('dashboard.gamification.rewards.eligible')}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="insight-card-premium" style={{
+                                background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+                                borderRadius: '24px',
+                                padding: '32px',
+                                color: 'white',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                boxShadow: '0 20px 40px rgba(49, 46, 129, 0.3)'
+                            }}>
+                                {/* Decorative elements */}
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '-20px',
+                                    right: '-20px',
+                                    width: '150px',
+                                    height: '150px',
+                                    background: 'rgba(255,255,255,0.05)',
+                                    borderRadius: '50%',
+                                    filter: 'blur(40px)'
+                                }}></div>
+
+                                <div className="flex flex-col md:flex-row gap-8 items-center relative z-10">
+                                    <div className="score-container flex-shrink-0">
+                                        <div className="circular-score" style={{
+                                            width: '120px',
+                                            height: '120px',
+                                            borderRadius: '50%',
+                                            border: '8px solid rgba(255,255,255,0.1)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            background: 'rgba(255,255,255,0.05)',
+                                            borderTopColor: '#f43f5e'
+                                        }}>
+                                            <span style={{ fontSize: '2rem', fontWeight: '800' }}>{recentInsight?.performance_score || 0}</span>
+                                            <span style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'uppercase' }}>{t('dashboard.gamification.aiAnalysis.scoreLabel')}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="content-container flex-grow">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span style={{ fontSize: '1.2rem' }}>🧠</span>
+                                            <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '700' }}>{t('dashboard.gamification.aiAnalysis.title')}</h3>
+                                            <span className="pulse-dot"></span>
+                                        </div>
+
+                                        {recentInsight ? (
+                                            <>
+                                                <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'rgba(255,255,255,0.9)', marginBottom: '20px' }}>
+                                                    {(() => {
+                                                        const summary = recentInsight.summary;
+                                                        if (!summary) return '';
+
+                                                        // Dynamic extraction for views/rate if not in metrics
+                                                        const viewsMatch = summary.match(/(\d+) kez görüntülendi/) || summary.match(/(\d+) izlenme/);
+                                                        const rateMatch = summary.match(/\(%?\s*([\d.]+)\s*%\)/) || summary.match(/\(%([\d.]+)\)/) || summary.match(/%([\d.]+) dönüşüm/);
+                                                        const viewsRaw = viewsMatch ? viewsMatch[1] : (recentInsight.metrics?.views || '?');
+                                                        const rateRaw = rateMatch ? rateMatch[1] : (recentInsight.metrics?.conversion_rate || '0');
+
+                                                        if (summary.includes('satış dönüşümü') || summary.includes('ziyaretçiler teklif istemeden')) {
+                                                            return t('dashboard.gamification.aiAnalysis.summaries.lowConversion', {
+                                                                views: viewsRaw,
+                                                                rate: rateRaw
+                                                            });
+                                                        }
+                                                        if (summary.includes('Google verisi bulunamadı') || summary.includes('henüz Google verisi')) {
+                                                            return t('dashboard.gamification.aiAnalysis.summaries.noData', { name: vendor?.business_name });
+                                                        }
+                                                        if (summary.includes('toplam görünürlük') || summary.includes('çok düşük')) {
+                                                            return t('dashboard.gamification.aiAnalysis.summaries.lowVisibility', { views: viewsRaw });
+                                                        }
+                                                        if (summary.includes('dengeli bir performans') || summary.includes('ivmeyi koruyun')) {
+                                                            return t('dashboard.gamification.aiAnalysis.summaries.healthy', {
+                                                                name: vendor?.business_name,
+                                                                rate: rateRaw,
+                                                                views: viewsRaw
+                                                            });
+                                                        }
+                                                        return summary;
+                                                    })()}
+                                                </p>
+                                                <div className="recommendations-row flex flex-wrap gap-3">
+                                                    {Array.isArray(recentInsight.recommendations) && recentInsight.recommendations.slice(0, 3).map((rec, i) => {
+                                                        const mapper = {
+                                                            'Fotoğraf galerisindeki ilk 3 görseli daha çekici hale getirin.': 'improvePhotos',
+                                                            'Açıklama kısmına \'Neden Sizi Seçmeliler?\' bölümü ekleyin.': 'whyUs',
+                                                            'Hizmet fiyatlarınızı veya başlangıç fiyatınızı belirtin.': 'addPrices',
+                                                            'Google Search Console üzerinden URL denetimi yapın.': 'searchConsole',
+                                                            'Site haritasına (sitemap) eklendiğinden emin olun.': 'sitemap',
+                                                            'Profil doluluk oranını %100\'e çıkarın.': 'completeProfile',
+                                                            'İşletme açıklamasında daha fazla anahtar kelime kullanın.': 'keywords',
+                                                            'Vitrin (Featured) özelliğini aktif ederek trafiği artırın.': 'featured',
+                                                            'Diğer sosyal mecralardan bu sayfaya link verin.': 'socialLinks',
+                                                            'Rezervasyon takviminizi güncel tutun.': 'calendar',
+                                                            'Yeni referans fotoğrafları ekleyerek ivmeyi koruyun.': 'freshPhotos',
+                                                            'Tedarikçi başarı öykünüzü bizimle paylaşın!': 'successStory'
+                                                        };
+                                                        const key = mapper[rec];
+                                                        const localizedRec = key ? t(`dashboard.gamification.aiAnalysis.recommendations.${key}`) : rec;
+
+                                                        return (
+                                                            <div key={i} className="rec-pill" style={{
+                                                                background: 'rgba(255,255,255,0.08)',
+                                                                padding: '8px 16px',
+                                                                borderRadius: '100px',
+                                                                fontSize: '0.8rem',
+                                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '8px'
+                                                            }}>
+                                                                <span style={{ color: '#fb7185' }}>✦</span> {localizedRec}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="loading-state py-4">
+                                                <p style={{ opacity: 0.7, fontStyle: 'italic' }}>{t('dashboard.gamification.aiAnalysis.analyzing')}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="stats-grid">
                             <div className="stat-card">
                                 <h3>{t('dashboard.status')}</h3>
                                 <span className="status-active">{t('dashboard.active')}</span>
                             </div>
+                            <div className="stat-card">
+                                <h3>{t('dashboard.package')}</h3>
+                                <p className="text-sm opacity-70">{t(`dashboard.tiers.${vendor?.subscription_tier || 'free'}`)}</p>
+                            </div>
                         </div>
+
+                        <style>{`
+                            .pulse-dot {
+                                width: 8px;
+                                height: 8px;
+                                background: #10b981;
+                                border-radius: 50%;
+                                display: inline-block;
+                                box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+                                animation: pulse 2s infinite;
+                            }
+                            @keyframes pulse {
+                                0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+                                70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+                                100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+                            }
+                            .rec-pill:hover {
+                                background: rgba(255,255,255,0.15) !important;
+                                transform: translateY(-2px);
+                                transition: all 0.2s;
+                            }
+                        `}</style>
                     </div>
                 );
             case 'profile':
@@ -144,30 +408,13 @@ const VendorDashboard = () => {
     };
 
     // 3-language promo texts
-    const promoTexts = {
-        tr: {
-            title: '🛍️ Yeni! Kendi Mağazanızı Açın',
-            desc: 'KolayDugun Shop Marketplace\'te kendi ürünlerinizi satın. İlk 10 tedarikçiye özel avantajlar!',
-            viewDemo: '🎨 Demo Mağazayı İncele',
-            viewPanel: '⚙️ Demo Paneli Gör',
-            apply: 'Hemen Başvur →'
-        },
-        de: {
-            title: '🛍️ Neu! Eröffnen Sie Ihren Shop',
-            desc: 'Verkaufen Sie Ihre Produkte im KolayDugun Shop Marketplace. Exklusive Vorteile für die ersten 10 Anbieter!',
-            viewDemo: '🎨 Demo-Shop ansehen',
-            viewPanel: '⚙️ Demo-Panel ansehen',
-            apply: 'Jetzt bewerben →'
-        },
-        en: {
-            title: '🛍️ New! Open Your Own Shop',
-            desc: 'Sell your products in KolayDugun Shop Marketplace. Exclusive benefits for first 10 vendors!',
-            viewDemo: '🎨 View Demo Shop',
-            viewPanel: '⚙️ View Demo Panel',
-            apply: 'Apply Now →'
-        }
+    const promo = {
+        title: t('dashboard.promo.title'),
+        desc: t('dashboard.promo.desc'),
+        viewDemo: t('dashboard.promo.viewDemo'),
+        viewPanel: t('dashboard.promo.viewPanel'),
+        apply: t('dashboard.promo.apply')
     };
-    const promo = promoTexts[language] || promoTexts.tr;
 
     return (
         <div className="section container dashboard-layout">
@@ -290,6 +537,12 @@ const VendorDashboard = () => {
                         disabled={!vendor}
                     >
                         🛍️ {t('shop.vendorShop.title', 'Mağazam')}
+                    </button>
+                    <button
+                        className="help-nav-btn"
+                        onClick={() => window.open('/faq?category=vendors', '_blank')}
+                    >
+                        ❓ {t('faq.title', 'Sıkça Sorulan Sorular')}
                     </button>
                     <hr style={{ margin: '10px 0', border: 'none', borderTop: '1px solid #eee' }} />
                     <button

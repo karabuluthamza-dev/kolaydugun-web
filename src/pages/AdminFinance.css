@@ -246,6 +246,10 @@ th {
     color: #000;
     border: none;
     padding: 5px 10px;
+}
+
+@media print {
+
     .footer,
     .sidebar,
     .admin-sidebar,
@@ -256,11 +260,7 @@ th {
     .hamburger-btn,
     .mobile-menu,
     #zammad-feedback-form,
-    /* If exists */
-    .intercom-lightweight-app
-
-    /* If exists */
-        {
+    .intercom-lightweight-app {
         display: none !important;
     }
 
@@ -312,7 +312,6 @@ th {
         border: 1px solid #ddd;
         border-collapse: collapse;
         font-size: 12px;
-        /* Smaller font for print */
     }
 
     th,
@@ -340,7 +339,6 @@ th {
 
     .card-icon {
         color: black !important;
-        /* Force icons to be visible/black */
     }
 
     /* Force background colors for charts if possible, or fallback */
@@ -363,8 +361,7 @@ th {
     }
 
     .finance-header h1::after {
-        content: " - Finans Raporu (" attr(data-date) ")";
-        /* We can add date via JS if needed, or just static text */
+        content: " - Finans Raporu";
         font-size: 0.6em;
         font-weight: normal;
     }

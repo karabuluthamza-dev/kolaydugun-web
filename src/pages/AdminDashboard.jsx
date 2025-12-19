@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabase'; // Changed from '../supabaseClient'
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext'; // Added useLanguage import
 import RevenueChart from '../components/Charts/RevenueChart';
 import LeadsChart from '../components/Charts/LeadsChart';
 import VendorGrowthChart from '../components/Charts/VendorGrowthChart';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-    usePageTitle('Admin Dashboard');
-    const { user } = useAuth();
     const navigate = useNavigate();
+    const { t, language } = useLanguage(); // Added useLanguage hook
+    usePageTitle(t('adminPanel.dashboard.pageTitle', 'Admin Dashboard')); // Updated page title
+    const { user } = useAuth();
     const [stats, setStats] = useState({
         totalVendors: 0,
         proVendors: 0,
@@ -23,7 +25,9 @@ const AdminDashboard = () => {
         totalRevenue: 0,
         todayLeads: 0,
         pendingCommissions: 0,
-        activeAffiliates: 0
+        activeAffiliates: 0,
+        totalPosts: 0, // Added for blog posts
+        publishedPosts: 0 // Added for blog posts
     });
     const [recentActivity, setRecentActivity] = useState([]);
     const [chartData, setChartData] = useState({
@@ -237,7 +241,7 @@ const AdminDashboard = () => {
             // Group by date
             const revenueByDate = {};
             transactions?.forEach(t => {
-                const date = new Date(t.created_at).toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' });
+                const date = new Date(t.created_at).toLocaleDateString(language, { month: 'short', day: 'numeric' });
                 revenueByDate[date] = (revenueByDate[date] || 0) + parseFloat(t.amount || 0);
             });
 
@@ -260,12 +264,12 @@ const AdminDashboard = () => {
             for (let i = 6; i >= 0; i--) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
-                const dateStr = date.toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' });
+                const dateStr = date.toLocaleDateString(language, { month: 'short', day: 'numeric' });
                 leadsByDate[dateStr] = { date: dateStr, new: 0, won: 0, lost: 0 };
             }
 
             leads?.forEach(l => {
-                const date = new Date(l.created_at).toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' });
+                const date = new Date(l.created_at).toLocaleDateString(language, { month: 'short', day: 'numeric' });
                 if (leadsByDate[date]) {
                     if (l.status === 'new') leadsByDate[date].new++;
                     else if (l.status === 'won') leadsByDate[date].won++;
@@ -289,13 +293,13 @@ const AdminDashboard = () => {
             for (let i = 2; i >= 0; i--) {
                 const date = new Date();
                 date.setMonth(date.getMonth() - i);
-                const monthStr = date.toLocaleDateString('tr-TR', { month: 'short' });
+                const monthStr = date.toLocaleDateString(language, { month: 'short' });
                 vendorsByMonth[monthStr] = { month: monthStr, total: 0 };
             }
 
             let cumulativeCount = 0;
             vendors?.forEach(v => {
-                const month = new Date(v.created_at).toLocaleDateString('tr-TR', { month: 'short' });
+                const month = new Date(v.created_at).toLocaleDateString(language, { month: 'short' });
                 if (vendorsByMonth[month]) {
                     cumulativeCount++;
                     vendorsByMonth[month].total = cumulativeCount;
@@ -325,14 +329,14 @@ const AdminDashboard = () => {
     return (
         <div className="section container admin-dashboard-container">
             <div className="admin-dashboard-header">
-                <h1>👋 Hoş Geldiniz!</h1>
+                <h1>👋 {t('adminPanel.dashboard.welcome', 'Hoş Geldiniz!')}</h1>
                 <p>
-                    {new Date().toLocaleDateString('tr-TR', {
+                    {new Date().toLocaleDateString(language, {
                         weekday: 'long',
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric'
-                    })} • KolayDugun Yönetim Paneli
+                    })} • {t('adminPanel.dashboard.subtitle', 'KolayDugun Yönetim Paneli')}
                 </p>
             </div>
 
@@ -341,63 +345,77 @@ const AdminDashboard = () => {
                 <div className="stat-card primary">
                     <div className="stat-icon">👥</div>
                     <div className="stat-content">
-                        <h3>Toplam Vendor</h3>
-                        <p className="stat-number">{stats.totalVendors}</p>
-                        <small>{stats.proVendors} Premium/Basic</small>
+                        <div className="stat-label">{t('adminPanel.dashboard.stats.totalVendors', 'Toplam Vendor')}</div>
+                        <div className="stat-value">{stats.totalVendors}</div>
+                        <div className="stat-trend neutral">
+                            {stats.proVendors} {t('adminPanel.dashboard.stats.proVendors', 'Premium/Basic')}
+                        </div>
                     </div>
                 </div>
 
                 <div className="stat-card success">
                     <div className="stat-icon">📋</div>
                     <div className="stat-content">
-                        <h3>Toplam Lead</h3>
-                        <p className="stat-number">{stats.totalLeads}</p>
-                        <small>Bugün: {stats.todayLeads}</small>
+                        <div className="stat-label">{t('adminPanel.dashboard.stats.totalLeads', 'Toplam Lead')}</div>
+                        <div className="stat-value">{stats.totalLeads}</div>
+                        <div className="stat-trend neutral">
+                            {t('adminPanel.dashboard.stats.todayLeads', 'Bugün')}: {stats.todayLeads}
+                        </div>
                     </div>
                 </div>
 
                 <div className="stat-card info" style={{ borderLeft: '4px solid #2e7d32' }}>
                     <div className="stat-icon">🏆</div>
                     <div className="stat-content">
-                        <h3>Kazanılan İşler</h3>
-                        <p className="stat-number">{stats.wonLeads}</p>
-                        <small>Dönüşüm: %{stats.conversionRate}</small>
+                        <div className="stat-label">{t('adminPanel.dashboard.stats.wonLeads', 'Kazanılan İşler')}</div>
+                        <div className="stat-value">{stats.wonLeads}</div>
+                        <div className="stat-trend neutral">
+                            {t('adminPanel.dashboard.stats.conversionRate', 'Dönüşüm')}: %{stats.conversionRate}
+                        </div>
                     </div>
                 </div>
 
                 <div className="stat-card warning">
                     <div className="stat-icon">⏳</div>
                     <div className="stat-content">
-                        <h3>Bekleyen İşler</h3>
-                        <p className="stat-number">{stats.pendingCreditRequests}</p>
-                        <small>{stats.newLeads} Yeni Lead</small>
+                        <div className="stat-label">{t('adminPanel.dashboard.stats.pendingLeads', 'Bekleyen İşler')}</div>
+                        <div className="stat-value">{stats.pendingCreditRequests}</div>
+                        <div className="stat-trend neutral">
+                            {stats.newLeads} {t('adminPanel.dashboard.stats.newLeads', 'Yeni Lead')}
+                        </div>
                     </div>
                 </div>
 
                 <div className="stat-card revenue">
                     <div className="stat-icon">💰</div>
                     <div className="stat-content">
-                        <h3>Toplam Gelir</h3>
-                        <p className="stat-number">€{stats.totalRevenue.toFixed(2)}</p>
-                        <small>Tüm zamanlar</small>
+                        <div className="stat-label">{t('adminPanel.dashboard.stats.totalRevenue', 'Toplam Gelir')}</div>
+                        <div className="stat-value">€{stats.totalRevenue.toFixed(2)}</div>
+                        <div className="stat-trend neutral">
+                            {t('adminPanel.dashboard.stats.allTime', 'Tüm zamanlar')}
+                        </div>
                     </div>
                 </div>
 
                 <div className="stat-card info" style={{ borderLeft: '4px solid #8b5cf6' }}>
                     <div className="stat-icon">📝</div>
                     <div className="stat-content">
-                        <h3>Blog Yazıları</h3>
-                        <p className="stat-number">{stats.totalPosts || 0}</p>
-                        <small>{stats.publishedPosts || 0} Yayında</small>
+                        <div className="stat-label">{t('adminPanel.dashboard.stats.blogPosts', 'Blog Yazıları')}</div>
+                        <div className="stat-value">{stats.totalPosts || 0}</div>
+                        <div className="stat-trend neutral">
+                            {stats.publishedPosts || 0} {t('adminPanel.dashboard.stats.published', 'Yayında')}
+                        </div>
                     </div>
                 </div>
 
                 <div className="stat-card" style={{ borderLeft: '4px solid #FF6B9D', background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8ef 100%)' }} onClick={() => navigate('/admin/shop-commissions')}>
                     <div className="stat-icon">🤝</div>
                     <div className="stat-content">
-                        <h3>Affiliate</h3>
-                        <p className="stat-number">€{stats.pendingCommissions?.toFixed(2) || '0.00'}</p>
-                        <small>{stats.activeAffiliates || 0} Aktif Referrer</small>
+                        <div className="stat-label">{t('adminPanel.dashboard.stats.affiliate', 'Affiliate')}</div>
+                        <div className="stat-value">€{stats.pendingCommissions?.toFixed(2) || '0.00'}</div>
+                        <div className="stat-trend neutral">
+                            {stats.activeAffiliates || 0} {t('adminPanel.dashboard.stats.activeReferrers', 'Aktif Referrer')}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -411,7 +429,7 @@ const AdminDashboard = () => {
 
             {/* Recent Activity */}
             <div className="recent-activity-section" style={{ marginTop: '2rem' }}>
-                <h2>Son Aktiviteler</h2>
+                <h2>{t('adminPanel.dashboard.recentActivity.title', 'Son Aktiviteler')}</h2>
                 {recentActivity.length > 0 ? (
                     <div className="activity-list" style={{ background: '#fff', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                         {recentActivity.map(item => {
@@ -421,56 +439,55 @@ const AdminDashboard = () => {
                             switch (item.type) {
                                 case 'lead':
                                     icon = '📋';
-                                    title = `Yeni Lead: ${item.contact_name}`;
-                                    description = item.category?.name || 'Kategori Yok';
+                                    title = `${t('adminPanel.dashboard.recentActivity.newLead', 'Yeni Lead')}: ${item.contact_name}`;
+                                    description = item.category?.name || t('adminPanel.dashboard.recentActivity.noCategory', 'Kategori Yok');
                                     navPath = '/admin/leads';
-                                    statusBadge = item.status === 'won' ? 'Kazanıldı' : item.status === 'lost' ? 'Kaybedildi' : item.status === 'new' ? 'Yeni' : item.status;
+                                    statusBadge = item.status === 'won' ? t('adminPanel.dashboard.recentActivity.won', 'Kazanıldı') : item.status === 'lost' ? t('adminPanel.dashboard.recentActivity.lost', 'Kaybedildi') : item.status === 'new' ? t('adminPanel.dashboard.recentActivity.new', 'Yeni') : item.status;
                                     break;
 
                                 case 'couple_vendor_message':
                                     icon = '💬';
-                                    // We'll fetch vendor names dynamically
-                                    title = `Yeni Mesaj`;
-                                    description = item.lead?.contact_name ? `Talep: ${item.lead.contact_name}` : (item.content || '').substring(0, 50) + '...';
+                                    title = t('adminPanel.dashboard.recentActivity.newMessage', 'Yeni Mesaj');
+                                    description = item.lead?.contact_name ? `${t('adminPanel.dashboard.recentActivity.request', 'Talep')}: ${item.lead.contact_name}` : (item.content || '').substring(0, 50) + '...';
                                     navPath = '/admin/messages';
-                                    statusBadge = item.read_at ? 'Okundu' : 'Okunmadı';
+                                    statusBadge = item.read_at ? t('adminPanel.dashboard.recentActivity.read', 'Okundu') : t('adminPanel.dashboard.recentActivity.unread', 'Okunmadı');
                                     break;
 
                                 case 'review':
                                     icon = item.rating >= 4 ? '⭐' : item.rating >= 3 ? '🌟' : '⚠️';
-                                    title = `Yeni Yorum: ${item.vendors?.business_name || 'Vendor'}`;
-                                    description = `${item.rating} yıldız - ${item.profiles?.full_name || item.profiles?.email || 'Anonim'}`;
+                                    title = `${t('adminPanel.dashboard.recentActivity.newReview', 'Yeni Yorum')}: ${item.vendors?.business_name || t('adminPanel.dashboard.recentActivity.vendor', 'Vendor')}`;
+                                    description = `${item.rating} ${t('adminPanel.dashboard.recentActivity.stars', 'yıldız')} - ${item.profiles?.full_name || item.profiles?.email || t('adminPanel.dashboard.recentActivity.anonymous', 'Anonim')}`;
                                     navPath = '/admin/reviews';
-                                    statusBadge = item.is_approved ? 'Onaylandı' : 'Bekliyor';
+                                    statusBadge = item.is_approved ? t('adminPanel.dashboard.recentActivity.approved', 'Onaylandı') : t('adminPanel.dashboard.recentActivity.pending', 'Bekliyor');
                                     break;
 
                                 case 'credit_request':
                                     icon = '💳';
-                                    title = `Kredi Talebi: ${item.vendors?.business_name || 'Vendor'}`;
-                                    description = `${item.amount} kredi talebi`;
+                                    title = `${t('adminPanel.dashboard.recentActivity.creditRequest', 'Kredi Talebi')}: ${item.vendors?.business_name || t('adminPanel.dashboard.recentActivity.vendor', 'Vendor')}`;
+                                    description = `${item.amount} ${t('adminPanel.dashboard.recentActivity.creditRequestAmount', 'kredi talebi')}`;
                                     navPath = '/admin/credit-approval';
-                                    statusBadge = item.status === 'approved' ? 'Onaylandı' : item.status === 'rejected' ? 'Reddedildi' : 'Bekliyor';
+                                    statusBadge = item.status === 'approved' ? t('adminPanel.dashboard.recentActivity.approved', 'Onaylandı') : item.status === 'rejected' ? t('adminPanel.dashboard.recentActivity.rejected', 'Reddedildi') : t('adminPanel.dashboard.recentActivity.pending', 'Bekliyor');
                                     break;
 
                                 case 'registration':
                                     icon = item.role === 'vendor' ? '🏪' : '👥';
-                                    title = `Yeni Kayıt: ${item.full_name || item.email}`;
-                                    description = item.role === 'vendor' ? 'Vendor Kaydı' : item.role === 'couple' ? 'Çift Kaydı' : 'Kullanıcı Kaydı';
+                                    title = `${t('adminPanel.dashboard.recentActivity.newRegistration', 'Yeni Kayıt')}: ${item.full_name || item.email}`;
+                                    description = item.role === 'vendor' ? t('adminPanel.dashboard.recentActivity.vendorRegistration', 'Vendor Kaydı') : item.role === 'couple' ? t('adminPanel.dashboard.recentActivity.coupleRegistration', 'Çift Kaydı') : t('adminPanel.dashboard.recentActivity.userRegistration', 'Kullanıcı Kaydı');
                                     navPath = item.role === 'vendor' ? '/admin/vendors' : '/admin/users';
-                                    statusBadge = 'Yeni';
+                                    statusBadge = t('adminPanel.dashboard.recentActivity.new', 'Yeni');
                                     break;
 
                                 case 'transaction':
                                     icon = '💰';
-                                    title = `İşlem: ${item.vendors?.business_name || 'Vendor'}`;
-                                    description = `€${item.amount} - ${item.type === 'credit_purchase' ? 'Kredi Alımı' : item.type === 'pro_subscription' ? 'Pro Abonelik' : item.type}`;
+                                    title = `${t('adminPanel.dashboard.recentActivity.transaction', 'İşlem')}: ${item.vendors?.business_name || t('adminPanel.dashboard.recentActivity.vendor', 'Vendor')}`;
+                                    description = `€${item.amount} - ${item.type === 'credit_purchase' ? t('adminPanel.dashboard.recentActivity.creditPurchase', 'Kredi Alımı') : item.type === 'pro_subscription' ? t('adminPanel.dashboard.recentActivity.proSubscription', 'Pro Abonelik') : item.type}`;
                                     navPath = '/admin/credit-approval';
-                                    statusBadge = item.status === 'completed' ? 'Tamamlandı' : item.status === 'pending' ? 'Bekliyor' : item.status;
+                                    statusBadge = item.status === 'completed' ? t('adminPanel.dashboard.recentActivity.completed', 'Tamamlandı') : item.status === 'pending' ? t('adminPanel.dashboard.recentActivity.pending', 'Bekliyor') : item.status;
                                     break;
 
                                 default:
                                     icon = '📌';
-                                    title = 'Aktivite';
+                                    title = t('adminPanel.dashboard.recentActivity.activity', 'Aktivite');
                                     description = '';
                                     navPath = '/admin';
                                     statusBadge = '';
@@ -526,7 +543,7 @@ const AdminDashboard = () => {
                                             {statusBadge}
                                         </span>
                                         <small style={{ color: '#999' }}>
-                                            {new Date(item.created_at).toLocaleDateString('tr-TR')}
+                                            {new Date(item.created_at).toLocaleDateString(language)}
                                         </small>
                                     </div>
                                 </div>
@@ -535,22 +552,22 @@ const AdminDashboard = () => {
                     </div>
                 ) : (
                     <div className="activity-placeholder">
-                        <p>Henüz aktivite yok.</p>
+                        <p>{t('adminPanel.dashboard.recentActivity.noActivity', 'Henüz aktivite yok.')}</p>
                     </div>
                 )}
             </div>
 
             {/* Quick Actions */}
             <div className="quick-actions-section">
-                <h2>Hızlı Erişim</h2>
+                <h2>{t('adminPanel.dashboard.quickActions.title', 'Hızlı Erişim')}</h2>
                 <div className="quick-actions-grid">
                     <button
                         className="action-card"
                         onClick={() => navigate('/admin/credit-approval')}
                     >
                         <div className="action-icon">✅</div>
-                        <h3>Kredi Onayları</h3>
-                        <p>{stats.pendingCreditRequests} bekleyen talep</p>
+                        <h3>{t('adminPanel.dashboard.quickActions.creditApproval', 'Kredi Onayları')}</h3>
+                        <p>{stats.pendingCreditRequests} {t('adminPanel.dashboard.quickActions.pendingRequests', 'bekleyen talep')}</p>
                     </button>
 
                     <button
@@ -558,8 +575,8 @@ const AdminDashboard = () => {
                         onClick={() => navigate('/admin/vendors')}
                     >
                         <div className="action-icon">🏪</div>
-                        <h3>Vendor Yönetimi</h3>
-                        <p>Tüm vendor'ları görüntüle</p>
+                        <h3>{t('adminPanel.dashboard.quickActions.vendorManagement', 'Vendor Yönetimi')}</h3>
+                        <p>{t('adminPanel.dashboard.quickActions.viewAllVendors', "Tüm vendor'ları görüntüle")}</p>
                     </button>
 
                     <button
@@ -567,8 +584,8 @@ const AdminDashboard = () => {
                         onClick={() => navigate('/admin/leads')}
                     >
                         <div className="action-icon">📨</div>
-                        <h3>Lead Yönetimi</h3>
-                        <p>Tüm lead'leri görüntüle</p>
+                        <h3>{t('adminPanel.dashboard.quickActions.leadManagement', 'Lead Yönetimi')}</h3>
+                        <p>{t('adminPanel.dashboard.quickActions.viewAllLeads', "Tüm lead'leri görüntüle")}</p>
                     </button>
 
                     <button
@@ -576,8 +593,8 @@ const AdminDashboard = () => {
                         onClick={() => navigate('/admin/transactions')}
                     >
                         <div className="action-icon">💳</div>
-                        <h3>İşlemler</h3>
-                        <p>Transaction geçmişi</p>
+                        <h3>{t('adminPanel.dashboard.quickActions.transactions', 'İşlemler')}</h3>
+                        <p>{t('adminPanel.dashboard.quickActions.transactionHistory', 'Transaction geçmişi')}</p>
                     </button>
 
                     <button
@@ -585,8 +602,8 @@ const AdminDashboard = () => {
                         onClick={() => navigate('/admin/config')}
                     >
                         <div className="action-icon">⚙️</div>
-                        <h3>Ayarlar</h3>
-                        <p>Sistem konfigürasyonu</p>
+                        <h3>{t('adminPanel.dashboard.quickActions.settings', 'Ayarlar')}</h3>
+                        <p>{t('adminPanel.dashboard.quickActions.systemConfig', 'Sistem konfigürasyonu')}</p>
                     </button>
 
                     <button
@@ -594,8 +611,8 @@ const AdminDashboard = () => {
                         onClick={() => navigate('/admin/analytics')}
                     >
                         <div className="action-icon">📊</div>
-                        <h3>Analitikler</h3>
-                        <p>Detaylı raporlar</p>
+                        <h3>{t('adminPanel.dashboard.quickActions.analytics', 'Analitikler')}</h3>
+                        <p>{t('adminPanel.dashboard.quickActions.detailedReports', 'Detaylı raporlar')}</p>
                     </button>
 
                     <button
@@ -603,8 +620,8 @@ const AdminDashboard = () => {
                         onClick={() => navigate('/admin/categories')}
                     >
                         <div className="action-icon">🏷️</div>
-                        <h3>Kategori Özellikleri</h3>
-                        <p>Özel alanları yönet</p>
+                        <h3>{t('adminPanel.dashboard.quickActions.categoryFeatures', 'Kategori Özellikleri')}</h3>
+                        <p>{t('adminPanel.dashboard.quickActions.manageCustomFields', 'Özel alanları yönet')}</p>
                     </button>
 
                     <button
@@ -612,8 +629,8 @@ const AdminDashboard = () => {
                         onClick={() => navigate('/admin/messages')}
                     >
                         <div className="action-icon">💬</div>
-                        <h3>Mesajlar</h3>
-                        <p>İletişim formu mesajları</p>
+                        <h3>{t('adminPanel.dashboard.quickActions.messages', 'Mesajlar')}</h3>
+                        <p>{t('adminPanel.dashboard.quickActions.contactFormMessages', 'İletişim formu mesajları')}</p>
                     </button>
                 </div>
             </div>

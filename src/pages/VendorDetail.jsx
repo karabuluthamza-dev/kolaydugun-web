@@ -11,6 +11,7 @@ import ShareButton from '../components/ShareButton';
 import FavoriteButton from '../components/FavoriteButton';
 import VideoEmbed from '../components/VideoEmbed';
 import SocialMediaLinks from '../components/SocialMediaLinks';
+import ClaimBusinessButton from '../components/ClaimBusinessButton';
 import { categoryImages, defaultImage } from '../constants/categoryImages';
 import { getCategoryTranslationKey } from '../constants/vendorData';
 import VendorReviews from '../components/Reviews/VendorReviews';
@@ -685,7 +686,10 @@ const VendorDetail = () => {
 
                     {/* Sticky Sidebar Contact */}
                     <aside>
-                        {/* Vendor Shop Card - TOP OF SIDEBAR */}
+                        {/* Claim Business Button - TOP of Sidebar if unclaimed */}
+                        <ClaimBusinessButton vendor={vendor} />
+
+                        {/* Vendor Shop Card */}
                         {vendorShop && (
                             <div className="vendor-shop-card" style={{
                                 marginBottom: '1.5rem',
@@ -808,7 +812,6 @@ const VendorDetail = () => {
                                 </p>
                             </form>
                         </div>
-
                     </aside>
                 </div>
             </div>

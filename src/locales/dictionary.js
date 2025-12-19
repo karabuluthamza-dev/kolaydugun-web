@@ -1,41 +1,18 @@
-import { community } from './community';
+import { community } from './community.js';
 // Unified Translation Dictionary
 
 // Updated: 2025-12-07 16:55
 // All languages are defined side-by-side to ensure consistency.
 
 export const dictionary = {
+    // Unified Checklist handled under dashboard if needed, or kept unique
     checklist: {
-        title: {
-            en: "Checklist",
-            de: "Checkliste",
-            tr: "Yapılacaklar Listesi"
-        },
-        placeholder: {
-            en: "Add a new task...",
-            de: "Neue Aufgabe hinzufügen...",
-            tr: "Yeni görev ekle..."
-        },
-        empty: {
-            en: "No tasks yet. Add one above!",
-            de: "Noch keine Aufgaben. Fügen Sie oben eine hinzu!",
-            tr: "Henüz görev yok. Yukarıdan ekleyin!"
-        },
-        add: {
-            en: "Add",
-            de: "Hinzufügen",
-            tr: "Ekle"
-        },
-        delete: {
-            en: "Delete",
-            de: "Löschen",
-            tr: "Sil"
-        },
-        completed: {
-            en: "Completed",
-            de: "Erledigt",
-            tr: "Tamamlandı"
-        }
+        title: { en: "Checklist", de: "Checkliste", tr: "Yapılacaklar Listesi" },
+        placeholder: { en: "Add a new task...", de: "Neue Aufgabe hinzufügen...", tr: "Yeni görev ekle..." },
+        empty: { en: "No tasks yet. Add one above!", de: "Noch keine Aufgaben. Fügen Sie oben eine hinzu!", tr: "Henüz görev yok. Yukarıdan ekleyin!" },
+        add: { en: "Add", de: "Hinzufügen", tr: "Ekle" },
+        delete: { en: "Delete", de: "Löschen", tr: "Sil" },
+        completed: { en: "Completed", de: "Erledigt", tr: "Tamamlandı" }
     },
     faq: {
         title: {
@@ -382,7 +359,11 @@ export const dictionary = {
                 en: "Paste your YouTube or Vimeo link here. It will appear on your profile.",
                 de: "Fügen Sie hier Ihren YouTube- oder Vimeo-Link ein. Er wird auf Ihrem Profil angezeigt.",
                 tr: "Tanıtım videonuzun linkini buraya yapıştırın. Profilinizde görünecektir."
-            }
+            },
+            locationSettings: { en: "Location Settings", de: "Standorteinstellungen", tr: "Konum Ayarları" },
+            useMyLocation: { en: "Use My Location", de: "Meinen Standort verwenden", tr: "Konumumu Kullan" },
+            latitude: { en: "Latitude", de: "Breitengrad", tr: "Enlem" },
+            longitude: { en: "Longitude", de: "Längengrad", tr: "Boylam" }
         },
         services: { en: "Services", de: "Leistungen", tr: "Hizmetler" },
         calendar: { en: "Calendar", de: "Kalender", tr: "Takvim" },
@@ -393,7 +374,606 @@ export const dictionary = {
             de: "Anfragen",
             tr: "Teklif İstekleri"
         },
-        rating: { en: "Rating", de: "Bewertung", tr: "Değerlendirme" }
+        rating: { en: "Rating", de: "Bewertung", tr: "Değerlendirme" },
+        gamification: {
+            rankCard: {
+                congrats: {
+                    en: "Congratulations! You are the #{{rank}} best vendor in the {{category}} category in {{city}}.",
+                    de: "Glückwunsch! Sie sind der {{rank}}. beste Anbieter in der Kategorie {{category}} in {{city}}.",
+                    tr: "Tebrikler! {{city}} bölgesindeki {{category}} kategorisinde en iyi {{rank}}. tedarikçisiniz."
+                },
+                motivation: {
+                    en: "Only {{points}} points left to become #1! Upload new photos to increase your score.",
+                    de: "Nur noch {{points}} Punkte bis zur Nummer 1! Laden Sie neue Fotos hoch, um Ihre Punktzahl zu erhöhen.",
+                    tr: "1 numara olmanıza sadece {{points}} puan kaldı! Hemen yeni fotoğraflar yükleyerek puanınızı artırın."
+                },
+                boostAction: {
+                    en: "Boost Score →",
+                    de: "Punkte steigern →",
+                    tr: "Puanı Artır →"
+                }
+            },
+            rewards: {
+                eligible: {
+                    en: "Congrats! As a Top 3 vendor, you are eligible for the \"Free Vitrin\" reward. It will be defined after review.",
+                    de: "Glückwunsch! Als Top-3-Anbieter haben Sie Anspruch auf die \"Kostenlose Vitrine\"-Belohnung. Sie wird nach Prüfung freigeschaltet.",
+                    tr: "Tebrikler! İlk 3'te olduğunuz için \"Ücretsiz Vitrin\" ödülüne aday oldunuz. İnceleme sonrası otomatik tanımlanacaktır."
+                }
+            },
+            aiAnalysis: {
+                title: { en: "AI Performance Analysis", de: "AI-Performance-Analyse", tr: "AI Performans Analizi" },
+                scoreLabel: { en: "Success Score", de: "Erfolgs-Score", tr: "Başarı Skoru" },
+                analyzing: {
+                    en: "Your account is being analyzed. Once your data is processed, your professional report will appear here.",
+                    de: "Ihr Konto wird analysiert. Sobald Ihre Daten verarbeitet sind, erscheint hier Ihr professioneller Bericht.",
+                    tr: "Hesabınız analiz ediliyor. Verileriniz harmanlandığında profesyonel raporunuz burada belirecek."
+                },
+                summaries: {
+                    noData: {
+                        en: "No Google search data found for {{name}} yet. You might be a new shop or not yet indexed by Google.",
+                        de: "Noch keine Google-Daten für {{name}} gefunden. Möglicherweise ist Ihr Shop neu oder noch nicht von Google indexiert.",
+                        tr: "{{name}} için henüz Google verisi bulunamadı. Yeni bir dükkan olabilir veya henüz Google tarafından indekslenmemiş olabilir."
+                    },
+                    lowConversion: {
+                        en: "Your page has been viewed {{views}} times, but the sales conversion ({{rate}}%) is low. Visitors are leaving without requesting a quote.",
+                        de: "Ihre Seite wurde {{views}} Mal aufgerufen, aber die Verkaufsrate ({{rate}}%) ist niedrig. Besucher verlassen die Seite, ohne ein Angebot anzufordern.",
+                        tr: "Sayfanız {{views}} kez görüntülendi ancak satış dönüşümü (%{{rate}}) düşük. Ziyaretçiler teklif istemeden ayrılıyorlar."
+                    },
+                    lowVisibility: {
+                        en: "Your conversion rate shows potential, but total visibility ({{views}} views) is very low. You might be lagging in Google rankings.",
+                        de: "Ihre Konversionsrate zeigt Potenzial, aber die Gesamtsichtbarkeit ({{views}} Aufrufe) ist sehr gering. Sie könnten in den Google-Rankings zurückliegen.",
+                        tr: "Dönüşüm oranınız potansiyel barındırıyor ancak toplam görünürlük ({{views}} izlenme) çok düşük. Google sıralamalarında geride kalıyor olabilirsiniz."
+                    },
+                    healthy: {
+                        en: "Great! {{name}} shows balanced performance. With {{rate}}% conversion and {{views}} views, you are above the industry average.",
+                        de: "Großartig! {{name}} zeigt eine ausgewogene Leistung. Mit {{rate}}% Konversion und {{views}} Aufrufen liegen Sie über dem Branchendurchschnitt.",
+                        tr: "Harika! {{name}} dengeli bir performans sergiliyor. %{{rate}} dönüşüm oranı ve {{views}} izlenme ile sektör ortalamasının üzerindesiniz."
+                    }
+                },
+                recommendations: {
+                    improvePhotos: {
+                        en: "Make the first 3 images in your gallery more attractive.",
+                        de: "Machen Sie die ersten 3 Bilder in Ihrer Galerie attraktiver.",
+                        tr: "Fotoğraf galerisindeki ilk 3 görseli daha çekici hale getirin."
+                    },
+                    whyUs: {
+                        en: "Add a 'Why Choose Us?' section to your description.",
+                        de: "Fügen Sie Ihrer Beschreibung einen Bereich \"Warum uns wählen?\" hinzu.",
+                        tr: "Açıklama kısmına 'Neden Sizi Seçmeliler?' bölümü ekleyin."
+                    },
+                    addPrices: {
+                        en: "Specify your service prices or starting price.",
+                        de: "Geben Sie Ihre Servicepreise oder Ihren Startpreis an.",
+                        tr: "Hizmet fiyatlarınızı veya başlangıç fiyatınızı belirtin."
+                    },
+                    searchConsole: {
+                        en: "Check your URL on Google Search Console.",
+                        de: "Überprüfen Sie Ihre URL in der Google Search Console.",
+                        tr: "Google Search Console üzerinden URL denetimi yapın."
+                    },
+                    sitemap: {
+                        en: "Make sure you are added to the sitemap.",
+                        de: "Stellen Sie sicher, dass Sie in der Sitemap enthalten sind.",
+                        tr: "Site haritasına (sitemap) eklendiğinden emin olun."
+                    },
+                    completeProfile: {
+                        en: "Increase your profile completion rate to 100%.",
+                        de: "Erhöhen Sie Ihre Profilvollständigkeit auf 100 %.",
+                        tr: "Profil doluluk oranını %100'e çıkarın."
+                    },
+                    keywords: {
+                        en: "Use more keywords in your business description.",
+                        de: "Verwenden Sie mehr Keywords in Ihrer Geschäftsbeschreibung.",
+                        tr: "İşletme açıklamasında daha fazla anahtar kelime kullanın."
+                    },
+                    featured: {
+                        en: "Increase traffic by activating the 'Featured' (Vitrin) feature.",
+                        de: "Erhöhen Sie den Traffic, indem Sie die 'Featured' (Vitrine)-Funktion aktivieren.",
+                        tr: "Vitrin (Featured) özelliğini aktif ederek trafiği artırın."
+                    },
+                    socialLinks: {
+                        en: "Link to this page from other social platforms.",
+                        de: "Verlinken Sie von anderen sozialen Plattformen auf diese Seite.",
+                        tr: "Diğer sosyal mecralardan bu sayfaya link verin."
+                    },
+                    calendar: {
+                        en: "Keep your booking calendar up to date.",
+                        de: "Halten Sie Ihren Buchungskalender auf dem neuesten Stand.",
+                        tr: "Rezervasyon takviminizi güncel tutun."
+                    },
+                    freshPhotos: {
+                        en: "Keep the momentum by adding new portfolio photos.",
+                        de: "Behalten Sie den Schwung bei, indem Sie neue Portfolio-Fotos hinzufügen.",
+                        tr: "Yeni referans fotoğrafları ekleyerek ivmeyi koruyun."
+                    },
+                    successStory: {
+                        en: "Share your vendor success story with us!",
+                        de: "Teilen Sie Ihre Erfolgsgeschichte als Anbieter mit uns!",
+                        tr: "Tedarikçi başarı öykünüzü bizimle paylaşın!"
+                    }
+                }
+            }
+        },
+        tiers: {
+            free: {
+                name: { en: "Free", de: "Kostenlos", tr: "Ücretsiz" },
+                desc: { en: "Basic visibility", de: "Grundlegende Sichtbarkeit", tr: "Temel görünürlük" }
+            },
+            basic: {
+                name: { en: "Basic", de: "Basic", tr: "Temel" },
+                desc: { en: "More photos & info", de: "Mehr Fotos & Infos", tr: "Daha fazla fotoğraf & bilgi" }
+            },
+            premium: {
+                name: { en: "Premium", de: "Premium", tr: "Premium" },
+                desc: { en: "Full access & top ranking", de: "Voller Zugriff & Top-Ranking", tr: "Tam erişim & üst sıra" }
+            },
+            pro: {
+                name: { en: "Pro", de: "Pro", tr: "Pro" },
+                desc: { en: "Advanced features", de: "Erweiterte Funktionen", tr: "Gelişmiş özellikler" }
+            }
+        },
+        alerts: {
+            saved: { en: "Changes saved successfully!", de: "Änderungen erfolgreich gespeichert!", tr: "Değişiklikler başarıyla kaydedildi!" },
+            locked: { en: "🔒 Upgrade to Premium to unlock this feature", de: "🔒 Upgrade auf Premium, um diese Funktion freizuschalten", tr: "🔒 Bu özelliği açmak için Premium'a yükseltin" },
+            uploading: { en: "Uploading...", de: "Wird hocheladgeladen...", tr: "Yükleniyor..." },
+            limitReached: { en: "Storage limit reached", de: "Speicherlimit erreicht", tr: "Depolama sınırına ulaşıldı" },
+            locationError: { en: "Error getting location", de: "Fehler beim Abrufen des Standorts", tr: "Konum alınırken hata oluştu" }
+        },
+
+        leads: {
+            noLeads: { en: "No inquiries yet.", de: "Noch keine Anfragen.", tr: "Henüz talep yok." }
+        },
+        faq: {
+            title: { en: "FAQ", de: "Häufig gestellte Fragen", tr: "Sıkça Sorulan Sorular" },
+            question: { en: "Question", de: "Frage", tr: "Soru" },
+            answer: { en: "Answer", de: "Antwort", tr: "Cevap" },
+            add: { en: "Add Question", de: "Frage hinzufügen", tr: "Soru Ekle" },
+            remove: { en: "Remove", de: "Entfernen", tr: "Sil" }
+        },
+        promo: {
+            title: { en: "🛍️ New! Open Your Own Shop", de: "🛍️ Neu! Eröffnen Sie Ihren Shop", tr: "🛍️ Yeni! Kendi Mağazanızı Açın" },
+            desc: {
+                en: "Sell your products in KolayDugun Shop Marketplace. Exclusive benefits for first 10 vendors!",
+                de: "Verkaufen Sie Ihre Produkte im KolayDugun Shop Marketplace. Exklusive Vorteile für die ersten 10 Anbieter!",
+                tr: "KolayDugun Shop Marketplace'te kendi ürünlerinizi satın. İlk 10 tedarikçiye özel avantajlar!"
+            },
+            viewDemo: { en: "🎨 View Demo Shop", de: "🎨 Demo-Shop ansehen", tr: "🎨 Demo Mağazayı İncele" },
+            viewPanel: { en: "⚙️ View Demo Panel", de: "⚙️ Demo-Panel ansehen", tr: "⚙️ Demo Paneli Gör" },
+            apply: { en: "Apply Now →", de: "Jetzt bewerben →", tr: "Hemen Başvur →" }
+        }
+    },
+    adminPanel: {
+        badge: { en: "Admin", de: "Admin", tr: "Yönetim" },
+        sidebar: {
+            labels: {
+                daily: { en: "Daily Tasks", de: "Tägliche Aufgaben", tr: "Günlük İşler" },
+                marketplace: { en: "Marketplace", de: "Marktplatz", tr: "Pazaryeri" },
+                content: { en: "Content", de: "Inhalt", tr: "İçerik" },
+                finance: { en: "Finance", de: "Finanzen", tr: "Finans" },
+                shop: { en: "Shop", de: "Mağaza", tr: "Mağaza" },
+                amazon: { en: "Money Machine", de: "Geldmaschine", tr: "💰 Para Makinesi" },
+                settings: { en: "Settings", de: "Einstellungen", tr: "Ayarlar" },
+                community: { en: "Community", de: "Community", tr: "Topluluk" }
+            },
+            menu: {
+                dashboard: { en: "Dashboard", de: "Dashboard", tr: "Başlangıç" },
+                leads: { en: "Leads", de: "Anfragen", tr: "Talepler" },
+                creditApproval: { en: "Credit Approval", de: "Kreditfreigabe", tr: "Kredi Onayları" },
+                reviews: { en: "Reviews", de: "Bewertungen", tr: "Yorumlar" },
+                support: { en: "Support Line", de: "Support-Hotline", tr: "Destek Hattı" },
+                vendors: { en: "Vendors", de: "Anbieter", tr: "Tedarikçiler" },
+                users: { en: "Users", de: "Benutzer", tr: "Kullanıcılar" },
+                categories: { en: "Categories", de: "Kategorien", tr: "Kategoriler" },
+                messages: { en: "Platform Messages", de: "Plattform-Nachrichten", tr: "Platform Mesajları" },
+                claims: { en: "Claim Requests", de: "Besitzansprüche", tr: "Sahiplik Talepleri" },
+                blog: { en: "Blog", de: "Blog", tr: "Blog" },
+                blogComments: { en: "Blog Comments", de: "Blog-Kommentare", tr: "Blog Yorumları" },
+                pages: { en: "Pages", de: "Seiten", tr: "Sayfalar" },
+                faq: { en: "FAQ", de: "FAQ", tr: "S.S.S." },
+                notifications: { en: "Notifications", de: "Benachrichtigungen", tr: "Bildirimler" },
+                pricing: { en: "Pricing", de: "Preise", tr: "Fiyatlandırma" },
+                finance: { en: "Finance", de: "Finanzen", tr: "Finans" },
+                shopApplications: { en: "Applications", de: "Bewerbungen", tr: "Başvurular" },
+                shopAccounts: { en: "Shop Accounts", de: "Shop-Konten", tr: "Mağaza Hesapları" },
+                shopCategories: { en: "Shop Categories", de: "Shop-Kategorien", tr: "Shop Kategorileri" },
+                shopProducts: { en: "Shop Products", de: "Shop-Produkte", tr: "Shop Ürünleri" },
+                shopProductRequests: { en: "Product Requests", de: "Produktanfragen", tr: "Ürün Başvuruları" },
+                shopInquiries: { en: "Contact Requests", de: "Kontaktanfragen", tr: "İletişim Talepleri" },
+                shopPlans: { en: "Shop Plans", de: "Shop-Pläne", tr: "Shop Paketleri" },
+                shopFaq: { en: "Vendor FAQ", de: "Anbieter FAQ", tr: "Tedarikçi SSS" },
+                shopAnnouncements: { en: "Vendor Announcements", de: "Anbieter Ankündigungen", tr: "Tedarikçi Duyuruları" },
+                shopCommissions: { en: "Commissions", de: "Provisionen", tr: "Komisyonlar" },
+                shopSettings: { en: "Shop Settings", de: "Shop-Einstellungen", tr: "Shop Ayarları" },
+                amazonDashboard: { en: "Dashboard", de: "Dashboard", tr: "Dashboard" },
+                amazonProducts: { en: "Amazon Products", de: "Amazon Produkte", tr: "Amazon Ürünleri" },
+                amazonAdd: { en: "Add Product", de: "Produkt hinzufügen", tr: "Ürün Ekle" },
+                amazonSettings: { en: "Amazon Settings", de: "Amazon Einstellungen", tr: "Amazon Ayarları" },
+                globalSettings: { en: "Global Settings", de: "Globale Einstellungen", tr: "Genel Ayarlar" },
+                translations: { en: "Translations", de: "Übersetzungen", tr: "Çeviriler" },
+                helpGuide: { en: "Help Guide", de: "Hilfe-Leitfaden", tr: "Yardım Rehberi" },
+                forumSettings: { en: "Forum Settings", de: "Forum Einstellungen", tr: "Forum Ayarları" },
+                forumCategories: { en: "Forum Categories", de: "Forum Kategorien", tr: "Forum Kategorileri" },
+                avatars: { en: "Avatars", de: "Avatare", tr: "Avatarlar" },
+                ghostMode: { en: "Ghost Mode", de: "Geistermodus", tr: "Hayalet Modu" },
+                botManagement: { en: "Bot Management", de: "Bot-Management", tr: "Bot Yönetimi" },
+                moderation: { en: "Moderation", de: "Moderation", tr: "Moderasyon" },
+                logout: { en: "Logout", de: "Abmelden", tr: "Çıkış Yap" },
+                backToSite: { en: "Back to Site", de: "Zurück zur Seite", tr: "Siteye Dön" }
+            },
+            menuDescriptions: {
+                dashboard: {
+                    en: "General statistics and quick access cards. Manage the entire panel from here.",
+                    de: "Allgemeine Statistiken und Schnellzugriffskarten. Verwalten Sie das gesamte Panel von hier aus.",
+                    tr: "Genel istatistikler ve hızlı erişim kartları. Tüm paneli buradan yönetin."
+                },
+                leads: {
+                    en: "View and manage quote requests from couples.",
+                    de: "Angebotsanfragen von Paaren anzeigen und verwalten.",
+                    tr: "Çiftlerden gelen teklif taleplerini görüntüleyin ve yönetin."
+                },
+                vendors: {
+                    en: "View all vendors, edit their profiles, and approve them.",
+                    de: "Alle Anbieter anzeigen, Profile bearbeiten und genehmigen.",
+                    tr: "Tüm tedarikçileri görüntüleyin, profillerini düzenleyin ve onaylayın."
+                },
+                users: {
+                    en: "View registered users (couples) and manage their accounts.",
+                    de: "Registrierte Benutzer (Paare) anzeigen und Konten verwalten.",
+                    tr: "Kayıtlı kullanıcıları (çiftler) görüntüleyin ve hesaplarını yönetin."
+                },
+                claims: {
+                    en: "Manage ownership claims and transfer processes of vendors.",
+                    de: "Besitzansprüche und Übertragungsprozesse von Anbietern verwalten.",
+                    tr: "Tedarikçilerin sahiplik taleplerini ve devir süreçlerini yönetin."
+                },
+                helpGuide: {
+                    en: "Guide for system management, claim system, and other features.",
+                    de: "Leitfaden für Systemverwaltung, Sahiplen-System und andere Funktionen.",
+                    tr: "Sistem yönetimi, claim (sahiplik) sistemi ve diğer özellikler hakkında rehber."
+                }
+            },
+            pageTitles: {
+                dashboard: { en: "Home", de: "Startseite", tr: "Başlangıç" },
+                leads: { en: "Leads", de: "Anfragen", tr: "Talepler" },
+                vendors: { en: "Vendors", de: "Anbieter", tr: "Tedarikçiler" },
+                users: { en: "Users", de: "Benutzer", tr: "Kullanıcılar" },
+                claims: { en: "Claim Requests", de: "Besitzansprüche", tr: "Sahiplik Talepleri" },
+                helpGuide: { en: "Admin Help", de: "Admin-Hilfe", tr: "Yönetici Yardımı" }
+            }
+        },
+        topbar: {
+            admin: { en: "Admin", de: "Admin", tr: "Admin" }
+        },
+        dashboard: {
+            welcome: { en: "Welcome!", de: "Willkommen!", tr: "Hoş Geldiniz!" },
+            subtitle: {
+                en: "KolayDugun Management Panel",
+                de: "KolayDugun Management-Panel",
+                tr: "KolayDugun Yönetim Paneli"
+            },
+            stats: {
+                totalVendors: { en: "Total Vendors", de: "Anbieter Gesamt", tr: "Toplam Vendor" },
+                proVendors: { en: "Premium/Basic", de: "Premium/Basis", tr: "Premium/Basic" },
+                totalLeads: { en: "Total Leads", de: "Anfragen Gesamt", tr: "Toplam Lead" },
+                todayLeads: { en: "Today", de: "Heute", tr: "Bugün" },
+                wonLeads: { en: "Won Deals", de: "Gewonnene Deals", tr: "Kazanılan İşler" },
+                conversionRate: { en: "Conversion", de: "Konversion", tr: "Dönüşüm" },
+                pendingJobs: { en: "Pending Jobs", de: "Ausstehende Jobs", tr: "Bekleyen İşler" },
+                newLeads: { en: "New Leads", de: "Neue Anfragen", tr: "Yeni Lead" },
+                totalRevenue: { en: "Total Revenue", de: "Gesamtumsatz", tr: "Toplam Gelir" },
+                allTime: { en: "All time", de: "Alle Zeiten", tr: "Tüm zamanlar" },
+                blogPosts: { en: "Blog Posts", de: "Blog-Beiträge", tr: "Blog Yazıları" },
+                published: { en: "Published", de: "Veröffentlicht", tr: "Yayında" },
+                affiliate: { en: "Affiliate", de: "Affiliate", tr: "Affiliate" },
+                activeReferrers: { en: "Active Referrers", de: "Aktive Empfehler", tr: "Aktif Referrer" }
+            },
+            recentActivity: {
+                title: { en: "Recent Activities", de: "Aktuelle Aktivitäten", tr: "Son Aktiviteler" },
+                noActivity: { en: "No activity yet.", de: "Noch keine Aktivität.", tr: "Henüz aktivite yok." },
+                types: {
+                    lead: { en: "New Lead", de: "Neue Anfrage", tr: "Yeni Lead" },
+                    message: { en: "New Message", de: "Neue Nachricht", tr: "Yeni Mesaj" },
+                    review: { en: "New Review", de: "Neue Bewertung", tr: "Yeni Yorum" },
+                    creditRequest: { en: "Credit Request", de: "Kreditantrag", tr: "Kredi Talebi" },
+                    registration: { en: "New Registration", de: "Neue Registrierung", tr: "Yeni Kayıt" },
+                    transaction: { en: "Transaction", de: "Transaktion", tr: "İşlem" }
+                }
+            },
+            quickAccess: {
+                title: { en: "Quick Access", de: "Schnellzugriff", tr: "Hızlı Erişim" },
+                creditApproval: { en: "Credit Approvals", de: "Kreditfreigaben", tr: "Kredi Onayları" },
+                vendorManagement: { en: "Vendor Management", de: "Anbieterverwaltung", tr: "Vendor Yönetimi" },
+                leadManagement: { en: "Lead Management", de: "Anfragenverwaltung", tr: "Lead Yönetimi" },
+                transactions: { en: "Transactions", de: "Transaktionen", tr: "İşlemler" },
+                settings: { en: "Settings", de: "Einstellungen", tr: "Ayarlar" },
+                analytics: { en: "Analytics", de: "Analysen", tr: "Analitikler" },
+                categories: { en: "Category Features", de: "Kategoriefunktionen", tr: "Kategori Özellikleri" },
+                messages: { en: "Messages", de: "Nachrichten", tr: "Mesajlar" }
+            }
+        },
+        users: {
+            title: { en: "User Management", de: "Benutzerverwaltung", tr: "Kullanıcı Yönetimi" },
+            subtitle: {
+                en: "View and manage all users in the system",
+                de: "Alle Benutzer im System anzeigen und verwalten",
+                tr: "Sistemdeki tüm kullanıcıları görüntüleyin ve yönetin"
+            },
+            table: {
+                email: { en: "EMAIL", de: "E-MAIL", tr: "E-POSTA" },
+                name: { en: "NAME", de: "NAME", tr: "İSİM" },
+                role: { en: "ROLE", de: "ROL", tr: "ROL" },
+                date: { en: "REGISTRATION DATE", de: "REGISTRIERUNGSDATUM", tr: "KAYIT TARİHİ" },
+                actions: { en: "ACTIONS", de: "AKTIONEN", tr: "İŞLEMLER" }
+            },
+            roles: {
+                couple: { en: "Couple", de: "Paar", tr: "Çift" },
+                vendor: { en: "Vendor", de: "Anbieter", tr: "Tedarikçi" },
+                admin: { en: "Admin", de: "Admin", tr: "Admin" },
+                bot: { en: "Bot", de: "Bot", tr: "Bot" }
+            },
+            actions: {
+                edit: { en: "Edit", de: "Bearbeiten", tr: "Düzenle" },
+                delete: { en: "Delete", de: "Löschen", tr: "Sil" },
+                save: { en: "Save", de: "Speichern", tr: "Kaydet" },
+                cancel: { en: "Cancel", de: "Abbrechen", tr: "İptal" },
+                addNew: { en: "Add New User", de: "Neuen Benutzer hinzufügen", tr: "Yeni Kullanıcı Ekle" },
+                messages: {
+                    confirmDelete: { en: "Are you sure you want to delete this user?", de: "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?", tr: "Bu kullanıcıyı silmek istediğinizden emin misiniz?" },
+                    deleteWarning: { en: "Warning: This action cannot be undone!", de: "Warnung: Diese Aktion kann nicht rückgängig gemacht werden!", tr: "Dikkat: Bu işlem geri alınamaz!" },
+                }
+            }
+        },
+        vendors: {
+            title: { en: "Vendor Management", de: "Anbieterverwaltung", tr: "Vendor Yönetimi" },
+            subtitle: { en: "View and manage all vendors in the system", de: "Alle Anbieter im System anzeigen und verwalten", tr: "Sistemdeki tüm tedarikçileri görüntüleyin ve yönetin" },
+            actions: {
+                addNew: { en: "New Vendor", de: "Neuer Anbieter", tr: "Yeni Tedarikçi" },
+                import: { en: "Import Excel", de: "Excel Importieren", tr: "Excel İçe Aktar" },
+                verify: { en: "Verify", de: "Verifizieren", tr: "Onayla" },
+                unverify: { en: "Unverify", de: "Verifizierung aufheben", tr: "Onayı Kaldır" },
+                makePremium: { en: "Make Premium", de: "Premium machen", tr: "Premium Yap" },
+                makeFree: { en: "Make Free", de: "Free machen", tr: "Free Yap" },
+                addToShowcase: { en: "Add to Showcase", de: "In Vitrine aufnehmen", tr: "Vitrine Ekle" },
+                removeFromShowcase: { en: "Remove from Showcase", de: "Aus Vitrine entfernen", tr: "Vitrinden Kaldır" },
+                aiAnalysis: { en: "AI Analysis", de: "AI Analyse", tr: "AI Analiz" },
+                edit: { en: "Edit", de: "Bearbeiten", tr: "Düzenle" },
+                delete: { en: "Delete", de: "Löschen", tr: "Sil" }
+            },
+            feedback: {
+                successVerify: { en: "Selected vendors verified successfully.", de: "Ausgewählte Anbieter erfolgreich verifiziert.", tr: "Seçilen tedarikçiler başarıyla onaylandı." },
+                successDelete: { en: "Selected vendors deleted successfully.", de: "Ausgewählte Anbieter erfolgreich gelöscht.", tr: "Seçilen tedarikçiler başarıyla silindi." },
+                successPublish: { en: "Report published and sent to vendor successfully!", de: "Bericht erfolgreich veröffentlicht und an Anbieter gesendet!", tr: "Rapor başarıyla yayınlandı ve işletmeciye gönderildi!" },
+                successBulkAi: { en: "AI reports generated for all vendors successfully!", de: "AI-Berichte für alle Anbieter erfolgreich erstellt!", tr: "Tüm tedarikçiler için AI raporu başarıyla oluşturuldu!" },
+                hardDeleteSuccess: { en: "Vendor and all associated data deleted successfully.", de: "Anbieter und alle zugehörigen Daten erfolgreich gelöscht.", tr: "Tedarikçi ve ilişkili tüm veriler başarıyla silindi." },
+                bulkAiConfirm: { en: "Are you sure you want to update AI reports for all active vendors? This may take a few minutes.", de: "Sind Sie sicher, dass Sie die AI-Berichte für alle aktiven Anbieter aktualisieren möchten? Dies kann einige Minuten dauern.", tr: "Tüm aktif tedarikçiler için AI raporlarını toplu olarak güncellemek istediğinize emin misiniz? Bu işlem birkaç dakika sürebilir." },
+                noVendors: { en: "No vendors found", de: "Keine Anbieter gefunden", tr: "Tedarikçi bulunamadı" },
+                noVendorsDesc: { en: "No vendors match the current filters or search.", de: "Keine Anbieter entsprechen den aktuellen Filtern oder der Suche.", tr: "Bu filtreye veya aramaya uygun tedarikçi yok." }
+            },
+            table: {
+                businessName: { en: "BUSINESS NAME", de: "FİRMANNAME", tr: "İŞLETME ADI" },
+                category: { en: "CATEGORY", de: "KATEGORIE", tr: "KATEGORİ" },
+                city: { en: "CITY", de: "STADT", tr: "ŞEHİR" },
+                membership: { en: "MEMBERSHIP", de: "MITGLIEDSCHAFT", tr: "ÜYELİK" },
+                aiReport: { en: "AI REPORT", de: "AI BERICHT", tr: "AI RAPOR" },
+                showcase: { en: "SHOWCASE", de: "VITRINE", tr: "VİTRİN" },
+                status: { en: "STATUS", de: "STATUS", tr: "DURUM" },
+                actions: { en: "ACTIONS", de: "AKTIONEN", tr: "İŞLEMLER" }
+            },
+            status: {
+                verified: { en: "Verified", de: "Verifiziert", tr: "Onaylı" },
+                pending: { en: "Pending", de: "Ausstehend", tr: "Bekliyor" },
+                featured: { en: "Featured", de: "In der Vitrine", tr: "Vitrinde" },
+                passive: { en: "Passive", de: "Passiv", tr: "Pasif" }
+            },
+            modals: {
+                showcaseTitle: { en: "Add to Showcase", de: "In die Vitrine", tr: "Vitrine Ekle" },
+                duration: { en: "Duration", de: "Dauer", tr: "Süre" },
+                durations: {
+                    week: { en: "1 Week", de: "1 Woche", tr: "1 Hafta" },
+                    month: { en: "1 Month", de: "1 Monat", tr: "1 Ay" },
+                    threeMonths: { en: "3 Months", de: "3 Monate", tr: "3 Ay" },
+                    custom: { en: "Custom Date", de: "Benutzerdefiniertes Datum", tr: "Özel Tarih" },
+                    unlimited: { en: "Unlimited", de: "Unbegrenzt", tr: "Sınırsız" }
+                },
+                order: { en: "Sort Order", de: "Sortierreihenfolge", tr: "Sıralama Önceliği" },
+                orderHint: { en: "Lower number appears at the top.", de: "Niedrigere Nummer erscheint oben.", tr: "Düşük numara daha üstte görünür." },
+                deleteTitle: { en: "Delete Vendor?", de: "Anbieter löschen?", tr: "Tedarikçiyi Sil?" },
+                deleteConfirm: { en: "Are you sure you want to delete this vendor and all associated data?", de: "Sind Sie sicher, dass Sie diesen Anbieter und alle zugehörigen Daten löschen möchten?", tr: "Bu tedarikçiyi ve ilişkili tüm verileri silmek istediğinizden emin misiniz?" },
+                deleteWarning: { en: "This action cannot be undone!", de: "Diese Aktion kann nicht rückgängig gemacht werden!", tr: "Bu işlem geri alınamaz!" },
+                deleteWarningExtra: { en: "All data belonging to the vendor (subscriptions, leads, etc.) will be deleted.", de: "Alle zum Anbieter gehörenden Daten (Abonnements, Leads usw.) werden gelöscht.", tr: "Tedarikçiye ait tüm veriler (abonelikler, leadler, vb.) silinecektir." },
+                expiryDate: { en: "Expiry Date", de: "Ablaufdatum", tr: "Bitiş Tarihi" },
+                saveAndAdd: { en: "Save and Add", de: "Speichern und Hinzufügen", tr: "Kaydet ve Ekle" }
+            },
+            filters: {
+                all: { en: "All", de: "Alle", tr: "Tümü" },
+                premium: { en: "Premium", de: "Premium", tr: "Premium" },
+                free: { en: "Free", de: "Free", tr: "Free" },
+                searchPlaceholder: { en: "Search vendor (business name)...", de: "Anbieter suchen (Firmenname)...", tr: "Tedarikçi ara (işletme adı)..." }
+            },
+            ai: {
+                analyzing: { en: "Analyzing...", de: "Analysieren...", tr: "Analiz ediliyor..." },
+                bulkUpdate: { en: "Bulk AI Update", de: "Bulk AI Update", tr: "Toplu AI Güncelle" },
+                updating: { en: "Updating...", de: "Aktualisieren...", tr: "Güncelleniyor..." },
+                reportTitle: { en: "AI Performance Report", de: "AI Performance Bericht", tr: "AI Performans Raporu" },
+                score: { en: "Score", de: "Punktzahl", tr: "Puan" },
+                noReport: { en: "No report yet", de: "Noch kein Bericht", tr: "Henüz yok" },
+                summary: { en: "Performance Summary", de: "Performance Zusammenfassung", tr: "Performans Özeti" },
+                recommendations: { en: "Recommendations", de: "Empfehlungen", tr: "Tavsiyeler" },
+                visibility: { en: "Visibility", de: "Sichtbarkeit", tr: "Görünürlük" },
+                conversion: { en: "Conversion", de: "Konversion", tr: "Dönüşüm" },
+                rating: { en: "Rating", de: "Bewertung", tr: "Puan / Yorum" },
+                favorites: { en: "Favorites", de: "Favoriten", tr: "Favoriler" },
+                publish: { en: "Publish & Share", de: "Veröffentlichen & Teilen", tr: "Yayınla ve Paylaş" },
+                publishing: { en: "Publishing...", de: "Veröffentlicht...", tr: "Yayınlanıyor..." },
+                published: { en: "Published", de: "Veröffentlicht", tr: "Yayında" },
+                sidebarDesc: { en: "A report will be generated by blending the last 30 days of data (Google Traffic + Local Leads).", de: "Ein Bericht wird erstellt, indem die Daten der letzten 30 Tage (Google Traffic + lokale Anfragen) gemischt werden.", tr: "Bu tedarikçinin son 30 günlük verileri (Google Trafik + Local Talepler) harmanlanarak bir rapor oluşturulacaktır." },
+                startAnalysis: { en: "Start Analysis", de: "Analyse starten", tr: "Analizi Başlat" }
+            },
+            pagination: {
+                previous: { en: "Previous", de: "Vorherige", tr: "Önceki" },
+                next: { en: "Next", de: "Nächste", tr: "Sonraki" },
+                page: { en: "Page", de: "Seite", tr: "Sayfa" }
+            },
+            bulk: {
+                selected: { en: "vendors selected", de: "Anbieter ausgewählt", tr: "tedarikçi seçildi" },
+                verify: { en: "Verify Selected", de: "Ausgewählte verifizieren", tr: "Seçilenleri Onayla" },
+                delete: { en: "Delete Selected", de: "Ausgewählte löschen", tr: "Seçilenleri Sil" },
+                confirmDelete: { en: "Are you sure you want to delete selected vendors?", de: "Sind Sie sicher, dass Sie die ausgewählten Anbieter löschen möchten?", tr: "Seçilen tedarikçileri silmek istediğinize emin misiniz?" }
+            }
+        },
+        leads: {
+            title: { en: "Lead Management (CRM)", de: "Anfragenverwaltung (CRM)", tr: "Talep Yönetimi (CRM)" },
+            subtitle: { en: "Track leads, update statuses and take notes", de: "Anfragen verfolgen, Status aktualisieren und Notizen machen", tr: "Talepleri takip edin, durumlarını güncelleyin ve notlar alın" },
+            table: {
+                status: { en: "STATUS", de: "STATUS", tr: "DURUM" },
+                date: { en: "DATE", de: "DATUM", tr: "TARİH" },
+                details: { en: "NAME & DETAILS", de: "NAME & DETAILS", tr: "İSİM & DETAYLAR" },
+                contact: { en: "CONTACT", de: "KONTAKT", tr: "İLETİŞİM" },
+                adminNote: { en: "ADMIN NOTE", de: "ADMIN NOTIZ", tr: "ADMİN NOTU" },
+                delete: { en: "DEL", de: "LÖSH", tr: "SİL" }
+            },
+            status: {
+                new: { en: "New", de: "Neu", tr: "Yeni" },
+                contacted: { en: "Contacted", de: "Kontaktiert", tr: "Arandı" },
+                quoted: { en: "Quoted", de: "Angebot", tr: "Teklif" },
+                won: { en: "Won", de: "Gewonnen", tr: "Anlaşıldı" },
+                lost: { en: "Lost", de: "Verloren", tr: "Olumsuz" }
+            },
+            placeholders: {
+                addNote: { en: "Add note...", de: "Notiz hinzufügen...", tr: "Not ekle..." }
+            },
+            feedback: {
+                noLeads: { en: "No leads", de: "Keine Anfragen", tr: "Talep yok" },
+                noLeadsDesc: { en: "No leads have been created yet.", de: "Es wurden noch keine Anfragen erstellt.", tr: "Henüz hiç talep oluşturulmamış." },
+                saved: { en: "Saved", de: "Gespeichert", tr: "Kaydedildi" }
+            },
+            budget: { en: "Budget", de: "Budget", tr: "Bütçe" }
+        },
+        shopAccounts: {
+            title: { en: "Shop Accounts", de: "Shop-Konten", tr: "Mağaza Hesapları" },
+            subtitle: { en: "Manage shop marketplace accounts", de: "Shop-Marktplatz-Konten verwalten", tr: "Shop pazaryeri mağazalarını yönetin" },
+            stats: {
+                activeShops: { en: "active shops", de: "aktive Shops", tr: "aktif mağaza" },
+                month: { en: "month", de: "Monat", tr: "ay" },
+                unlimited: { en: "Unlimited", de: "Unbegrenzt", tr: "Sınırsız" }
+            },
+            filters: {
+                allStatuses: { en: "All Statuses", de: "Alle Status", tr: "Tüm Durumlar" },
+                allPlans: { en: "All Plans", de: "Alle Pläne", tr: "Tüm Planlar" }
+            },
+            plans: {
+                starter: { en: "Starter", de: "Starter", tr: "Starter" },
+                business: { en: "Business", de: "Business", tr: "Business" },
+                premium: { en: "Premium", de: "Premium", tr: "Premium" }
+            },
+            actions: {
+                addNew: { en: "New Shop", de: "Neuer Shop", tr: "Yeni Mağaza" },
+                edit: { en: "Edit", de: "Bearbeiten", tr: "Düzenle" },
+                delete: { en: "Delete", de: "Löschen", tr: "Sil" },
+                viewShop: { en: "View Shop", de: "Shop ansehen", tr: "Mağazayı Görüntüle" },
+                activate: { en: "Activate", de: "Aktivieren", tr: "Aktif Yap" },
+                deactivate: { en: "Deactivate", de: "Deaktivieren", tr: "Pasif Yap" }
+            },
+            table: {
+                shop: { en: "SHOP", de: "SHOP", tr: "MAĞAZA" },
+                email: { en: "EMAIL", de: "E-MAIL", tr: "EMAIL" },
+                plan: { en: "PLAN", de: "PLAN", tr: "PLAN" },
+                affiliate: { en: "AFFILIATE", de: "AFFILIATE", tr: "AFFILIATE" },
+                expires: { en: "EXPIRES", de: "ABLAUF", tr: "BİTİŞ" },
+                status: { en: "STATUS", de: "STATUS", tr: "DURUM" },
+                actions: { en: "ACTIONS", de: "AKTIONEN", tr: "İŞLEMLER" },
+                noShops: { en: "No shops found", de: "Keine Shops gefunden", tr: "Mağaza bulunamadı" },
+                products: { en: "products", de: "Produkte", tr: "ürün" }
+            },
+            form: {
+                createTitle: { en: "Create New Shop", de: "Neuen Shop erstellen", tr: "Yeni Mağaza Oluştur" },
+                editTitle: { en: "Edit Shop", de: "Shop bearbeiten", tr: "Mağaza Düzenle" },
+                email: { en: "Email", de: "E-Mail", tr: "Email" },
+                plan: { en: "Plan", de: "Plan", tr: "Plan" },
+                planStartedAt: { en: "Plan Start Date", de: "Plan Startdatum", tr: "Plan Başlangıç Tarihi" },
+                planExpiresAt: { en: "Plan Expiry Date", de: "Plan Ablaufdatum", tr: "Plan Bitiş Tarihi" },
+                expiresHint: { en: "If left empty, 30 days will be added", de: "Wenn leer gelassen, werden 30 Tage hinzugefügt", tr: "Boş bırakırsan 30 gün sonra eklenir" },
+                businessName: { en: "Business Name", de: "Geschäftsbereich", tr: "Mağaza Adı" },
+                slug: { en: "URL Slug", de: "URL-Slug", tr: "URL Slug" },
+                descriptionTr: { en: "Description (Turkish)", de: "Beschreibung (Türkisch)", tr: "Açıklama (Türkçe)" },
+                descriptionDe: { en: "Description (German)", de: "Beschreibung (Deutsch)", tr: "Açıklama (Almanca)" },
+                descriptionEn: { en: "Description (English)", de: "Beschreibung (Englisch)", tr: "Açıklama (İngilizce)" },
+                contactInfo: { en: "Contact Information", de: "Kontaktinformationen", tr: "İletişim Bilgileri" },
+                phone: { en: "Phone", de: "Telefon", tr: "Telefon" },
+                contactEmail: { en: "Contact Email", de: "Kontakt-E-Mail", tr: "İletişim Email" },
+                website: { en: "Website", de: "Webseite", tr: "Website" },
+                active: { en: "Shop Active", de: "Shop Aktiv", tr: "Mağaza Aktif" }
+            },
+            placeholders: {
+                search: { en: "Search shop or email...", de: "Shop oder E-Mail suchen...", tr: "Mağaza veya email ara..." },
+                description: { en: "Short description about the shop...", de: "Kurze Beschreibung über den Shop...", tr: "Mağaza hakkında kısa açıklama..." }
+            },
+            status: {
+                active: { en: "Active", de: "Aktiv", tr: "Aktif" },
+                passive: { en: "Passive", de: "Passiv", tr: "Pasif" }
+            },
+            feedback: {
+                successCreate: { en: "✅ Shop account created!", de: "✅ Shop-Konto erstellt!", tr: "✅ Mağaza hesabı oluşturuldu!" },
+                successUpdate: { en: "✅ Shop account updated!", de: "✅ Shop-Konto aktualisiert!", tr: "✅ Mağaza hesabı güncellendi!" },
+                successDelete: { en: "✅ Shop account deleted!", de: "✅ Shop-Konto gelöscht!", tr: "✅ Mağaza hesabı silindi!" }
+            }
+        },
+        helpGuide: {
+            title: { en: "Admin Help Guide", de: "Admin-Hilfe", tr: "Yönetici Yardım Rehberi" },
+            subtitle: { en: "Guidelines for system management and feature usage", de: "Leitfaden für Systemverwaltung und Funktionsnutzung", tr: "Sistem yönetimi ve özellik kullanımı hakkında kılavuz" },
+            sections: {
+                claim: {
+                    title: { en: "Business Ownership (Claim) System", de: "Unternehmens-Sahiplen-System", tr: "İşletme Sahiplik (Claim) Sistemi" },
+                    q1: { en: "What is a Representative (Unowned) Vendor?", de: "Was ist ein repräsentatives (besitzerloses) Profil?", tr: "Temsili (Sahipsiz) Tedarikçi Nedir?" },
+                    a1: { en: "Businesses that appear on the platform but are not yet managed by their actual owner. \"Claim This Business\" button appears on these profiles.", de: "Unternehmen, die auf der Plattform erscheinen, aber noch nicht von ihrem eigentlichen Inhaber verwaltet werden. Auf diesen Profilen erscheint die Schaltfläche \"Profil beanspruchen\".", tr: "Platformda görünen ancak henüz gerçek sahibi tarafından yönetilmeyen işletmelerdir. Bu profillerde \"Bu İşletmeyi Sahiplen\" butonu görünür." },
+                    q2: { en: "How to Create?", de: "Wie wird es erstellt?", tr: "Nasıl Oluşturulur?" },
+                    steps: [
+                        { en: "Go to the Vendor Management page.", de: "Gehen Sie zur Seite \"Vendor Management\".", tr: "Vendor Yönetimi sayfasına gidin." },
+                        { en: "Click the + New Vendor button.", de: "Klicken Sie auf die Schaltfläche \"+ Neuer Anbieter\".", tr: "+ Yeni Tedarikçi butonuna tıklayın." },
+                        { en: "In the pop-up window, check the \"No Owner (Claimable)\" option.", de: "Wählen Sie im Popup-Fenster die Option \"Kein Inhaber (beanspruchbar)\".", tr: "Açılan pencerede \"Sahibi Yok (Claim Edilebilir)\" seçeneğini işaretleyin." },
+                        { en: "In this mode, Email and Password are not required. Enter business details and save.", de: "In diesem Modus sind E-Mail ve Passwort nicht erforderlich. Geben Sie die Geschäftsdaten ein ve speichern Sie.", tr: "Bu modda E-posta ve Şifre istenmez. İşletme bilgilerini girip kaydedin." }
+                    ],
+                    q3: { en: "How the Process Works?", de: "Wie funktioniert der Prozess?", tr: "Süreç Nasıl İşler?" },
+                    a3: { en: "The actual business owner visits the site, clicks the button, and creates a request by presenting evidence. When you review and approve this request from the \"Claim Requests\" page, the profile is automatically transferred to that user.", de: "Der eigentliche Geschäftsinhaber besucht die Website, klickt auf die Schaltfläche ve erstellt eine Anfrage, indem er Beweise vorlegt. Wenn Sie diese Anfrage auf der Seite \"Sahiplik Talepleri\" prüfen ve genehmigen, wird das Profil automatisch auf diesen Benutzer übertragen.", tr: "Gerçek işletme sahibi siteye gelir, butona tıklar ve kanıtlarını sunarak talep oluşturur. Siz \"Sahiplik Talepleri\" sayfasından bu talebi inceleyip onayladığınızda, profil otomatik olarak o kullanıcıya devredilir." }
+                },
+                ranking: {
+                    title: { en: "Success Score and AI Insights", de: "Erfolgs-Score ve KI-Analysen", tr: "Başarı Skoru ve AI Analizleri" },
+                    intro: { en: "Vendor rankings are determined by the AI Success Score. This score is based on:", de: "Das Ranking der Anbieter wird durch den KI-Erfolgs-Score bestimmt. Dieser Score basiert auf folgenden Daten:", tr: "Tedarikçilerin sıralaması AI Başarı Skoru üzerinden belirlenir. Bu skor şu verilere dayanır:" },
+                    factors: [
+                        { en: "Profile completion rate (every field must be filled for 100%)", de: "Profilvollständigkeit (alle Felder müssen ausgefüllt sein für 100%)", tr: "Profil doluluk oranı (%100 olması için her alan dolmalı)" },
+                        { en: "Quality and number of photo gallery items", de: "Qualität ve Anzahl der Fotos in der Galerie", tr: "Fotoğraf galerisinin kalitesi ve sayısı" },
+                        { en: "View / Request Quote (Conversion) rate", de: "Anzahl der Aufrufe / Angebotsanfragen (Konversionsrate)", tr: "Görüntülenme / Teklif İsteme (Dönüşüm) oranı" }
+                    ],
+                    footer: { en: "You can use the \"Batch AI Update\" button on the Vendor Management page for bulk updates.", de: "Verwenden Sie für Massenaktualisierungen die Schaltfläche \"Bulk-KI-Update\" auf der Seite Vendor Management.", tr: "Toplu güncelleme yapmak için Vendor Yönetimi sayfasındaki \"Toplu AI Güncelle\" butonunu kullanabilirsiniz." }
+                },
+                roles: {
+                    title: { en: "User Roles", de: "Benutzerrollen", tr: "Kullanıcı Rolleri" },
+                    couple: { en: "Couple: Standard user. Browses the site, requests quotes.", de: "Couple: Standardbenutzer. Durchsucht die Plattform, fordert Angebote an.", tr: "Couple (Çift): Standart kullanıcı. Siteyi gezer, teklif ister." },
+                    vendor: { en: "Vendor: Business owner. Can access their dashboard and see leads.", de: "Vendor: Geschäftsinhaber. Kann auf sein Dashboard zugreifen ve Leads sehen.", tr: "Vendor (Tedarikçi): İşletme sahibi. Dashboard'una erişebilir, teklifleri görür." },
+                    admin: { en: "Admin: Authorized user who manages files, users, and requests.", de: "Admin: Bevollmächtigter Benutzer, der Dateien, Benutzer ve Anfragen verwaltet.", tr: "Admin (Yönetici): Dosyaları, kullanıcıları ve talepleri yöneten tam yetkili kullanıcı." }
+                },
+                finance: {
+                    title: { en: "Finance and Subscription", de: "Finanzen ve Abonnements", tr: "Finans ve Abonelik Sistemi" },
+                    intro: { en: "Businesses can be in three different subscription types:", de: "Unternehmen können drei verschiedene Abonnementtypen haben:", tr: "İşletmeler üç farklı üyelik tipinde olabilir:" },
+                    tiers: [
+                        { en: "Free: Basic features, low priority.", de: "Free: Grundfunktionen, niedrige Priorität.", tr: "Free: Temel özellikler, düşük öncelik." },
+                        { en: "Basic: Standard features and medium ranking.", de: "Basic: Standardfunktionen ve mittleres Ranking.", tr: "Basic: Standart özellikler ve orta sıralama." },
+                        { en: "Premium: Top visibility, featured placements, and full AI support.", de: "Premium: Höchste Sichtbarkeit, Hervorhebung ve volle KI-Unterstützung.", tr: "Premium: En üst sırada görünüm, öne çıkarılma ve tam AI desteği." }
+                    ],
+                    footer: { en: "Payments and invoice management can be tracked from the Finance tab.", de: "Zahlungen ve Rechnungsverwaltung können über den Reiter \"Finanzen\" verfolgt werden.", tr: "Ödemeler ve fatura yönetimi Finans sekmesinden takip edilebilir." }
+                },
+                commission: {
+                    title: { en: "Commission and Lead Management", de: "Kommission ve Lead-Management", tr: "Komisyon ve Teklif Yönetimi" },
+                    intro: { en: "Every quote and deal sent through the system is recorded in the admin panel:", de: "Jedes über das System gesendete Angebot ve jede Vereinbarung wird im Admin-Panel aufgezeichnet:", tr: "Sistem üzerinden gönderilen her teklif ve gerçekleşen anlaşma yönetici paneline düşer:" },
+                    rules: [
+                        { en: "A percentage commission is calculated for weddings where an agreement is reached.", de: "Bei Hochzeiten, bei denen eine Vereinbarung getroffen wurde, wird eine prozentuale Provision berechnet.", tr: "Anlaşma sağlanan düğünlerde belirlenen % oranında komisyon hesaplanır." },
+                        { en: "Vendors can update deal status from their panel.", de: "Anbieter können den Status des Geschäfts über ihr Panel aktualisieren.", tr: "Tedarikçiler panelinden anlaşma durumunu güncelleyebilir." },
+                        { en: "Admins track collections from the Deals page.", de: "Admins verfolgen die Zahlungen über die Seite \"Deals\".", tr: "Yöneticiler Anlaşmalar sayfasından tahsilatları takip eder." }
+                    ]
+                }
+            },
+            footerNote: { en: "Contact the development team if you encounter a technical issue.", de: "Kontaktieren Sie das Entwicklungsteam, wenn ein technisches Problem auftritt.", tr: "Sistemle ilgili teknik bir sorun yaşarsanız geliştirici ekibe ulaşın." }
+        }
     },
     common: {
         select: {
@@ -508,6 +1088,11 @@ export const dictionary = {
             de: "Wird geladen...",
             tr: "Yükleniyor..."
         },
+        close: {
+            en: "Close",
+            de: "Schließen",
+            tr: "Kapat"
+        },
         error: {
             en: "An error occurred",
             de: "Ein Fehler ist aufgetreten",
@@ -522,6 +1107,93 @@ export const dictionary = {
             en: "Add to Favorites",
             de: "Zu Favoriten hinzufügen",
             tr: "Favorilere Ekle"
+        },
+        login: {
+            en: "Log In",
+            de: "Anmelden",
+            tr: "Giriş Yap"
+        },
+        vendorClaim: {
+            badge: {
+                en: "Claim Profile",
+                de: "Profil beanspruchen",
+                tr: "İşletmeyi Sahiplen"
+            },
+            buttonTitle: {
+                en: "Claim This Business",
+                de: "Das ist mein Unternehmen",
+                tr: "Bu İşletme Benim"
+            },
+            hint: {
+                en: "Are you the owner? Request to manage this page.",
+                de: "Sind Sie der Inhaber? Beantragen Sie die Verwaltung dieser Seite.",
+                tr: "İşletme sahibi misiniz? Sayfayı yönetmek için talep gönderin."
+            },
+            modalTitle: {
+                en: "Business Ownership Claim",
+                de: "Inhaberschaft beanspruchen",
+                tr: "İşletme Sahipliği Talebi"
+            },
+            intro: (name, lang) => {
+                const names = {
+                    tr: `${name} işletmesinin size ait olduğunu doğrulamak için lütfen aşağıdaki bilgileri doldurun.`,
+                    en: `Please provide the details below to verify that you are the owner of ${name}.`,
+                    de: `Bitte geben Sie die unten stehenden Details an, um zu bestätigen, dass Sie der Inhaber von ${name} sind.`
+                };
+                return names[lang] || names.en;
+            },
+            form: {
+                email: { en: "Your Email", de: "Ihre E-Mail", tr: "E-posta Adresiniz" },
+                phone: { en: "Your Phone Number", de: "Ihre Telefonnummer", tr: "Telefon Numaranız" },
+                message: { en: "Verification Note (Optional)", de: "Verifizierungshinweis (Optional)", tr: "Doğrulama Notu (Opsiyonel)" },
+                placeholder: { en: "Add a short note...", de: "Kurze Notiz hinzufügen...", tr: "Kısa bir not ekleyin..." },
+                submit: { en: "Send Request", de: "Anfrage senden", tr: "Talebi Gönder" },
+                submitting: { en: "Sending...", de: "Wird gesendet...", tr: "Gönderiliyor..." }
+            },
+            success: {
+                title: { en: "Request Received!", de: "Anfrage erhalten!", tr: "Talebi Alındı!" },
+                desc: { en: "Our administrators will review your information.", de: "Unsere Administratoren werden Ihre Informationen prüfen.", tr: "Yöneticilerimiz bilgilerinizi inceleyecektir." }
+            },
+            loginRequired: {
+                en: "Please log in first",
+                de: "Bitte melden Sie sich zuerst an",
+                tr: "Lütfen önce giriş yapın"
+            },
+            admin: {
+                title: { en: "Claim Requests", de: "Besitzansprüche", tr: "Sahiplik Talepleri" },
+                subtitle: { en: "Safely transfer businesses to owners", de: "Übertragen Sie Unternehmen sicher an Inhaber", tr: "İşletmeleri gerçek sahiplerine güvenli bir şekilde devredin" },
+                filters: {
+                    all: { en: "All", de: "Alle", tr: "Hepsi" },
+                    pending: { en: "Pending", de: "Ausstehend", tr: "Bekleyenler" },
+                    approved: { en: "Approved", de: "Genehmigt", tr: "Onaylananlar" },
+                    rejected: { en: "Rejected", de: "Abgelehnt", tr: "Reddedilenler" },
+                    noRequests: { en: "No requests found.", de: "Keine Anfragen gefunden.", tr: "Henüz talep bulunmuyor." }
+                },
+                table: {
+                    business: { en: "Business", de: "Unternehmen", tr: "İşletme" },
+                    claimant: { en: "Claimant", de: "Antragsteller", tr: "Talep Eden" },
+                    contact: { en: "Contact", de: "Kontakt", tr: "İletişim" },
+                    message: { en: "Message", de: "Nachricht", tr: "Mesaj" },
+                    date: { en: "Date", de: "Datum", tr: "Tarih" },
+                    status: { en: "Status", de: "Status", tr: "Durum" },
+                    actions: { en: "Actions", de: "Aktionen", tr: "İşlemler" }
+                },
+                actions: {
+                    approve: { en: "Approve", de: "Genehmigen", tr: "Onayla" },
+                    reject: { en: "Reject", de: "Ablehnen", tr: "Red" },
+                    confirmApprove: (name, email, lang) => {
+                        const msgs = {
+                            tr: `"${name}" sahipliğini ${email} kullanıcısına devretmek istediğinize emin misiniz?`,
+                            en: `Are you sure you want to hand over "${name}" to ${email}?`,
+                            de: `Sind Sie sicher, dass Sie die Inhaberschaft von "${name}" an ${email} übertragen möchten?`
+                        };
+                        return msgs[lang] || msgs.en;
+                    },
+                    rejectPrompt: { en: "Enter rejection reason:", de: "Grund für die Ablehnung eingeben:", tr: "Red sebebi girin:" },
+                    successApprove: { en: "Approved and ownership transferred!", de: "Genehmigt und Inhaberschaft übertragen!", tr: "Onaylandı ve sahiplik devredildi!" },
+                    successReject: { en: "Request rejected.", de: "Anfrage abgelehnt.", tr: "Talep reddedildi." }
+                }
+            }
         }
     },
     reviews: {
@@ -575,6 +1247,11 @@ export const dictionary = {
             de: "Fehler beim Senden der Bewertung",
             tr: "Yorum gönderilirken hata oluştu"
         },
+        noMessage: {
+            en: "No message",
+            de: "Keine Nachricht",
+            tr: "Mesaj yok"
+        },
         ratingRequired: {
             en: "Please select a rating",
             de: "Bitte wählen Sie eine Bewertung",
@@ -594,6 +1271,21 @@ export const dictionary = {
             en: "Error submitting review",
             de: "Fehler beim Senden der Bewertung",
             tr: "Yorum gönderilirken hata oluştu"
+        },
+        loginToReview: {
+            en: "Please log in to leave a review.",
+            de: "Bitte melden Sie sich an, um eine Bewertung abzugeben.",
+            tr: "Yorum yapmak için giriş yapmalısınız."
+        },
+        shareExperience: {
+            en: "What do you think about this vendor?",
+            de: "Was denken Sie über diesen Anbieter?",
+            tr: "Bu tedarikçi hakkında ne düşünüyorsunuz?"
+        },
+        writeFirstReview: {
+            en: "Write a Review",
+            de: "Bewertung schreiben",
+            tr: "Değerlendirme Yap"
         }
     },
     weddingWebsite: {
@@ -711,6 +1403,23 @@ export const dictionary = {
             en: "Save Changes",
             de: "Änderungen speichern",
             tr: "Değişiklikleri Kaydet"
+        },
+        slugHint: {
+            en: "Only use letters, numbers and hyphens (-).",
+            de: "Nur Buchstaben, Zahlen und Bindestriche (-) verwenden.",
+            tr: "Sadece harf, rakam ve tire (-) kullanın."
+        },
+        guestList: {
+            responses: { en: "Responses", de: "Antworten", tr: "Yanıt" },
+            totalGuests: { en: "Total Guests", de: "Gesamte Gäste", tr: "Toplam Kişi" },
+            name: { en: "Name", de: "Name", tr: "İsim" },
+            status: { en: "Status", de: "Status", tr: "Durum" },
+            guestCount: { en: "Guest Count", de: "Personenzahl", tr: "Kişi Sayısı" },
+            message: { en: "Message", de: "Nachricht", tr: "Mesaj" },
+            date: { en: "Date", de: "Datum", tr: "Tarih" },
+            noResponses: { en: "No responses yet.", de: "Noch keine Antworten.", tr: "Henüz yanıt yok." },
+            attending: { en: "Attending", de: "Nimmt teil", tr: "Geliyor" },
+            notAttending: { en: "Not attending", de: "Nimmt nicht teil", tr: "Gelmiyor" }
         }
     },
     messages: {
@@ -2809,55 +3518,6 @@ export const dictionary = {
             tr: "Reddet"
         }
     },
-    vendorDashboard: {
-        tiers: {
-            free: {
-                name: { en: "Free", de: "Kostenlos", tr: "Ücretsiz" },
-                desc: { en: "Basic visibility", de: "Grundlegende Sichtbarkeit", tr: "Temel görünürlük" }
-            },
-            basic: {
-                name: { en: "Basic", de: "Basic", tr: "Temel" },
-                desc: { en: "More photos & info", de: "Mehr Fotos & Infos", tr: "Daha fazla fotoğraf & bilgi" }
-            },
-            premium: {
-                name: { en: "Premium", de: "Premium", tr: "Premium" },
-                desc: { en: "Full access & top ranking", de: "Voller Zugriff & Top-Ranking", tr: "Tam erişim & üst sıra" }
-            }
-        },
-        profile: {
-            locationSettings: {
-                en: "Location Settings",
-                de: "Standorteinstellungen",
-                tr: "Konum Ayarları"
-            },
-            useMyLocation: {
-                en: "Use My Location",
-                de: "Meinen Standort verwenden",
-                tr: "Konumumu Kullan"
-            },
-            latitude: {
-                en: "Latitude",
-                de: "Breitengrad",
-                tr: "Enlem"
-            },
-            longitude: {
-                en: "Longitude",
-                de: "Längengrad",
-                tr: "Boylam"
-            },
-            businessName: { en: "Business Name", de: "Firmenname", tr: "İşletme Adı" },
-            category: { en: "Category", de: "Kategorie", tr: "Kategori" },
-            additionalCategories: {
-                en: "Additional Categories",
-                de: "Zusätzliche Kategorien",
-                tr: "Ek Kategoriler"
-            },
-            city: { en: "City", de: "Stadt", tr: "Şehir" },
-            description: { en: "Description", de: "Beschreibung", tr: "Açıklama" },
-            priceRange: { en: "Price Range", de: "Preisklasse", tr: "Fiyat Aralığı" },
-            capacity: { en: "Capacity", de: "Kapazität", tr: "Kapasite" }
-        }
-    },
     paymentMethods: {
         cash: { en: "Cash", de: "Barzahlung", tr: "Nakit" },
         creditCard: { en: "Credit Card", de: "Kreditkarte", tr: "Kredi Kartı" },
@@ -4336,11 +4996,7 @@ export const dictionary = {
         }
     },
 
-    checklist: {
-        title: { en: "To-Do List", de: "Checkliste", tr: "Yapılacaklar Listesi" },
-        placeholder: { en: "Add new task...", de: "Neue Aufgabe hinzufügen...", tr: "Yeni görev ekle..." },
-        empty: { en: "No tasks added yet.", de: "Noch keine Aufgaben hinzugefügt.", tr: "Henüz görev eklenmedi." }
-    },
+
     forgotPassword: {
         title: {
             en: "Forgot Password",
@@ -4415,102 +5071,7 @@ export const dictionary = {
             tr: "Şifre en az 6 karakter olmalıdır."
         }
     },
-    vendorDashboard: {
-        alerts: {
-            saved: {
-                en: "Changes saved successfully!",
-                de: "Änderungen erfolgreich gespeichert!",
-                tr: "Değişiklikler başarıyla kaydedildi!"
-            },
-            locked: {
-                en: "🔒 Upgrade to Premium to unlock this feature",
-                de: "🔒 Upgrade auf Premium, um diese Funktion freizuschalten",
-                tr: "🔒 Bu özelliği açmak için Premium'a yükseltin"
-            }
-        },
-        tiers: {
-            free: {
-                name: {
-                    en: "Free Plan",
-                    de: "Kostenlos",
-                    tr: "Ücretsiz Paket"
-                },
-                desc: {
-                    en: "Basic visibility",
-                    de: "Basis-Sichtbarkeit",
-                    tr: "Temel görünürlük"
-                }
-            },
-            premium: {
-                name: {
-                    en: "Premium Plan",
-                    de: "Premium",
-                    tr: "Premium Paket"
-                },
-                desc: {
-                    en: "High visibility & more features",
-                    de: "Hohe Sichtbarkeit & mehr Funktionen",
-                    tr: "Yüksek görünürlük & daha fazla özellik"
-                }
-            }
-        },
-        profile: {
-            locationSettings: {
-                en: "Location Settings",
-                de: "Standorteinstellungen",
-                tr: "Konum Ayarları"
-            },
-            useMyLocation: {
-                en: "Use My Location",
-                de: "Meinen Standort verwenden",
-                tr: "Konumumu Kullan"
-            },
-            latitude: {
-                en: "Latitude",
-                de: "Breitengrad",
-                tr: "Enlem"
-            },
-            longitude: {
-                en: "Longitude",
-                de: "Längengrad",
-                tr: "Boylam"
-            }
-        },
-        leads: {
-            noLeads: {
-                en: "No inquiries yet.",
-                de: "Noch keine Anfragen.",
-                tr: "Henüz talep yok."
-            }
-        },
-        faq: {
-            title: {
-                en: "FAQ",
-                de: "Häufig gestellte Fragen",
-                tr: "Sıkça Sorulan Sorular"
-            },
-            question: {
-                en: "Question",
-                de: "Frage",
-                tr: "Soru"
-            },
-            answer: {
-                en: "Answer",
-                de: "Antwort",
-                tr: "Cevap"
-            },
-            add: {
-                en: "Add Question",
-                de: "Frage hinzufügen",
-                tr: "Soru Ekle"
-            },
-            remove: {
-                en: "Remove",
-                de: "Entfernen",
-                tr: "Sil"
-            }
-        }
-    },
+
     contact: {
         title: {
             en: "Contact Us",
@@ -5396,5 +5957,15 @@ dictionary.shop = {
             categoryWrong: { en: "Wrong category selected", de: "Falsche Kategorie ausgewählt", tr: "Yanlış kategori seçilmiş" },
             other: { en: "Other (specify)", de: "Andere (angeben)", tr: "Diğer (belirtin)" }
         }
+    }
+};
+
+// Aliases for backward compatibility
+dictionary.vendorDashboard = dictionary.dashboard;
+dictionary.vendorCard = {
+    perfectService: {
+        en: "Excellence Certified",
+        de: "Zertifizierter Top-Service",
+        tr: "Mükemmel Hizmet Sertifikalı"
     }
 };

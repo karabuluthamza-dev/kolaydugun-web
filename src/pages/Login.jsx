@@ -17,8 +17,22 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login, loginWithGoogle } = useAuth();
+    const { login, loginWithGoogle, user: currentUser, loading: authLoading } = useAuth();
     const navigate = useNavigate();
+
+    // Auto-redirect if already logged in
+    React.useEffect(() => {
+        if (!authLoading && currentUser) {
+            let role = currentUser?.role || currentUser?.user_metadata?.role;
+            if (role === 'admin') {
+                navigate('/admin');
+            } else if (role === 'vendor') {
+                navigate('/vendor/dashboard');
+            } else {
+                navigate('/user-dashboard');
+            }
+        }
+    }, [currentUser, authLoading, navigate]);
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');

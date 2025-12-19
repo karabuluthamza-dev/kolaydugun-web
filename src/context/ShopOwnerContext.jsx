@@ -51,7 +51,7 @@ export const ShopOwnerProvider = ({ children }) => {
                     )
                 `)
                 .or(`user_id.eq.${user?.id},email.eq.${user?.email}`)
-                .single();
+                .maybeSingle();
 
             // DEBUG LOG
             console.log('🏪 Shop account query result:', { data, error });

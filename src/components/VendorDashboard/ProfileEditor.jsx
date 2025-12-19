@@ -258,7 +258,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 await refreshVendors();
             }
 
-            alert(t('vendorDashboard.alerts.saved'));
+            alert(t('dashboard.alerts.saved'));
             onUpdate();
         } catch (error) {
             console.error('Error updating profile:', error);
@@ -270,7 +270,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
 
     const renderLockedOverlay = () => (
         <div className="locked-overlay">
-            <span>🔒 {t('vendorDashboard.alerts.locked')}</span>
+            <span>🔒 {t('dashboard.alerts.locked')}</span>
         </div>
     );
 
@@ -286,7 +286,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 },
                 (error) => {
                     console.error("Error getting location:", error);
-                    alert(t('vendorDashboard.alerts.locationError') || "Konum alınamadı. Lütfen tarayıcı izinlerini kontrol edin.");
+                    alert(t('dashboard.alerts.locationError') || "Konum alınamadı. Lütfen tarayıcı izinlerini kontrol edin.");
                 }
             );
         } else {
@@ -300,9 +300,9 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
 
             <div className="tier-badge-container">
                 <span className={`badge badge-${currentTier}`}>
-                    {t(`vendorDashboard.tiers.${currentTier}.name`)}
+                    {t(`dashboard.tiers.${currentTier}.name`)}
                 </span>
-                <p className="text-muted">{t(`vendorDashboard.tiers.${currentTier}.desc`)}</p>
+                <p className="text-muted">{t(`dashboard.tiers.${currentTier}.desc`)}</p>
             </div>
 
             <form onSubmit={handleSubmit}>
@@ -384,7 +384,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                     <div className={`form-section ${!features.map_view ? 'locked' : ''}`}>
                         {!features.map_view && renderLockedOverlay()}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                            <h3>📍 {t('vendorDashboard.profile.locationSettings')}</h3>
+                            <h3>📍 {t('dashboard.profile.locationSettings')}</h3>
                             <button
                                 type="button"
                                 onClick={handleGetLocation}
@@ -392,12 +392,12 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                 style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
                                 disabled={!features.map_view}
                             >
-                                📍 {t('vendorDashboard.profile.useMyLocation')}
+                                📍 {t('dashboard.profile.useMyLocation')}
                             </button>
                         </div>
                         <div className="form-row">
                             <div className="form-group">
-                                <label>{t('vendorDashboard.profile.latitude')}</label>
+                                <label>{t('dashboard.profile.latitude')}</label>
                                 <input
                                     type="text"
                                     name="latitude"
@@ -409,7 +409,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                 />
                             </div>
                             <div className="form-group">
-                                <label>{t('vendorDashboard.profile.longitude')}</label>
+                                <label>{t('dashboard.profile.longitude')}</label>
                                 <input
                                     type="text"
                                     name="longitude"
@@ -587,39 +587,35 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 {/* FAQ Section - Tier Restricted */}
                 <div className={`form-section ${!features.faq ? 'locked' : ''}`}>
                     {!features.faq && renderLockedOverlay()}
-                    <h3>{t('vendorDashboard.faq.title')}</h3>
+                    <h3>{t('dashboard.faq.title')}</h3>
                     {(formData.faq || []).map((item, index) => (
                         <div key={index} className="faq-item" style={{ marginBottom: '1rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
                             <div className="form-group">
-                                <label>{t('vendorDashboard.faq.question')} {index + 1}</label>
+                                <label>{t('dashboard.faq.question')} {index + 1}</label>
                                 <input
                                     type="text"
                                     value={item.question}
                                     onChange={(e) => handleFaqChange(index, 'question', e.target.value)}
                                     className="form-control"
-                                    placeholder={t('vendorDashboard.faq.question')}
-                                    disabled={!features.faq}
+                                    placeholder={t('dashboard.faq.question')}
                                 />
                             </div>
                             <div className="form-group">
-                                <label>{t('vendorDashboard.faq.answer')}</label>
+                                <label>{t('dashboard.faq.answer')}</label>
                                 <textarea
                                     rows="6"
                                     value={item.answer}
                                     onChange={(e) => handleFaqChange(index, 'answer', e.target.value)}
                                     className="form-control"
-                                    placeholder={t('vendorDashboard.faq.answer')}
-                                    disabled={!features.faq}
+                                    placeholder={t('dashboard.faq.answer')}
                                 />
                             </div>
                             <button
                                 type="button"
                                 onClick={() => removeFaq(index)}
-                                className="btn btn-text text-danger"
-                                style={{ fontSize: '0.9rem' }}
-                                disabled={!features.faq}
+                                className="btn btn-sm btn-danger"
                             >
-                                🗑️ {t('vendorDashboard.faq.remove')}
+                                {t('dashboard.faq.remove')}
                             </button>
                         </div>
                     ))}

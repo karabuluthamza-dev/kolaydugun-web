@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { useLanguage } from '../context/LanguageContext';
 import { categoryImages, defaultImage } from '../constants/categoryImages';
+import { dictionary } from '../locales/dictionary';
 import './FeaturedVendors.css';
 
 const FeaturedVendors = () => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [vendors, setVendors] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -108,11 +109,15 @@ const FeaturedVendors = () => {
                                         e.target.src = categoryDefault;
                                     }}
                                 />
-                                {(vendor.is_claimed || vendor.is_verified) && (
+                                {(vendor.is_claimed || vendor.is_verified) ? (
                                     <span className="claimed-badge-small">
                                         ✓ {t('common.claimed')}
                                     </span>
-                                )}
+                                ) : !vendor.user_id ? (
+                                    <span className="claimed-badge-small" style={{ background: 'rgba(255, 255, 255, 0.9)', color: '#e91e63', border: '1px solid #e91e63' }}>
+                                        🛡️ {t('common.vendorClaim.badge')}
+                                    </span>
+                                ) : null}
                             </div>
                             <div className="vendor-info">
                                 <h3 className="vendor-name">{vendor.business_name}</h3>

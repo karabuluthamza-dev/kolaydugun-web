@@ -211,7 +211,6 @@ const ShopApplication = () => {
                 product_description: formData.product_description || null,
                 referred_by_code: formData.referred_by_code ? formData.referred_by_code.toUpperCase() : null,
                 referred_by_shop_id: affiliateShop?.id || null,
-                referred_by_shop_id: affiliateShop?.id || null,
                 selected_plan: formData.selected_plan || 'starter',
                 affiliate_campaign_slug: campaignSlug || null, // Campaign tracking
                 status: 'pending'

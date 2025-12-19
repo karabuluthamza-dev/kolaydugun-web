@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import './AdminShopProducts.css'; // Reuse existing styles
 
 const AdminShopAccounts = () => {
-    const { language } = useLanguage();
+    const { t, language } = useLanguage();
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -114,7 +114,7 @@ const AdminShopAccounts = () => {
                     .update(payload)
                     .eq('id', editingAccount.id);
                 if (error) throw error;
-                alert('✅ Mağaza hesabı güncellendi!');
+                alert(t('adminPanel.shopAccounts.feedback.successUpdate', '✅ Mağaza hesabı güncellendi!'));
             } else {
                 // Set plan start date for new accounts
                 payload.plan_started_at = new Date().toISOString();
@@ -124,7 +124,7 @@ const AdminShopAccounts = () => {
                     .from('shop_accounts')
                     .insert([payload]);
                 if (error) throw error;
-                alert('✅ Mağaza hesabı oluşturuldu!');
+                alert(t('adminPanel.shopAccounts.feedback.successCreate', '✅ Mağaza hesabı oluşturuldu!'));
             }
 
             setShowModal(false);
@@ -132,7 +132,7 @@ const AdminShopAccounts = () => {
             fetchAccounts();
         } catch (error) {
             console.error('Error saving account:', error);
-            alert('Hata: ' + error.message);
+            alert(t('common.error', 'Hata: ') + error.message);
         }
     };
 
@@ -150,32 +150,25 @@ const AdminShopAccounts = () => {
     };
 
     const handleDelete = async (id) => {
-        console.log('Deleting shop account:', id);
+        if (!window.confirm(t('common.confirmDelete', 'Emin misiniz?'))) return;
 
         try {
             // First delete related products
             await supabase.from('shop_products').delete().eq('shop_account_id', id);
 
             // Then delete the account
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('shop_accounts')
                 .delete()
-                .eq('id', id)
-                .select();
+                .eq('id', id);
 
-            console.log('Delete result:', { data, error });
+            if (error) throw error;
 
-            if (error) {
-                console.error('Delete error:', error);
-                alert('Silme hatası: ' + (error.message || JSON.stringify(error)));
-                return;
-            }
-
-            alert('✅ Mağaza hesabı silindi!');
+            alert(t('adminPanel.shopAccounts.feedback.successDelete', '✅ Mağaza hesabı silindi!'));
             fetchAccounts();
         } catch (error) {
-            console.error('Catch error:', error);
-            alert('Hata: ' + error.message);
+            console.error('Delete error:', error);
+            alert(t('common.error', 'Hata: ') + error.message);
         }
     };
 
@@ -236,7 +229,7 @@ const AdminShopAccounts = () => {
                 fontSize: '0.75rem',
                 fontWeight: '600'
             }}>
-                {p.name} ({p.limit === -1 ? '∞' : p.limit} ürün)
+                {p.name} ({p.limit === -1 ? '∞' : p.limit} {t('adminPanel.shopAccounts.table.products', 'ürün')})
             </span>
         );
     };
@@ -244,18 +237,18 @@ const AdminShopAccounts = () => {
     const getStatusBadge = (isActive) => {
         return isActive ? (
             <span style={{ background: '#dcfce7', color: '#16a34a', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
-                ✅ Aktif
+                ✅ {t('adminPanel.shopAccounts.status.active', 'Aktif')}
             </span>
         ) : (
             <span style={{ background: '#fee2e2', color: '#dc2626', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
-                ⏸️ Pasif
+                ⏸️ {t('adminPanel.shopAccounts.status.passive', 'Pasif')}
             </span>
         );
     };
 
     const formatDate = (dateStr) => {
         if (!dateStr) return '-';
-        return new Date(dateStr).toLocaleDateString('de-DE');
+        return new Date(dateStr).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'de-DE');
     };
 
     const activeCount = accounts.filter(a => a.is_active).length;
@@ -266,15 +259,15 @@ const AdminShopAccounts = () => {
     );
 
     if (loading) {
-        return <div className="admin-loading">Yükleniyor...</div>;
+        return <div className="admin-loading">{t('common.loading', 'Yükleniyor...')}</div>;
     }
 
     return (
         <div className="admin-shop-products">
             <div className="admin-page-header">
                 <div>
-                    <h1>🏪 Mağaza Hesapları</h1>
-                    <p>Shop marketplace mağazalarını yönetin</p>
+                    <h1>🏪 {t('adminPanel.shopAccounts.title', 'Mağaza Hesapları')}</h1>
+                    <p>{t('adminPanel.shopAccounts.subtitle', 'Shop marketplace mağazalarını yönetin')}</p>
                 </div>
                 <div className="header-actions">
                     <span style={{
@@ -284,10 +277,10 @@ const AdminShopAccounts = () => {
                         borderRadius: '8px',
                         fontSize: '0.875rem'
                     }}>
-                        📊 {activeCount} aktif mağaza
+                        📊 {activeCount} {t('adminPanel.shopAccounts.stats.activeShops', 'aktif mağaza')}
                     </span>
                     <button className="btn-primary" onClick={() => { resetForm(); setShowModal(true); }}>
-                        + Yeni Mağaza
+                        + {t('adminPanel.shopAccounts.actions.addNew', 'Yeni Mağaza')}
                     </button>
                 </div>
             </div>
@@ -296,21 +289,21 @@ const AdminShopAccounts = () => {
             <div className="filters-bar">
                 <input
                     type="text"
-                    placeholder="🔍 Mağaza veya email ara..."
+                    placeholder={t('adminPanel.shopAccounts.placeholders.search', '🔍 Mağaza veya email ara...')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     style={{ flex: 1, maxWidth: '300px' }}
                 />
                 <select value={filter.status} onChange={(e) => setFilter({ ...filter, status: e.target.value })}>
-                    <option value="all">Tüm Durumlar</option>
-                    <option value="active">Aktif</option>
-                    <option value="inactive">Pasif</option>
+                    <option value="all">{t('adminPanel.shopAccounts.filters.allStatuses', 'Tüm Durumlar')}</option>
+                    <option value="active">{t('adminPanel.shopAccounts.status.active', 'Aktif')}</option>
+                    <option value="inactive">{t('adminPanel.shopAccounts.status.passive', 'Pasif')}</option>
                 </select>
                 <select value={filter.plan} onChange={(e) => setFilter({ ...filter, plan: e.target.value })}>
-                    <option value="all">Tüm Planlar</option>
-                    <option value="starter">Starter</option>
-                    <option value="business">Business</option>
-                    <option value="premium">Premium</option>
+                    <option value="all">{t('adminPanel.shopAccounts.filters.allPlans', 'Tüm Planlar')}</option>
+                    <option value="starter">{t('adminPanel.shopAccounts.plans.starter', 'Starter')}</option>
+                    <option value="business">{t('adminPanel.shopAccounts.plans.business', 'Business')}</option>
+                    <option value="premium">{t('adminPanel.shopAccounts.plans.premium', 'Premium')}</option>
                 </select>
             </div>
 
@@ -328,7 +321,7 @@ const AdminShopAccounts = () => {
                         }}>
                             <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{plan.name}</div>
                             <div style={{ fontSize: '1.5rem', fontWeight: '700', color: plan.color }}>{count}</div>
-                            <div style={{ fontSize: '0.7rem', color: '#9ca3af' }}>{plan.price}€/ay</div>
+                            <div style={{ fontSize: '0.7rem', color: '#9ca3af' }}>{plan.price}€/{t('adminPanel.shopAccounts.stats.month', 'ay')}</div>
                         </div>
                     );
                 })}
@@ -339,19 +332,19 @@ const AdminShopAccounts = () => {
                 <table className="products-table">
                     <thead>
                         <tr>
-                            <th>Mağaza</th>
-                            <th>Email</th>
-                            <th>Plan</th>
-                            <th>Affiliate</th>
-                            <th>Bitiş</th>
-                            <th>Durum</th>
-                            <th>İşlemler</th>
+                            <th>{t('adminPanel.shopAccounts.table.shop', 'Mağaza')}</th>
+                            <th>{t('adminPanel.shopAccounts.table.email', 'Email')}</th>
+                            <th>{t('adminPanel.shopAccounts.table.plan', 'Plan')}</th>
+                            <th>{t('adminPanel.shopAccounts.table.affiliate', 'Affiliate')}</th>
+                            <th>{t('adminPanel.shopAccounts.table.expires', 'Bitiş')}</th>
+                            <th>{t('adminPanel.shopAccounts.table.status', 'Durum')}</th>
+                            <th>{t('adminPanel.shopAccounts.table.actions', 'İşlemler')}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredAccounts.length === 0 ? (
                             <tr>
-                                <td colSpan="7" className="empty-row">Mağaza bulunamadı</td>
+                                <td colSpan="7" className="empty-row">{t('adminPanel.shopAccounts.table.noShops', 'Mağaza bulunamadı')}</td>
                             </tr>
                         ) : (
                             filteredAccounts.map(account => (
@@ -390,7 +383,7 @@ const AdminShopAccounts = () => {
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="btn-approve"
-                                                title="Mağazayı Görüntüle"
+                                                title={t('adminPanel.shopAccounts.actions.viewShop', 'Mağazayı Görüntüle')}
                                                 style={{ padding: '4px 8px', fontSize: '0.75rem', textDecoration: 'none' }}
                                             >
                                                 👁️
@@ -398,15 +391,15 @@ const AdminShopAccounts = () => {
                                             <button
                                                 className={account.is_active ? 'btn-warning' : 'btn-approve'}
                                                 onClick={() => handleToggleActive(account)}
-                                                title={account.is_active ? 'Pasif Yap' : 'Aktif Yap'}
+                                                title={account.is_active ? t('adminPanel.shopAccounts.actions.deactivate', 'Pasif Yap') : t('adminPanel.shopAccounts.actions.activate', 'Aktif Yap')}
                                                 style={{ padding: '4px 8px', fontSize: '0.75rem' }}
                                             >
                                                 {account.is_active ? '⏸️' : '▶️'}
                                             </button>
-                                            <button className="btn-edit" onClick={() => handleEdit(account)} title="Düzenle">
+                                            <button className="btn-edit" onClick={() => handleEdit(account)} title={t('adminPanel.shopAccounts.actions.edit', 'Düzenle')}>
                                                 ✏️
                                             </button>
-                                            <button className="btn-delete" onClick={() => handleDelete(account.id)} title="Sil">
+                                            <button className="btn-delete" onClick={() => handleDelete(account.id)} title={t('adminPanel.shopAccounts.actions.delete', 'Sil')}>
                                                 🗑️
                                             </button>
                                         </div>
@@ -423,14 +416,14 @@ const AdminShopAccounts = () => {
                 <div className="modal-overlay" onClick={() => setShowModal(false)}>
                     <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>{editingAccount ? '✏️ Mağaza Düzenle' : '➕ Yeni Mağaza Oluştur'}</h2>
+                            <h2>{editingAccount ? '✏️ ' + t('adminPanel.shopAccounts.form.editTitle', 'Mağaza Düzenle') : '➕ ' + t('adminPanel.shopAccounts.form.createTitle', 'Yeni Mağaza Oluştur')}</h2>
                             <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
                         </div>
                         <form onSubmit={handleSubmit}>
                             {/* Basic Info */}
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Email *</label>
+                                    <label>{t('adminPanel.shopAccounts.form.email', 'Email')} *</label>
                                     <input
                                         type="email"
                                         value={formData.email}
@@ -440,14 +433,14 @@ const AdminShopAccounts = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Plan *</label>
+                                    <label>{t('adminPanel.shopAccounts.form.plan', 'Plan')} *</label>
                                     <select
                                         value={formData.plan}
                                         onChange={(e) => setFormData({ ...formData, plan: e.target.value })}
                                     >
-                                        <option value="starter">🟢 Starter (19€/ay - 5 ürün)</option>
-                                        <option value="business">🔵 Business (39€/ay - 20 ürün)</option>
-                                        <option value="premium">🟣 Premium (69€/ay - Sınırsız)</option>
+                                        <option value="starter">🟢 Starter (19€/{t('adminPanel.shopAccounts.stats.month', 'ay')} - 5 {t('adminPanel.shopAccounts.table.products', 'ürün')})</option>
+                                        <option value="business">🔵 Business (39€/{t('adminPanel.shopAccounts.stats.month', 'ay')} - 20 {t('adminPanel.shopAccounts.table.products', 'ürün')})</option>
+                                        <option value="premium">🟣 Premium (69€/{t('adminPanel.shopAccounts.stats.month', 'ay')} - {t('adminPanel.shopAccounts.stats.unlimited', 'Sınırsız')})</option>
                                     </select>
                                 </div>
                             </div>
@@ -455,7 +448,7 @@ const AdminShopAccounts = () => {
                             {/* Plan Dates */}
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>📅 Plan Başlangıç Tarihi</label>
+                                    <label>📅 {t('adminPanel.shopAccounts.form.planStartedAt', 'Plan Başlangıç Tarihi')}</label>
                                     <input
                                         type="date"
                                         value={formData.plan_started_at}
@@ -463,19 +456,19 @@ const AdminShopAccounts = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>📅 Plan Bitiş Tarihi</label>
+                                    <label>📅 {t('adminPanel.shopAccounts.form.planExpiresAt', 'Plan Bitiş Tarihi')}</label>
                                     <input
                                         type="date"
                                         value={formData.plan_expires_at}
                                         onChange={(e) => setFormData({ ...formData, plan_expires_at: e.target.value })}
                                     />
-                                    <small style={{ color: '#6b7280' }}>Boş bırakırsan 30 gün sonra eklenir</small>
+                                    <small style={{ color: '#6b7280' }}>{t('adminPanel.shopAccounts.form.expiresHint', 'Boş bırakırsan 30 gün sonra eklenir')}</small>
                                 </div>
                             </div>
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Mağaza Adı *</label>
+                                    <label>{t('adminPanel.shopAccounts.form.businessName', 'Mağaza Adı')} *</label>
                                     <input
                                         type="text"
                                         value={formData.business_name}
@@ -489,7 +482,7 @@ const AdminShopAccounts = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>URL Slug</label>
+                                    <label>{t('adminPanel.shopAccounts.form.slug', 'URL Slug')}</label>
                                     <input
                                         type="text"
                                         value={formData.slug}
@@ -502,18 +495,18 @@ const AdminShopAccounts = () => {
 
                             {/* Descriptions */}
                             <div className="form-group">
-                                <label>Açıklama (Türkçe)</label>
+                                <label>{t('adminPanel.shopAccounts.form.descriptionTr', 'Açıklama (Türkçe)')}</label>
                                 <textarea
                                     value={formData.description_tr}
                                     onChange={(e) => setFormData({ ...formData, description_tr: e.target.value })}
                                     rows={2}
-                                    placeholder="Mağaza hakkında kısa açıklama..."
+                                    placeholder={t('adminPanel.shopAccounts.placeholders.description', 'Mağaza hakkında kısa açıklama...')}
                                 />
                             </div>
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Açıklama (Almanca)</label>
+                                    <label>{t('adminPanel.shopAccounts.form.descriptionDe', 'Açıklama (Almanca)')}</label>
                                     <textarea
                                         value={formData.description_de}
                                         onChange={(e) => setFormData({ ...formData, description_de: e.target.value })}
@@ -521,7 +514,7 @@ const AdminShopAccounts = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Açıklama (İngilizce)</label>
+                                    <label>{t('adminPanel.shopAccounts.form.descriptionEn', 'Açıklama (İngilizce)')}</label>
                                     <textarea
                                         value={formData.description_en}
                                         onChange={(e) => setFormData({ ...formData, description_en: e.target.value })}
@@ -531,7 +524,7 @@ const AdminShopAccounts = () => {
                             </div>
 
                             {/* Contact Info */}
-                            <h4 style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>📞 İletişim Bilgileri</h4>
+                            <h4 style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>📞 {t('adminPanel.shopAccounts.form.contactInfo', 'İletişim Bilgileri')}</h4>
                             <div className="form-row">
                                 <div className="form-group">
                                     <label>WhatsApp</label>
@@ -543,7 +536,7 @@ const AdminShopAccounts = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Telefon</label>
+                                    <label>{t('adminPanel.shopAccounts.form.phone', 'Telefon')}</label>
                                     <input
                                         type="text"
                                         value={formData.contact_phone}
@@ -555,7 +548,7 @@ const AdminShopAccounts = () => {
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>İletişim Email</label>
+                                    <label>{t('adminPanel.shopAccounts.form.contactEmail', 'İletişim Email')}</label>
                                     <input
                                         type="email"
                                         value={formData.contact_email}
@@ -564,7 +557,7 @@ const AdminShopAccounts = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Website</label>
+                                    <label>{t('adminPanel.shopAccounts.form.website', 'Website')}</label>
                                     <input
                                         type="url"
                                         value={formData.website_url}
@@ -583,13 +576,13 @@ const AdminShopAccounts = () => {
                                         onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                                         style={{ marginRight: '8px' }}
                                     />
-                                    Mağaza Aktif
+                                    {t('adminPanel.shopAccounts.form.active', 'Mağaza Aktif')}
                                 </label>
                             </div>
 
                             <div className="modal-actions">
-                                <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>İptal</button>
-                                <button type="submit" className="btn-primary">{editingAccount ? 'Güncelle' : 'Oluştur'}</button>
+                                <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>{t('common.cancel', 'İptal')}</button>
+                                <button type="submit" className="btn-primary">{editingAccount ? t('common.save', 'Güncelle') : t('common.add', 'Oluştur')}</button>
                             </div>
                         </form>
                     </div>

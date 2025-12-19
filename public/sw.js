@@ -1,5 +1,5 @@
 // KolayDugun PWA Service Worker
-const CACHE_NAME = 'kolaydugun-v1';
+const CACHE_NAME = 'kolaydugun-v2';
 const ASSETS_TO_PRECACHE = [
     '/',
     '/index.html',
