@@ -203,7 +203,7 @@ const LeadsViewer = (props) => {
             <h2>{t('dashboard.inquiriesLabel')}</h2>
             {leads.length === 0 ? (
                 <div className="alert-info" style={{ padding: '1rem', background: '#e0f2fe', borderRadius: '8px', color: '#0369a1' }}>
-                    <p>{t('dashboard.leads.noLeads')}</p>
+                    <p>{t('leads.noLeads')}</p>
                 </div>
             ) : (
                 <div className="leads-list">

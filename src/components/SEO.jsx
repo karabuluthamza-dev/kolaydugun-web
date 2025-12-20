@@ -19,14 +19,23 @@ const SEO = ({
     const siteName = 'KolayDugun.de';
     const defaultDescription = 'Find the best wedding vendors in Germany. Turkish & International weddings made easy.';
 
-    // Use the uploaded OG image if available, fallback to logo, then default
-    const defaultImage = settings?.og_image_url || settings?.logo_url || 'https://kolaydugun.de/og-image.jpg';
+    // Use the provided image, then settings images, then default fallback
+    const defaultImage = settings?.og_image_url || settings?.logo_url || '/og-image.jpg';
     const siteUrl = 'https://kolaydugun.de';
 
     const fullTitle = title ? `${title} | ${siteName}` : siteName;
     const fullDescription = description || defaultDescription;
     const fullUrl = url ? `${siteUrl}${url}` : siteUrl;
-    const fullImage = image || defaultImage;
+
+    // Ensure image is an absolute URL
+    let fullImage = image || defaultImage;
+
+    // Support for Supabase Storage paths if they don't start with http
+    if (fullImage && !fullImage.startsWith('http')) {
+        // If it starts with vendors/ or similar, it might be a Supabase path. 
+        // For now, assume it's relative to the main site or needs the full origin.
+        fullImage = `${siteUrl}${fullImage.startsWith('/') ? '' : '/'}${fullImage}`;
+    }
 
     return (
         <Helmet>

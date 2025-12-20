@@ -10,6 +10,7 @@ import LeadsViewer from '../components/VendorDashboard/LeadsViewer';
 import VendorMessages from '../components/VendorDashboard/VendorMessages';
 import VendorShop from '../components/VendorDashboard/VendorShop';
 import VendorWallet from './VendorWallet';
+import { useDragScroll } from '../hooks/useDragScroll';
 import './VendorDashboard.css';
 
 const VendorDashboard = () => {
@@ -21,6 +22,7 @@ const VendorDashboard = () => {
     // Initialize tab from URL or default to 'overview'
     const initialTab = searchParams.get('tab') || 'overview';
     const [activeTab, setActiveTab] = useState(initialTab);
+    const scrollRef = useDragScroll();
 
     // Sync activeTab with URL params
     useEffect(() => {
@@ -157,7 +159,7 @@ const VendorDashboard = () => {
                             <div className="flex gap-4">
                                 <div className="stat-pill">
                                     <span className={`badge badge-${vendor?.subscription_tier || 'free'}`}>
-                                        {t(`dashboard.tiers.${vendor?.subscription_tier || 'free'}`)}
+                                        {t(`dashboard.tiers.${vendor?.subscription_tier || 'free'}.name`)}
                                     </span>
                                 </div>
                             </div>
@@ -363,7 +365,7 @@ const VendorDashboard = () => {
                             </div>
                             <div className="stat-card">
                                 <h3>{t('dashboard.package')}</h3>
-                                <p className="text-sm opacity-70">{t(`dashboard.tiers.${vendor?.subscription_tier || 'free'}`)}</p>
+                                <p className="text-sm opacity-70">{t(`dashboard.tiers.${vendor?.subscription_tier || 'free'}.name`)}</p>
                             </div>
                         </div>
 
@@ -418,7 +420,7 @@ const VendorDashboard = () => {
 
     return (
         <div className="section container dashboard-layout">
-            <aside className="dashboard-sidebar">
+            <aside className="dashboard-sidebar" ref={scrollRef}>
                 {/* Shop Marketplace Promo Card - Compact */}
                 <div className="shop-promo-card" style={{
                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',

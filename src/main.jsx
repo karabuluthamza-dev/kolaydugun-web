@@ -159,9 +159,9 @@ const paypalOptions = {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <PayPalScriptProvider options={paypalOptions}>
-        <HelmetProvider>
-          <AuthProvider>
+      <AuthProvider>
+        <PayPalScriptProvider options={paypalOptions}>
+          <HelmetProvider>
             <LanguageProvider>
               <PWAInstallProvider>
                 <SiteSettingsProvider>
@@ -177,9 +177,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 </SiteSettingsProvider>
               </PWAInstallProvider>
             </LanguageProvider>
-          </AuthProvider>
-        </HelmetProvider>
-      </PayPalScriptProvider>
+          </HelmetProvider>
+        </PayPalScriptProvider>
+      </AuthProvider>
     </ErrorBoundary>
   </React.StrictMode>,
 );

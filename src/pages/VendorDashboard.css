@@ -140,15 +140,40 @@
     .dashboard-layout {
         grid-template-columns: 1fr;
         gap: 1rem;
+        padding-top: 10px;
     }
 
     .dashboard-sidebar {
-        padding: 1rem;
-        position: static;
+        padding: 0.75rem;
+        position: sticky;
+        top: 70px;
+        /* Adjust based on your header height */
+        z-index: 100;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        border-radius: 8px;
-        margin-bottom: 1rem;
+        border-radius: 12px;
+        margin-bottom: 0.5rem;
+        background: white;
+        border: 1px solid #f1f5f9;
+        /* Hide scrollbar while keeping scroll functionality */
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+
+        /* Drag to scroll support */
+        cursor: grab;
+        user-select: none;
+
+        /* Fade effect to indicate more content */
+        mask-image: linear-gradient(to right, black 90%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to right, black 90%, transparent 100%);
+    }
+
+    .dashboard-sidebar.dragging {
+        cursor: grabbing;
+    }
+
+    .dashboard-sidebar::-webkit-scrollbar {
+        display: none;
     }
 
     .sidebar-header {
@@ -157,8 +182,10 @@
 
     .sidebar-nav {
         flex-direction: row;
+        flex-wrap: nowrap;
         min-width: max-content;
-        padding-bottom: 5px;
+        gap: 0.5rem;
+        padding: 4px 8px;
     }
 
     .sidebar-nav button {
@@ -166,23 +193,49 @@
         padding: 0.5rem 1rem;
         background: #f8fafc;
         border: 1px solid #e2e8f0;
+        font-size: 0.85rem;
+        height: 40px;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .sidebar-nav button.active {
         background: var(--color-primary);
+        color: white;
         border-color: var(--color-primary);
+        box-shadow: 0 4px 10px rgba(255, 107, 157, 0.2);
     }
 
     .dashboard-content {
-        padding: 1rem;
+        padding: 1.25rem;
+        border-radius: 16px;
     }
 
     .dashboard-welcome {
-        padding: 1.5rem;
+        padding: 2rem 1rem;
+    }
+
+    .dashboard-welcome h1 {
+        font-size: 1.75rem;
     }
 
     .stats-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .ai-insight-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .insight-card-premium {
+        padding: 20px !important;
+    }
+
+    .score-container {
+        margin-bottom: 15px;
     }
 }
 

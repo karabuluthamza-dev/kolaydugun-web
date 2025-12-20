@@ -71,10 +71,10 @@ const Navbar = () => {
                         <img
                             src={settings.logo_url}
                             alt="KolayDugun.de"
-                            style={{ height: '40px', objectFit: 'contain' }}
+                            style={{ height: '35px', maxWidth: '180px', objectFit: 'contain' }}
                         />
                     ) : (
-                        'KolayDugun.de'
+                        <span style={{ fontSize: '1.2rem' }}>KolayDugun.de</span>
                     )}
                 </Link>
 
@@ -229,7 +229,7 @@ const Navbar = () => {
                                         gap: '4px',
                                         background: '#9333ea',
                                         color: 'white',
-                                        padding: '6px 10px',
+                                        padding: '5px 8px', /* Reduced from 6px 10px */
                                         borderRadius: '18px',
                                         textDecoration: 'none',
                                         fontWeight: '500',
@@ -260,7 +260,7 @@ const Navbar = () => {
                                         gap: '4px',
                                         background: 'linear-gradient(135deg, #10b981, #059669)',
                                         color: 'white',
-                                        padding: '6px 12px',
+                                        padding: '5px 10px', /* Reduced from 6px 12px */
                                         borderRadius: '18px',
                                         textDecoration: 'none',
                                         fontWeight: '500',
@@ -290,7 +290,7 @@ const Navbar = () => {
                                         gap: '4px',
                                         background: '#ff6b6b',
                                         color: 'white',
-                                        padding: '6px 10px',
+                                        padding: '5px 8px', /* Reduced from 6px 10px */
                                         borderRadius: '18px',
                                         textDecoration: 'none',
                                         fontWeight: '500',
@@ -333,7 +333,7 @@ const Navbar = () => {
                                     background: 'transparent',
                                     border: '1px solid #e0e0e0',
                                     color: '#666',
-                                    padding: '6px 12px',
+                                    padding: '5px 10px', /* Reduced from 6px 12px */
                                     borderRadius: '20px',
                                     fontSize: '0.85rem',
                                     cursor: 'pointer',

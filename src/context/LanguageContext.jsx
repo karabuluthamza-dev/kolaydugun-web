@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import i18n from '../i18n';
 import { useTranslations } from '../hooks/useTranslations';
 import { dictionary } from '../locales/dictionary';
@@ -65,51 +65,48 @@ export const LanguageProvider = ({ children }) => {
 
         if (translationFailed) {
             try {
+                // Try direct dictionary lookup as safety net
                 const parts = key.split('.');
-                let current;
-                let startIndex = 0;
-
-                // FORCE FALLBACK for community to bypass potential i18n/context staleness
-                if (parts[0] === 'community') {
-                    current = community; // Use the imported community object
-                    startIndex = 1; // Start traversing from the second part
-                } else {
-                    current = dictionary; // Default to dictionary
-                }
-
-                for (let i = startIndex; i < parts.length; i++) {
-                    const part = parts[i];
-                    if (current && typeof current === 'object' && current[part]) {
-                        current = current[part];
-                    } else {
-                        // Key path not found, return fallback or key
-                        return fallbackValue || key;
+                let current = dictionary;
+                for (const part of parts) {
+                    if (current[part] === undefined) {
+                        current = null;
+                        break;
                     }
+                    current = current[part];
                 }
 
-                // Current should now be the translation object {en:..., tr:..., de:...}
+                let finalString = '';
                 if (current && typeof current === 'object') {
-                    const lang = language || i18n.language || 'tr';
-                    const translation = current[lang] || current['en'];
-                    return translation || fallbackValue || key;
+                    finalString = current[language] || current['de'] || current['en'] || fallbackValue || key;
+                } else if (typeof current === 'string') {
+                    finalString = current;
+                } else {
+                    finalString = fallbackValue || key;
                 }
+
+                // Simple interpolation for fallback (replaces {{key}} with options.key)
+                if (typeof finalString === 'string' && options && typeof options === 'object') {
+                    Object.keys(options).forEach(optKey => {
+                        finalString = finalString.replace(new RegExp(`{{${optKey}}}`, 'g'), options[optKey]);
+                    });
+                }
+                return finalString;
             } catch (e) {
-                console.warn('Translation fallback failed:', e);
+                console.warn('[I18N] Translation fallback failed for key:', key, e);
                 return fallbackValue || key;
             }
         }
-
         return result;
     };
 
-    const value = {
+    const value = useMemo(() => ({
         language,
         changeLanguage,
         t,
-        loading
-    };
-
-    console.log('[DEBUG] LanguageProvider rendering with value:', { language, loading });
+        loading,
+        translations
+    }), [language, loading, translations]);
 
     return (
         <LanguageContext.Provider value={value}>
@@ -121,12 +118,20 @@ export const LanguageProvider = ({ children }) => {
 export const useLanguage = () => {
     const context = useContext(LanguageContext);
     if (!context) {
-        console.warn('[CRITICAL] useLanguage was called outside of a LanguageProvider! Returning fallback to prevent crash.');
+        // Find which component is calling this outside of provider
+        const stack = new Error().stack;
+        const callerName = stack?.split('\n')?.[2]?.trim() || 'Unknown';
+
+        console.warn(`[CRITICAL] useLanguage was called outside of a LanguageProvider! 
+            Caller: ${callerName}
+            Returning fallback to prevent crash.`);
+
         return {
-            language: 'tr',
-            changeLanguage: () => { },
-            t: (key) => key,
-            loading: false
+            language: i18n.language || 'tr',
+            changeLanguage: (lng) => i18n.changeLanguage(lng),
+            t: (key) => i18n.t(key) || key,
+            loading: false,
+            translations: {}
         };
     }
     return context;

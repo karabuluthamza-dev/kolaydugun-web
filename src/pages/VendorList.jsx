@@ -282,9 +282,19 @@ const VendorList = () => {
                                     <VendorCardSkeleton key={index} />
                                 ))
                             ) : currentVendors.length > 0 ? (
-                                currentVendors.map(vendor => (
-                                    <VendorCard key={vendor.id} {...vendor} />
-                                ))
+                                currentVendors.map(vendor => {
+                                    // DEBUG: Log claim fields for Test Claimable Vendor
+                                    if (vendor.business_name?.includes('Claimable') || vendor.name?.includes('Claimable')) {
+                                        console.log('[VendorList] Claimable vendor props:', {
+                                            name: vendor.business_name || vendor.name,
+                                            user_id: vendor.user_id,
+                                            is_claimed: vendor.is_claimed,
+                                            is_verified: vendor.is_verified,
+                                            id: vendor.id
+                                        });
+                                    }
+                                    return <VendorCard key={vendor.id} {...vendor} />;
+                                })
                             ) : (
                                 <div className="no-vendors-message">
                                     <p className="no-vendors-text">{t('vendors.noResults') || 'Seçilen filtrelere uygun tedarikçi bulunamadı.'}</p>

@@ -350,22 +350,16 @@ export const dictionary = {
                 de: "Zusätzliche Kategorien",
                 tr: "Ek Kategoriler"
             },
-            videoUrl: {
-                en: "Video URL",
-                de: "Video-URL",
-                tr: "Video Linki"
-            },
-            videoHint: {
-                en: "Paste your YouTube or Vimeo link here. It will appear on your profile.",
-                de: "Fügen Sie hier Ihren YouTube- oder Vimeo-Link ein. Er wird auf Ihrem Profil angezeigt.",
-                tr: "Tanıtım videonuzun linkini buraya yapıştırın. Profilinizde görünecektir."
-            },
-            locationSettings: { en: "Location Settings", de: "Standorteinstellungen", tr: "Konum Ayarları" },
-            useMyLocation: { en: "Use My Location", de: "Meinen Standort verwenden", tr: "Konumumu Kullan" },
-            latitude: { en: "Latitude", de: "Breitengrad", tr: "Enlem" },
-            longitude: { en: "Longitude", de: "Längengrad", tr: "Boylam" }
+            longitude: { en: "Longitude", de: "Längengrad", tr: "Boylam" },
+            additionalCategories: { en: "Additional Categories", de: "Zusätzliche Kategorien", tr: "Ek Kategoriler" },
+            videoUrl: { en: "Video URL", de: "Video-URL", tr: "Video Linki" },
+            videoHint: { en: "Paste your YouTube or Vimeo link here. It will appear on your profile.", en: "Paste your YouTube or Vimeo link here. It will appear on your profile.", de: "Fügen Sie hier Ihren YouTube- oder Vimeo-Link ein. Er wird auf Ihrem Profil angezeigt.", tr: "Tanıtım videonuzun linkini buraya yapıştırın. Profilinizde görünecektir." }
         },
-        services: { en: "Services", de: "Leistungen", tr: "Hizmetler" },
+        services: {
+            title: { en: "Services", de: "Leistungen", tr: "Hizmetler" },
+            add: { en: "Add", de: "Hinzufügen", tr: "Ekle" },
+            empty: { en: "No content yet.", de: "Noch kein Inhalt.", tr: "Henüz içerik yok." }
+        },
         calendar: { en: "Calendar", de: "Kalender", tr: "Takvim" },
         settings: { en: "Settings", de: "Einstellungen", tr: "Ayarlar" },
         views: { en: "Profile Views", de: "Profilaufrufe", tr: "Profil Görüntülenme" },
@@ -522,6 +516,30 @@ export const dictionary = {
 
         leads: {
             noLeads: { en: "No inquiries yet.", de: "Noch keine Anfragen.", tr: "Henüz talep yok." }
+        },
+        vendorLeads: {
+            title: { en: "Quote Requests", de: "Angebotsanfragen", tr: "Teklif İstekleri" },
+            date: { en: "Event Date", de: "Veranstaltungsdatum", tr: "Etkinlik Tarihi" },
+            guests: { en: "Guests", de: "Gäste", tr: "Davetli Sayısı" },
+            phone: { en: "Phone", de: "Telefon", tr: "Telefon" },
+            email: { en: "Email", de: "E-Mail", tr: "E-Posta" },
+            status: { en: "Status", de: "Status", tr: "Durum" },
+            notes: { en: "My Notes", de: "Meine Notizen", tr: "Notlarım" },
+            notesPlaceholder: { en: "Add personal notes about this lead...", de: "Persönliche Notizen zu dieser Anfrage hinzufügen...", tr: "Bu talep hakkında kişisel notlar ekleyin..." },
+            saved: { en: "Saved", de: "Gespeichert", tr: "Kaydedildi" },
+            unlockBtn: { en: "🔓 Unlock Contact Info", de: "🔓 Kontaktdaten freischalten", tr: "🔓 İletişim Bilgilerini Aç" },
+            processing: { en: "Processing...", de: "Wird verarbeitet...", tr: "İşleniyor..." },
+            statuses: {
+                new: { en: "New", de: "Neu", tr: "Yeni" },
+                contacted: { en: "Contacted", de: "Kontaktiert", tr: "İletişime Geçildi" },
+                booked: { en: "Booked", de: "Gebucht", tr: "Anlaşıldı" },
+                lost: { en: "Lost", de: "Verloren", tr: "Olumsuz" }
+            },
+            alerts: {
+                statusError: { en: "Error updating status", de: "Fehler beim Aktualisieren des Status", tr: "Durum güncellenirken hata oluştu" },
+                unlockSuccess: { en: "Contact unlocked! New balance: ", de: "Kontakt freigeschaltet! Neues Guthaben: ", tr: "İletişim bilgileri açıldı! Yeni bakiye: " },
+                genericError: { en: "An error occurred", de: "Ein Fehler ist aufgetreten", tr: "Bir hata oluştu" }
+            }
         },
         faq: {
             title: { en: "FAQ", de: "Häufig gestellte Fragen", tr: "Sıkça Sorulan Sorular" },
@@ -3868,22 +3886,6 @@ export const dictionary = {
         req_backstage: { tr: "Kulis", en: "Backstage", de: "Backstage" },
         req_high_ceiling: { tr: "Yüksek Tavan", en: "High Ceiling", de: "Hohe Decke" }
     },
-    vendorWallet: {
-        title: { en: "Wallet", de: "Geldbörse", tr: "Cüzdan" },
-        desc: { en: "View and manage your credit balance.", de: "Guthaben einsehen und verwalten.", tr: "Kredi bakiyenizi görüntüleyin ve yönetin." },
-        currentBalance: { en: "Current Balance", de: "Aktuelles Guthaben", tr: "Mevcut Bakiye" },
-        credits: { en: "Credits", de: "Credits", tr: "Kredi" },
-        history: { en: "Transaction History", de: "Transaktionsverlauf", tr: "İşlem Geçmişi" },
-        noTxn: { en: "No transactions yet", de: "Noch keine Transaktionen", tr: "Henüz işlem yok" },
-        purchase: { en: "Credit Purchase", de: "Credit-Kauf", tr: "Kredi Yükleme" },
-        usage: { en: "Credit Usage", de: "Credit-Nutzung", tr: "Kredi Kullanımı" },
-        packagesTitle: { en: "Credit Packages", de: "Credit-Pakete", tr: "Kredi Paketleri" },
-        loadingPackages: { en: "Loading packages...", de: "Pakete werden geladen...", tr: "Paketler yükleniyor..." },
-        buyBtn: { en: "Buy Now", de: "Jetzt kaufen", tr: "Satın Al" },
-        confirmPurchase: { en: "Do you want to buy {name} ({credits} Credits) for €{price}?", de: "Möchten Sie {name} ({credits} Credits) für €{price} kaufen?", tr: "{name} ({credits} Kredi) satın almak istiyor musunuz? Tutar: €{price}" },
-        purchaseSuccess: { en: "✅ Credits added successfully!", de: "✅ Credits erfolgreich hinzugefügt!", tr: "✅ Kredi başarıyla yüklendi!" },
-        purchaseError: { en: "Purchase failed.", de: "Kauf fehlgeschlagen.", tr: "Satın alma işlemi başarısız oldu." }
-    },
     timeline: {
         title: {
             en: "My Agenda",
@@ -5918,45 +5920,75 @@ dictionary.shop = {
         myProducts: { en: "My Products", de: "Meine Produkte", tr: "Ürünlerim" },
         pendingApproval: { en: "Pending admin approval", de: "Wartet auf Genehmigung", tr: "Admin onayı bekleniyor" },
         rejectionReason: { en: "Rejection reason", de: "Ablehnungsgrund", tr: "Red nedeni" }
-    },
+    }
+};
 
-    // Help texts
-    help: {
-        imageUrl: {
-            en: "Upload your image to Google Drive, Imgur, or your own website, then paste the link here.",
-            de: "Laden Sie Ihr Bild auf Google Drive, Imgur oder Ihre eigene Website hoch und fügen Sie den Link hier ein.",
-            tr: "Görseli Google Drive, Imgur veya kendi sitenize yükleyip linki buraya yapıştırın."
-        },
-        imageUrlLink: { en: "How to get image link?", de: "Wie bekomme ich den Bildlink?", tr: "Görsel linki nasıl alınır?" },
-        price: {
-            en: "Enter price with comma (e.g. 49,99). Currency is set to EUR by default.",
-            de: "Geben Sie den Preis mit Komma ein (z.B. 49,99). Währung ist standardmäßig EUR.",
-            tr: "Fiyatı virgülle yazın (örn: 49,99). Para birimi otomatik EUR olarak ayarlanır."
-        },
-        category: {
-            en: "Select the most relevant category for your product.",
-            de: "Wählen Sie die relevanteste Kategorie für Ihr Produkt.",
-            tr: "Ürününüz için en uygun kategoriyi seçin."
-        }
+// Help texts
+dictionary.help = {
+    imageUrl: {
+        en: "Upload your image to Google Drive, Imgur, or your own website, then paste the link here.",
+        de: "Laden Sie Ihr Bild auf Google Drive, Imgur oder Ihre eigene Website hoch und fügen Sie den Link hier ein.",
+        tr: "Görseli Google Drive, Imgur veya kendi sitenize yükleyip linki buraya yapıştırın."
     },
+    imageUrlLink: { en: "How to get image link?", de: "Wie bekomme ich den Bildlink?", tr: "Görsel linki nasıl alınır?" },
+    price: {
+        en: "Enter price with comma (e.g. 49,99). Currency is set to EUR by default.",
+        de: "Geben Sie den Preis mit Komma ein (z.B. 49,99). Währung ist standardmäßig EUR.",
+        tr: "Fiyatı virgülle yazın (örn: 49,99). Para birimi otomatik EUR olarak ayarlanır."
+    },
+    category: {
+        en: "Select the most relevant category for your product.",
+        de: "Wählen Sie die relevanteste Kategorie für Ihr Produkt.",
+        tr: "Ürününüz için en uygun kategoriyi seçin."
+    }
+};
 
-    // Admin
-    admin: {
-        title: { en: "Shop Management", de: "Shop-Verwaltung", tr: "Mağaza Yönetimi" },
-        categories: { en: "Categories", de: "Kategorien", tr: "Kategoriler" },
-        products: { en: "Products", de: "Produkte", tr: "Ürünler" },
-        inquiries: { en: "Inquiries", de: "Anfragen", tr: "İletişim Talepleri" },
-        pendingProducts: { en: "Pending Approval", de: "Zur Genehmigung", tr: "Onay Bekleyenler" },
-        approve: { en: "Approve", de: "Genehmigen", tr: "Onayla" },
-        reject: { en: "Reject", de: "Ablehnen", tr: "Reddet" },
-        rejectReason: { en: "Rejection Reason", de: "Ablehnungsgrund", tr: "Red Nedeni" },
-        rejectReasons: {
-            imageQuality: { en: "Image quality is insufficient", de: "Bildqualität ist unzureichend", tr: "Görsel kalitesi yetersiz" },
-            descriptionMissing: { en: "Description is missing or unclear", de: "Beschreibung fehlt oder ist unklar", tr: "Açıklama eksik veya belirsiz" },
-            priceError: { en: "Price information is incorrect", de: "Preisinformation ist falsch", tr: "Fiyat bilgisi hatalı" },
-            categoryWrong: { en: "Wrong category selected", de: "Falsche Kategorie ausgewählt", tr: "Yanlış kategori seçilmiş" },
-            other: { en: "Other (specify)", de: "Andere (angeben)", tr: "Diğer (belirtin)" }
-        }
+// Admin
+dictionary.admin = {
+    title: { en: "Shop Management", de: "Shop-Verwaltung", tr: "Mağaza Yönetimi" },
+    categories: { en: "Categories", de: "Kategorien", tr: "Kategoriler" },
+    products: { en: "Products", de: "Produkte", tr: "Ürünler" },
+    inquiries: { en: "Inquiries", de: "Anfragen", tr: "İletişim Talepleri" },
+    pendingProducts: { en: "Pending Approval", de: "Zur Genehmigung", tr: "Onay Bekleyenler" },
+    approve: { en: "Approve", de: "Genehmigen", tr: "Onayla" },
+    reject: { en: "Reject", de: "Ablehnen", tr: "Reddet" },
+    rejectReason: { en: "Rejection Reason", de: "Ablehnungsgrund", tr: "Red Nedeni" },
+    rejectReasons: {
+        imageQuality: { en: "Image quality is insufficient", de: "Bildqualität ist unzureichend", tr: "Görsel kalitesi yetersiz" },
+        descriptionMissing: { en: "Description is missing or unclear", de: "Beschreibung fehlt oder ist unklar", tr: "Açıklama eksik veya belirsiz" },
+        priceError: { en: "Price information is incorrect", de: "Preisinformation ist falsch", tr: "Fiyat bilgisi hatalı" },
+        categoryWrong: { en: "Wrong category selected", de: "Falsche Kategorie ausgewählt", tr: "Yanlış kategori seçilmiş" },
+        other: { en: "Other (specify)", de: "Andere (angeben)", tr: "Diğer (belirtin)" }
+    },
+    vendors: {
+        modal: {
+            title: { en: "Add New Vendor", de: "Neuen Anbieter hinzufügen", tr: "Yeni Tedarikçi Ekle" },
+            isClaimable: { en: "Unclaimed (Claimable)", de: "Nicht beansprucht (Claimable)", tr: "Sahibi Yok (Claim Edilebilir)" },
+            isClaimableDesc: {
+                en: "If active, no auth user is created and profile appears with 'Claim' button.",
+                de: "Wenn aktiv, wird kein Benutzerkonto erstellt und das Profil erscheint mit dem Button 'Beanspruchen'.",
+                tr: "Bu seçenek aktifse, kullanıcı hesabı oluşturulmaz ve profil 'Sahiplen' butonu ile görünür."
+            },
+            email: { en: "Email", de: "E-Mail", tr: "E-posta" },
+            password: { en: "Password", de: "Passwort", tr: "Şifre" },
+            businessName: { en: "Business Name", de: "Firma Name", tr: "İşletme Adı" },
+            category: { en: "Category", de: "Kategorie", tr: "Kategori" },
+            city: { en: "City", de: "Stadt", tr: "Şehir" },
+            priceRange: { en: "Price Range", de: "Preisklasse", tr: "Fiyat Aralığı" },
+            capacity: { en: "Capacity", de: "Kapazität", tr: "Kapasite" },
+            cancel: { en: "Cancel", de: "Abbrechen", tr: "İptal" },
+            create: { en: "Create", de: "Erstellen", tr: "Oluştur" },
+            creating: { en: "Creating...", de: "Wird erstellt...", tr: "Oluşturuluyor..." },
+            success: { en: "✅ Vendor created successfully!", de: "✅ Anbieter erfolgreich erstellt!", tr: "✅ Tedarikçi başarıyla oluşturuldu!" },
+            error: { en: "Error creating vendor: ", de: "Fehler beim Erstellen des Anbieters: ", tr: "Tedarikçi oluşturulurken hata: " },
+            select: { en: "Select...", de: "Auswählen...", tr: "Seçiniz" }
+        },
+        pwa: {
+            install: { en: "Install App", de: "App installieren", tr: "Uygulamayı Yükle" },
+            installText: { en: "Install KolayDüğün for better experience!", de: "Installieren Sie KolayDüğün für ein besseres Erlebnis!", tr: "Daha iyi bir deneyim için KolayDüğün'ü yükleyin!" },
+            iosInstructions: { en: "Tap Share and then 'Add to Home Screen' to install KolayDüğün.", de: "Tippen Sie auf Teilen ve dann auf 'Zum Home-Bildschirm', um KolayDüğün zu installieren.", tr: "KolayDüğün'ü yüklemek için Paylaş'a ve ardından 'Ana Ekrana Ekle'ye dokunun." }
+        },
+        logout: { en: "Logout", de: "Abmelden", tr: "Çıkış Yap" }
     }
 };
 

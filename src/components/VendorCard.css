@@ -1,24 +1,25 @@
 .vendor-card {
     background: white;
-    border-radius: 20px;
+    border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     display: flex;
     flex-direction: column;
     height: 100%;
     position: relative;
-    border: 1px solid rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .vendor-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1), 0 10px 20px -10px rgba(0, 0, 0, 0.05);
+    border-color: rgba(255, 107, 157, 0.2);
 }
 
 .vendor-card-image-wrapper {
     position: relative;
-    height: 260px;
+    height: 240px;
     overflow: hidden;
 }
 
@@ -26,139 +27,140 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.8s ease;
+    transition: transform 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .vendor-card:hover .vendor-card-image {
-    transform: scale(1.08);
+    transform: scale(1.1);
 }
 
-/* Gradient Overlay for better contrast if needed, though we keep text below for now */
 .vendor-card-image-wrapper::after {
     content: '';
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 30%;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
+    height: 40%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
     pointer-events: none;
+    opacity: 0.6;
 }
 
 .vendor-card-badge {
     position: absolute;
     top: 16px;
     left: 16px;
-    background: rgba(255, 255, 255, 0.95);
-    color: var(--primary-color);
-    padding: 6px 14px;
-    border-radius: 30px;
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #1e293b;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     z-index: 2;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
+    letter-spacing: 0.2px;
+}
+
+.vendor-card-badge.featured {
+    background: linear-gradient(135deg, #FF6B9D, #ff8e53);
+    color: white;
+    border: none;
+}
+
+.vendor-card-badge.top-rated {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: white;
 }
 
 .vendor-card-favorite {
     position: absolute;
     top: 16px;
     right: 16px;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.9);
     border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     z-index: 2;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
 }
 
 .vendor-card-favorite:hover {
     background: white;
-    transform: scale(1.15);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transform: scale(1.1);
+}
+
+.vendor-card-favorite.active {
+    background: #fff1f2;
 }
 
 .vendor-card-content {
-    padding: 1.75rem;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
     flex: 1;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .vendor-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.25rem;
 }
 
 .vendor-card-category {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    /* Slate 400 */
+    font-size: 0.7rem;
+    color: #64748b;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
 }
 
 .vendor-card-rating {
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: #1e293b;
     background: #fffbeb;
-    padding: 4px 8px;
-    border-radius: 8px;
+    padding: 2px 8px;
+    border-radius: 6px;
 }
 
 .star {
     color: #fbbf24;
-    font-size: 1rem;
+}
+
+.score {
+    color: #1e293b;
 }
 
 .reviews {
-    color: #94a3b8;
+    color: #64748b;
+    font-size: 0.75rem;
     font-weight: 500;
-    font-size: 0.8rem;
-    margin-left: 2px;
 }
 
 .vendor-card-title {
-    font-size: 1.4rem;
+    font-size: 1.25rem;
     font-weight: 800;
     margin: 0;
     line-height: 1.3;
-    color: #1e293b;
-    /* Slate 800 */
+    color: #0f172a;
 }
 
 .vendor-card-title a {
     color: inherit;
     text-decoration: none;
-    transition: color 0.2s;
-    background-image: linear-gradient(var(--primary-color), var(--primary-color));
-    background-size: 0% 2px;
-    background-position: left bottom;
-    background-repeat: no-repeat;
-    transition: background-size 0.3s;
-}
-
-.vendor-card-title a:hover {
-    color: var(--primary-color);
-    background-size: 100% 2px;
 }
 
 .vendor-card-location {
@@ -166,9 +168,7 @@
     align-items: center;
     gap: 6px;
     color: #64748b;
-    /* Slate 500 */
-    font-size: 0.95rem;
-    margin-bottom: 1rem;
+    font-size: 0.9rem;
     font-weight: 500;
 }
 
@@ -178,95 +178,69 @@
     align-items: center;
     justify-content: space-between;
     padding-top: 1.25rem;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid #f8fafc;
 }
 
 .vendor-card-price {
     font-weight: 700;
     color: #334155;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
-/* Claim Badge Specifics */
-.vendor-card-badge.claim-badge {
-    top: 10px;
-    left: 10px;
-    background: rgba(255, 255, 255, 0.95);
-    color: #e91e63;
-    border: 1px solid #e91e63;
-    font-size: 0.7rem;
+.vendor-card-cta {
+    background: #1e293b !important;
+    color: white !important;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 0.85rem;
     font-weight: 700;
-    padding: 6px 10px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
     text-decoration: none;
-    transition: all 0.2s ease;
-    text-transform: none !important;
+    transition: all 0.3s ease;
 }
 
-.vendor-card-badge.claim-badge:hover {
-    background: #e91e63;
-    color: white;
+.vendor-card-cta:hover {
+    background: #0f172a !important;
     transform: scale(1.05);
 }
 
-/* Admin Shortcut - Visible but subtle */
+/* Claim & Verified Badges */
+.vendor-card-badge.claim-badge {
+    background: rgba(255, 255, 255, 0.95);
+    color: #be185d;
+    border: 1px solid #fce7f3;
+}
+
+.vendor-card-badge.claimed-badge {
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2) !important;
+}
+
+/* Admin Manage Button */
 .admin-manage-btn {
     position: absolute;
     bottom: 12px;
     left: 50%;
     transform: translateX(-50%);
-    background: #ffffff !important;
+    background: rgba(255, 255, 255, 0.95) !important;
     color: #334155 !important;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.8rem;
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 0.75rem;
     font-weight: 700;
-    text-decoration: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(8px);
     z-index: 10;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    visibility: visible !important;
 }
 
-.admin-manage-btn:hover {
-    background: #f8fafc !important;
-    transform: translateX(-50%) scale(1.05);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-    color: #FF6B9D !important;
-    /* Primary color hardcoded */
-    border-color: #FF6B9D !important;
-}
+@media (max-width: 640px) {
+    .vendor-card-image-wrapper {
+        height: 200px;
+    }
 
-/* Ensure CTA is solid and visible */
-.vendor-card-cta {
-    color: #ffffff !important;
-    /* Force white text */
-    font-weight: 700;
-    font-size: 0.95rem;
-    text-decoration: none;
-    padding: 12px 24px;
-    border-radius: 12px;
-    background: #FF6B9D !important;
-    /* Hardcoded Primary Color */
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
-    text-align: center;
-    min-width: 120px;
-    display: inline-block;
-}
+    .vendor-card-content {
+        padding: 1.25rem;
+    }
 
-.vendor-card-cta:hover {
-    background: #db2777 !important;
-    /* Hardcoded Darker Pink */
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(236, 72, 153, 0.4);
+    .vendor-card-title {
+        font-size: 1.1rem;
+    }
 }

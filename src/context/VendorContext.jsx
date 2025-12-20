@@ -292,6 +292,14 @@ export const VendorProvider = ({ children }) => {
             if (error) throw error;
 
             if (data && data.length > 0) {
+                // DEBUG: Log claim-related fields
+                console.log('[VendorContext] Raw vendor data sample:', data.slice(0, 3).map(v => ({
+                    name: v.business_name,
+                    user_id: v.user_id,
+                    is_claimed: v.is_claimed,
+                    is_verified: v.is_verified
+                })));
+
                 const mappedVendors = data.map(v => {
                     // Determine category image from DB
                     const normalizedCat = normalizeCategory(v.category);

@@ -14,7 +14,7 @@ const tempClient = createClient(supabaseUrl, supabaseAnonKey, {
     }
 });
 
-const VendorCreateModal = ({ onClose, onCreated }) => {
+const VendorCreateModal = ({ onClose, onSuccess }) => {
     const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -54,12 +54,15 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
                 });
 
                 if (authError) throw authError;
-                if (!authData.user) throw new Error('Kullanıcı oluşturulamadı.');
+                if (!authData.user) throw new Error(t('admin.vendors.modal.errorUser'));
 
                 userId = authData.user.id;
 
                 // Wait for triggers
                 await new Promise(r => setTimeout(r, 1000));
+            } else {
+                // For claimable vendors, generate a random ID
+                userId = crypto.randomUUID();
             }
 
             // Check if vendor entry exists
@@ -74,8 +77,9 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
                 const { error: vendorError } = await supabase
                     .from('vendors')
                     .insert([{
+                        id: userId, // CRITICAL: Explicitly set the ID
                         business_name: formData.businessName,
-                        user_id: userId,
+                        user_id: formData.isClaimable ? null : userId,
                         category: formData.category,
                         city: formData.city,
                         price_range: formData.price,
@@ -110,13 +114,13 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
                     .eq('id', userId);
             }
 
-            alert('✅ Tedarikçi başarıyla oluşturuldu!');
-            onCreated();
+            alert(t('admin.vendors.modal.success'));
+            onSuccess();
             onClose();
 
         } catch (error) {
             console.error('Create error:', error);
-            alert('Hata: ' + error.message);
+            alert(t('admin.vendors.modal.error') + error.message);
         } finally {
             setLoading(false);
         }
@@ -126,7 +130,7 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
         <div className="modal-overlay">
             <div className="modal-content">
                 <div className="modal-header">
-                    <h2>Yeni Tedarikçi Ekle</h2>
+                    <h2>{t('admin.vendors.modal.title')}</h2>
                     <button onClick={onClose} className="close-btn">&times;</button>
                 </div>
                 <form onSubmit={handleSubmit}>
@@ -138,17 +142,17 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
                                 checked={formData.isClaimable}
                                 onChange={handleChange}
                             />
-                            <strong>Sahibi Yok (Claim Edilebilir)</strong>
+                            <strong>{t('admin.vendors.modal.isClaimable')}</strong>
                         </label>
                         <p style={{ fontSize: '0.8rem', color: '#6B7280', marginTop: '4px' }}>
-                            Bu seçenek aktifse, kullanıcı hesabı oluşturulmaz ve profil "Sahiplen" butonu ile yayında görünür.
+                            {t('admin.vendors.modal.isClaimableDesc')}
                         </p>
                     </div>
 
                     {!formData.isClaimable && (
                         <>
                             <div className="form-group">
-                                <label>E-posta</label>
+                                <label>{t('admin.vendors.modal.email')}</label>
                                 <input
                                     type="email"
                                     name="email"
@@ -158,7 +162,7 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
                                 />
                             </div>
                             <div className="form-group">
-                                <label>Şifre</label>
+                                <label>{t('admin.vendors.modal.password')}</label>
                                 <input
                                     type="password"
                                     name="password"
@@ -171,7 +175,7 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
                         </>
                     )}
                     <div className="form-group">
-                        <label>İşletme Adı</label>
+                        <label>{t('admin.vendors.modal.businessName')}</label>
                         <input
                             type="text"
                             name="businessName"
@@ -181,7 +185,7 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
                         />
                     </div>
                     <div className="form-group">
-                        <label>Kategori</label>
+                        <label>{t('admin.vendors.modal.category')}</label>
                         <select name="category" value={formData.category} onChange={handleChange}>
                             {CATEGORIES.map(cat => (
                                 <option key={cat} value={cat}>
@@ -191,7 +195,7 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
                         </select>
                     </div>
                     <div className="form-group">
-                        <label>Şehir</label>
+                        <label>{t('admin.vendors.modal.city')}</label>
                         <select name="city" value={formData.city} onChange={handleChange}>
                             {CITIES.map(city => (
                                 <option key={city} value={city}>{city}</option>
@@ -199,9 +203,9 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
                         </select>
                     </div>
                     <div className="form-group">
-                        <label>Fiyat Aralığı</label>
+                        <label>{t('admin.vendors.modal.priceRange')}</label>
                         <select name="price" value={formData.price} onChange={handleChange} className="form-control">
-                            <option value="">Seçiniz</option>
+                            <option value="">{t('admin.vendors.modal.select')}</option>
                             <option value="€">{t('filters.price_1')}</option>
                             <option value="€€">{t('filters.price_2')}</option>
                             <option value="€€€">{t('filters.price_3')}</option>
@@ -209,7 +213,7 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
                         </select>
                     </div>
                     <div className="form-group">
-                        <label>Kapasite</label>
+                        <label>{t('admin.vendors.modal.capacity')}</label>
                         <input
                             type="number"
                             name="capacity"
@@ -219,9 +223,9 @@ const VendorCreateModal = ({ onClose, onCreated }) => {
                         />
                     </div>
                     <div className="modal-actions">
-                        <button type="button" onClick={onClose} className="btn btn-secondary">İptal</button>
+                        <button type="button" onClick={onClose} className="btn btn-secondary">{t('admin.vendors.modal.cancel')}</button>
                         <button type="submit" className="btn btn-primary" disabled={loading}>
-                            {loading ? 'Oluşturuluyor...' : 'Oluştur'}
+                            {loading ? t('admin.vendors.modal.creating') : t('admin.vendors.modal.create')}
                         </button>
                     </div>
                 </form>

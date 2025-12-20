@@ -11,6 +11,7 @@ const AdminClaims = () => {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('pending');
     const [processing, setProcessing] = useState(false);
+    const [actionModal, setActionModal] = useState({ show: false, type: '', request: null, reason: '' });
 
     useEffect(() => {
         fetchRequests();
@@ -23,8 +24,7 @@ const AdminClaims = () => {
                 .from('claim_requests')
                 .select(`
                     *,
-                    vendor:vendor_id(business_name, slug),
-                    profile:user_id(email)
+                    vendor:vendor_id(business_name, slug)
                 `)
                 .order('created_at', { ascending: false });
 
@@ -33,54 +33,66 @@ const AdminClaims = () => {
             }
 
             const { data, error } = await query;
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase Query Error:', error);
+                throw error;
+            }
             setRequests(data || []);
         } catch (error) {
             console.error('Error fetching claim requests:', error);
+            alert(t('common.error', 'Hata: ') + (error.message || 'Veriler yüklenemedi.'));
         } finally {
             setLoading(false);
         }
     };
 
     const handleApprove = async (request) => {
-        const confirmed = window.confirm(
-            strings.actions.confirmApprove(request.vendor?.business_name || 'Business', request.profile?.email || request.contact_email, language)
-        );
-        if (!confirmed) return;
-
-        setProcessing(true);
-        try {
-            const { error } = await supabase.rpc('approve_vendor_claim', {
-                p_request_id: request.id
-            });
-
-            if (error) throw error;
-            alert(t('common.vendorClaim.admin.actions.successApprove', 'Onaylandı ve sahiplik devredildi!'));
-            fetchRequests();
-        } catch (error) {
-            console.error('Approval error:', error);
-            alert(t('common.error', 'Hata: ') + error.message);
-        } finally {
-            setProcessing(false);
-        }
+        setActionModal({
+            show: true,
+            type: 'approve',
+            request: request,
+            reason: ''
+        });
     };
 
     const handleReject = async (request) => {
-        const reason = window.prompt(t('common.vendorClaim.admin.actions.rejectPrompt', 'Red sebebi girin:'));
-        if (reason === null) return;
+        setActionModal({
+            show: true,
+            type: 'reject',
+            request: request,
+            reason: ''
+        });
+    };
+
+    const confirmAction = async () => {
+        const { type, request, reason } = actionModal;
+        if (!request) return;
 
         setProcessing(true);
         try {
-            const { error } = await supabase.rpc('reject_vendor_claim', {
-                p_request_id: request.id,
-                p_notes: reason
-            });
-
-            if (error) throw error;
-            alert(t('common.vendorClaim.admin.actions.successReject', 'Talep reddedildi.'));
+            if (type === 'approve') {
+                const { error } = await supabase.rpc('approve_vendor_claim', {
+                    p_request_id: request.id
+                });
+                if (error) throw error;
+                alert(t('common.vendorClaim.admin.actions.successApprove', 'Onaylandı ve sahiplik devredildi!'));
+            } else {
+                if (!reason.trim()) {
+                    alert(t('admin.vendors.modal.error', 'Lütfen bir sebep girin.'));
+                    setProcessing(false);
+                    return;
+                }
+                const { error } = await supabase.rpc('reject_vendor_claim', {
+                    p_request_id: request.id,
+                    p_notes: reason
+                });
+                if (error) throw error;
+                alert(t('common.vendorClaim.admin.actions.successReject', 'Talep reddedildi.'));
+            }
+            setActionModal({ show: false, type: '', request: null, reason: '' });
             fetchRequests();
         } catch (error) {
-            console.error('Rejection error:', error);
+            console.error(`${type} error:`, error);
             alert(t('common.error', 'Hata: ') + error.message);
         } finally {
             setProcessing(false);
@@ -221,6 +233,51 @@ const AdminClaims = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Custom Action Modal */}
+            {actionModal.show && (
+                <div className="modal-overlay">
+                    <div className="modal-content" style={{ maxWidth: '400px' }}>
+                        <div className="modal-header">
+                            <h3>{actionModal.type === 'approve' ? strings.actions.approve[language] : strings.actions.reject[language]}</h3>
+                        </div>
+                        <div className="modal-body" style={{ padding: '20px 0' }}>
+                            {actionModal.type === 'approve' ? (
+                                <p>{strings.actions.confirmApprove(actionModal.request?.vendor?.business_name, actionModal.request?.contact_email, language)}</p>
+                            ) : (
+                                <div className="form-group">
+                                    <label>{t('common.vendorClaim.admin.actions.rejectPrompt', 'Red sebebi girin:')}</label>
+                                    <textarea
+                                        className="form-control"
+                                        value={actionModal.reason}
+                                        onChange={(e) => setActionModal({ ...actionModal, reason: e.target.value })}
+                                        rows="3"
+                                        autoFocus
+                                        required
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        <div className="modal-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => setActionModal({ show: false, type: '', request: null, reason: '' })}
+                                disabled={processing}
+                            >
+                                {t('common.cancel')}
+                            </button>
+                            <button
+                                className={`btn ${actionModal.type === 'approve' ? 'btn-primary' : 'btn-danger'}`}
+                                onClick={confirmAction}
+                                disabled={processing}
+                                style={actionModal.type === 'reject' ? { backgroundColor: '#dc2626', color: 'white' } : {}}
+                            >
+                                {processing ? '...' : (actionModal.type === 'approve' ? strings.actions.approve[language] : strings.actions.reject[language])}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
