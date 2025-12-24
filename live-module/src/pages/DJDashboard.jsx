@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Plus, Play, Trash2, LayoutDashboard, QrCode, LogOut, Loader2, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const DJDashboard = () => {
+    const navigate = useNavigate();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
@@ -20,7 +22,10 @@ const DJDashboard = () => {
     const fetchEvents = async () => {
         try {
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('Oturum açmanız gerekiyor.');
+            if (!user) {
+                navigate('/login');
+                return;
+            }
 
             // 1. Fetch events
             const { data: eventsData, error: err } = await supabase
@@ -117,13 +122,25 @@ const DJDashboard = () => {
                     <h1 className="text-3xl font-black tracking-tight text-white">DJ Panel</h1>
                     <p className="text-slate-500 font-medium">Etkinliklerinizi yönetin ve yeni istek sayfaları açın.</p>
                 </div>
-                <button
-                    onClick={() => setShowModal(true)}
-                    className="bg-prime hover:bg-rose-600 text-white px-6 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-prime/20 transition-all active:scale-95"
-                >
-                    <Plus className="w-5 h-5" />
-                    YENİ ETKİNLİK BAŞLAT
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={async () => {
+                            await supabase.auth.signOut();
+                            navigate('/login');
+                        }}
+                        className="p-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-2xl transition-all"
+                        title="Çıkış Yap"
+                    >
+                        <LogOut className="w-5 h-5" />
+                    </button>
+                    <button
+                        onClick={() => setShowModal(true)}
+                        className="bg-prime hover:bg-rose-600 text-white px-6 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-prime/20 transition-all active:scale-95"
+                    >
+                        <Plus className="w-5 h-5" />
+                        YENİ ETKİNLİK BAŞLAT
+                    </button>
+                </div>
             </div>
 
             {loading ? (
