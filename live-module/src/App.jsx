@@ -4,6 +4,7 @@ import DJDashboard from './pages/DJDashboard';
 import LiveFeed from './pages/LiveFeed';
 import GuestPage from './pages/GuestPage';
 import LoginPage from './pages/LoginPage';
+import StatisticsPage from './pages/StatisticsPage';
 
 function App() {
     return (
@@ -15,6 +16,7 @@ function App() {
                     {/* DJ Routes */}
                     <Route path="/dashboard" element={<DJDashboard />} />
                     <Route path="/live/:eventId" element={<LiveFeed />} />
+                    <Route path="/stats/:eventId" element={<StatisticsPage />} />
 
                     {/* Guest Route */}
                     <Route path="/e/:slug" element={<GuestPage />} />

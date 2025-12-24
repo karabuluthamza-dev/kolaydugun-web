@@ -30,6 +30,7 @@ const Footer = () => {
         { label: t('mobileNav.vendors'), to: '/vendors' },
         { label: t('mobileNav.shop'), to: '/shop' },
         { label: t('mobileNav.forum'), to: '/community' },
+        { label: t('liveRequest.title'), to: '/canli-istek-sistemi' },
         { label: t('faq.title'), to: '/faq' },
         { label: t('sitemapLink') || 'Site Haritası', to: '/directory' },
     ];

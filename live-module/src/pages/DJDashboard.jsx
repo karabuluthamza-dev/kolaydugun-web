@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Plus, Play, Trash2, LayoutDashboard, QrCode, LogOut, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Play, Trash2, LayoutDashboard, QrCode, LogOut, Loader2, AlertCircle, BarChart3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const DJDashboard = () => {
@@ -119,8 +119,8 @@ const DJDashboard = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-12 py-6">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tight text-white">DJ Panel</h1>
-                    <p className="text-slate-500 font-medium">Etkinliklerinizi yönetin ve yeni istek sayfaları açın.</p>
+                    <h1 className="text-3xl font-black tracking-tight text-white">Canlı İstek Paneli</h1>
+                    <p className="text-slate-500 font-medium">Müzisyenler ve orkestralar için canlı istek yönetimi.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button
@@ -177,9 +177,19 @@ const DJDashboard = () => {
                                     <button
                                         onClick={() => window.open(`/live/${event.id}`, '_blank')}
                                         className="p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all"
-                                        title="İstekleri Gör"
+                                        title="Canlı Yayını Başlat"
                                     >
                                         <Play className="w-5 h-5" />
+                                    </button>
+                                    <button
+                                        onClick={() => navigate(`/stats/${event.id}`)}
+                                        className="p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all relative group"
+                                        title="Analiz ve İstatistikler (Pro)"
+                                    >
+                                        <BarChart3 className="w-5 h-5" />
+                                        {(event.settings?.request_limit || 0) <= 20 && (
+                                            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-prime rounded-full border-2 border-slate-900" />
+                                        )}
                                     </button>
                                     <button
                                         onClick={() => handleDeleteEvent(event.id)}

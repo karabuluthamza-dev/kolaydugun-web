@@ -58,7 +58,7 @@ const LoginPage = () => {
                     <div className="inline-flex items-center justify-center w-20 h-20 bg-prime/10 rounded-full mb-6">
                         <Music className="w-10 h-10 text-prime" />
                     </div>
-                    <h1 className="text-3xl font-black tracking-tight text-white mb-2">DJ Girişi</h1>
+                    <h1 className="text-3xl font-black tracking-tight text-white mb-2">Müzisyen Girişi</h1>
                     <p className="text-slate-500 font-medium text-sm">KolayDüğün hesabınızla giriş yapın</p>
                 </div>
 

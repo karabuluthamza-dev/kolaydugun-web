@@ -104,6 +104,37 @@ export const dictionary = {
             "tr": "İşlerini KolayDugun ile büyüten binlerce düğün profesyoneline katılın."
         }
     },
+    "liveRequest": {
+        "title": {
+            "tr": "Müzisyenler ve Orkestralar İçin Canlı İstek Sistemi",
+            "de": "Live-Wunsch-System für Musiker und Orchester",
+            "en": "Live Request System for Musicians & Orchestras"
+        },
+        "subtitle": {
+            "tr": "Düğün ve etkinliklerde QR kod ile saniyeler içinde şarkı istekleri alın, etkileşimi zirveye taşıyın.",
+            "de": "Erhalten Sie Songwünsche innerhalb von Sekunden über QR-Code bei Hochzeiten und Veranstaltungen, steigern Sie die Interaktion.",
+            "en": "Receive song requests in seconds via QR code at weddings and events, take interaction to the peak."
+        },
+        "features": {
+            "realtime": {
+                "title": { "tr": "Anlık Bildirim", "de": "Sofortige Benachrichtigung", "en": "Instant Notification" },
+                "desc": { "tr": "Yeni istekler DJ/Müzisyen ekranına anında düşer.", "de": "Neue Anfragen erscheinen sofort auf dem DJ/Musiker-Bildschirm.", "en": "New requests appear instantly on the DJ/Musician screen." }
+            },
+            "stats": {
+                "title": { "tr": "Gelişmiş Analiz", "de": "Erweiterte Analyse", "en": "Advanced Analytics" },
+                "desc": { "tr": "Gecenin en çok istenen şarkılarını ve etkileşim oranlarını görün.", "de": "Sehen Sie die meistgewünschten Songs der Nacht und Interaktionsraten.", "en": "See the most requested songs of the night and interaction rates." }
+            },
+            "spam": {
+                "title": { "tr": "Akıllı Filtre", "de": "Intelligenter Filter", "en": "Smart Filter" },
+                "desc": { "tr": "Küfürlü ve mükerrer istekler otomatik engellenir.", "de": "Anstößige und doppelte Anfragen werden automatisch blockiert.", "en": "Offensive and duplicate requests are automatically blocked." }
+            }
+        },
+        "cta": {
+            "tr": "Hemen Ücretsiz Deneyin",
+            "de": "Jetzt kostenlos testen",
+            "en": "Try for Free Now"
+        }
+    },
 
     "planningTools": {
         "title": {

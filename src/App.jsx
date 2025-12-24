@@ -24,6 +24,7 @@ import Checkout from './pages/Checkout';
 
 import VendorLanding from './pages/VendorLanding';
 import SeoLandingPage from './pages/SeoLandingPage';
+import LiveRequestLanding from './pages/LiveRequestLanding';
 
 // Lazy load heavy dashboard components
 const VendorDashboard = lazy(() => import('./pages/VendorDashboard'));
@@ -193,6 +194,9 @@ function App() {
             <Route path="/locations/:city" element={<SeoLandingPage />} />
             <Route path="/vendor-landing" element={<VendorLanding />} />
             <Route path="/tedarikci-basvuru" element={<VendorLanding />} />
+            <Route path="/canli-istek-sistemi" element={<LiveRequestLanding />} />
+            <Route path="/de/live-wunsch-system" element={<LiveRequestLanding />} />
+            <Route path="/en/live-request-system" element={<LiveRequestLanding />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/faq" element={<FAQPage />} />
