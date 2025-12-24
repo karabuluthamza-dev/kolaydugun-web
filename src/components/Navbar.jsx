@@ -141,7 +141,7 @@ const Navbar = () => {
                                             margin: '5px 0'
                                         }}
                                     >
-                                        👤 Profil
+                                        👤 {t('nav.profile')}
                                     </Link>
                                 )}
                                 {/* Shop Panel Button - for shop owners */}
@@ -161,7 +161,7 @@ const Navbar = () => {
                                             margin: '5px 0'
                                         }}
                                     >
-                                        🏪 Mağaza Paneli
+                                        🏪 {t('nav.shopPanel')}
                                     </Link>
                                 )}
                                 {user.role === 'couple' && (
@@ -229,7 +229,7 @@ const Navbar = () => {
                                         gap: '4px',
                                         background: '#9333ea',
                                         color: 'white',
-                                        padding: '5px 8px', /* Reduced from 6px 10px */
+                                        padding: '6px 12px',
                                         borderRadius: '18px',
                                         textDecoration: 'none',
                                         fontWeight: '500',
@@ -247,7 +247,7 @@ const Navbar = () => {
                                     }}
                                 >
                                     <span style={{ fontSize: '1rem' }}>👤</span>
-                                    <span>Profil</span>
+                                    <span>{t('nav.profile')}</span>
                                 </Link>
                             )}
                             {/* Shop Panel Button - Desktop */}
@@ -260,7 +260,7 @@ const Navbar = () => {
                                         gap: '4px',
                                         background: 'linear-gradient(135deg, #10b981, #059669)',
                                         color: 'white',
-                                        padding: '5px 10px', /* Reduced from 6px 12px */
+                                        padding: '6px 12px',
                                         borderRadius: '18px',
                                         textDecoration: 'none',
                                         fontWeight: '500',
@@ -278,7 +278,7 @@ const Navbar = () => {
                                     }}
                                 >
                                     <span style={{ fontSize: '1rem' }}>🏪</span>
-                                    <span>Mağaza</span>
+                                    <span>{t('nav.shop')}</span>
                                 </Link>
                             )}
                             {user.role === 'couple' && (
@@ -290,7 +290,7 @@ const Navbar = () => {
                                         gap: '4px',
                                         background: '#ff6b6b',
                                         color: 'white',
-                                        padding: '5px 8px', /* Reduced from 6px 10px */
+                                        padding: '6px 12px',
                                         borderRadius: '18px',
                                         textDecoration: 'none',
                                         fontWeight: '500',
@@ -333,7 +333,7 @@ const Navbar = () => {
                                     background: 'transparent',
                                     border: '1px solid #e0e0e0',
                                     color: '#666',
-                                    padding: '5px 10px', /* Reduced from 6px 12px */
+                                    padding: '6px 12px',
                                     borderRadius: '20px',
                                     fontSize: '0.85rem',
                                     cursor: 'pointer',

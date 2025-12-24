@@ -27,13 +27,14 @@ const CommunityHome = () => {
             let data = [];
             let error = null;
 
+            console.log('[CommunityHome] fetchPosts called', { categorySlug, authorFilter });
+
             // If author filter is active, first try to get their posts
             if (authorFilter) {
                 const { data: authorPosts, error: postsError } = await supabase
                     .from('forum_posts')
                     .select(`
                         *,
-                        profile:profiles!forum_posts_user_id_profiles_fk(first_name, last_name, avatar_url, forum_avatar_url, role),
                         category:category_id(name_tr, icon, slug)
                     `)
                     .eq('status', 'published')
@@ -42,9 +43,18 @@ const CommunityHome = () => {
 
                 if (postsError) throw postsError;
 
-                // If author has posts, use them
+                // Fetch profile separately
                 if (authorPosts && authorPosts.length > 0) {
-                    data = authorPosts;
+                    const { data: profileData } = await supabase
+                        .from('profiles')
+                        .select('id, first_name, last_name, avatar_url, forum_avatar_url, role')
+                        .eq('id', authorFilter)
+                        .maybeSingle();
+
+                    data = authorPosts.map(post => ({
+                        ...post,
+                        profile: profileData || null
+                    }));
                 } else {
                     // Author has no posts, find posts they commented on
                     const { data: comments, error: commentsError } = await supabase
@@ -61,7 +71,6 @@ const CommunityHome = () => {
                             .from('forum_posts')
                             .select(`
                                 *,
-                                profile:profiles!forum_posts_user_id_profiles_fk(first_name, last_name, avatar_url, forum_avatar_url, role),
                                 category:category_id(name_tr, icon, slug)
                             `)
                             .eq('status', 'published')
@@ -69,7 +78,27 @@ const CommunityHome = () => {
                             .order('created_at', { ascending: false });
 
                         if (commentedError) throw commentedError;
-                        data = commentedPosts || [];
+
+                        // Fetch profiles separately
+                        if (commentedPosts && commentedPosts.length > 0) {
+                            const userIds = [...new Set(commentedPosts.map(p => p.user_id))];
+                            const { data: profilesData } = await supabase
+                                .from('profiles')
+                                .select('id, first_name, last_name, avatar_url, forum_avatar_url, role')
+                                .in('id', userIds);
+
+                            const profilesMap = {};
+                            (profilesData || []).forEach(p => {
+                                profilesMap[p.id] = p;
+                            });
+
+                            data = commentedPosts.map(post => ({
+                                ...post,
+                                profile: profilesMap[post.user_id] || null
+                            }));
+                        } else {
+                            data = commentedPosts || [];
+                        }
                     }
                 }
             } else if (categorySlug) {
@@ -78,7 +107,6 @@ const CommunityHome = () => {
                     .from('forum_posts')
                     .select(`
                         *,
-                        profile:profiles!forum_posts_user_id_profiles_fk(first_name, last_name, avatar_url, forum_avatar_url, role),
                         category:category_id!inner(name_tr, icon, slug)
                     `)
                     .eq('category.slug', categorySlug)
@@ -86,22 +114,64 @@ const CommunityHome = () => {
                     .order('created_at', { ascending: false });
 
                 if (catError) throw catError;
-                data = catPosts || [];
+
+                // Fetch profiles separately
+                if (catPosts && catPosts.length > 0) {
+                    const userIds = [...new Set(catPosts.map(p => p.user_id))];
+                    const { data: profilesData } = await supabase
+                        .from('profiles')
+                        .select('id, first_name, last_name, avatar_url, forum_avatar_url, role')
+                        .in('id', userIds);
+
+                    const profilesMap = {};
+                    (profilesData || []).forEach(p => {
+                        profilesMap[p.id] = p;
+                    });
+
+                    data = catPosts.map(post => ({
+                        ...post,
+                        profile: profilesMap[post.user_id] || null
+                    }));
+                } else {
+                    data = catPosts || [];
+                }
             } else {
                 // Default - all posts
+                console.log('[CommunityHome] Fetching all posts...');
                 const { data: allPosts, error: allError } = await supabase
                     .from('forum_posts')
                     .select(`
                         *,
-                        profile:profiles!forum_posts_user_id_profiles_fk(first_name, last_name, avatar_url, forum_avatar_url, role),
                         category:category_id(name_tr, icon, slug)
                     `)
                     .eq('status', 'published')
                     .order('created_at', { ascending: false })
                     .limit(20);
 
+                console.log('[CommunityHome] All posts query result:', { allPosts, allError });
                 if (allError) throw allError;
-                data = allPosts || [];
+
+                // Fetch profiles separately
+                if (allPosts && allPosts.length > 0) {
+                    const userIds = [...new Set(allPosts.map(p => p.user_id))];
+                    const { data: profilesData } = await supabase
+                        .from('profiles')
+                        .select('id, first_name, last_name, avatar_url, forum_avatar_url, role')
+                        .in('id', userIds);
+
+                    // Map profiles to posts
+                    const profilesMap = {};
+                    (profilesData || []).forEach(p => {
+                        profilesMap[p.id] = p;
+                    });
+
+                    data = allPosts.map(post => ({
+                        ...post,
+                        profile: profilesMap[post.user_id] || null
+                    }));
+                } else {
+                    data = allPosts || [];
+                }
             }
 
             // Enrich vendor posts with business_name
@@ -111,7 +181,7 @@ const CommunityHome = () => {
                         .from('vendors')
                         .select('business_name, image_url')
                         .eq('user_id', post.user_id)
-                        .single();
+                        .maybeSingle();
 
                     return {
                         ...post,
@@ -121,6 +191,7 @@ const CommunityHome = () => {
                 return post;
             }));
 
+            console.log('[CommunityHome] Final enriched posts:', enrichedPosts);
             setPosts(enrichedPosts);
         } catch (error) {
             console.error('Error fetching posts:', error);
@@ -191,6 +262,30 @@ const CommunityHome = () => {
                         .replace('{{query}}', searchQuery)
                         .replace('{{count}}', filteredPosts.length)}
                 </p>
+            )}
+
+            {/* Empty State */}
+            {filteredPosts.length === 0 && !loading && (
+                <div className="bg-white rounded-[24px] p-12 shadow-sm border border-[#E6DCC3] text-center">
+                    <div className="text-6xl mb-4">💬</div>
+                    <h3 className="text-xl font-bold text-gray-700 mb-2">
+                        {searchQuery ? t('community.noSearchResults') || 'Arama sonucu bulunamadı' : t('community.noTopics') || 'Henüz konu yok'}
+                    </h3>
+                    <p className="text-gray-500 mb-6">
+                        {searchQuery
+                            ? t('community.tryDifferentSearch') || 'Farklı bir arama terimi deneyin'
+                            : t('community.beFirst') || 'İlk konuyu sen aç!'}
+                    </p>
+                    {!searchQuery && (
+                        <Link
+                            to="/community/ask"
+                            className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-bold hover:shadow-lg transition-all"
+                        >
+                            <LucideIcons.PlusCircle size={20} />
+                            {t('community.newTopic.button') || 'Yeni Konu Aç'}
+                        </Link>
+                    )}
+                </div>
             )}
 
             {filteredPosts.map((post, index) => (

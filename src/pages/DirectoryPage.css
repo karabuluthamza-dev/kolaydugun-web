@@ -1,0 +1,61 @@
+.directory-page {
+    margin-top: 100px;
+    padding-bottom: 60px;
+}
+
+.directory-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.directory-header h1 {
+    font-size: 2.5rem;
+    color: #1a1a2e;
+    margin-bottom: 15px;
+}
+
+.directory-header p {
+    font-size: 1.2rem;
+    color: #6b7280;
+}
+
+.directory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 40px;
+}
+
+.directory-city-section h2 {
+    font-size: 1.4rem;
+    color: #e91e63;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #fce7f3;
+    margin-bottom: 15px;
+}
+
+.directory-links {
+    list-style: none;
+    padding: 0;
+}
+
+.directory-links li {
+    margin-bottom: 8px;
+}
+
+.directory-links a {
+    color: #4b5563;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+.directory-links a:hover {
+    color: #be185d;
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .directory-grid {
+        grid-template-columns: 1fr;
+    }
+}

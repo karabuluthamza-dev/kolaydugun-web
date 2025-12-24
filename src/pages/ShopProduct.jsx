@@ -502,7 +502,7 @@ const ShopProduct = () => {
             <div className="container">
                 {/* Breadcrumb */}
                 <div className="product-breadcrumb-premium">
-                    <Link to="/shop">Shop</Link>
+                    <Link to={`/${language}/shop`}>Shop</Link>
                     <span className="separator">/</span>
                     {shop && (
                         <>
@@ -768,7 +768,7 @@ const ShopProduct = () => {
 
                         {/* Back Link */}
                         <Link
-                            to={shop?.slug ? `/shop/magaza/${shop.slug}` : '/shop'}
+                            to={shop?.slug ? `/shop/magaza/${shop.slug}` : `/${language}/shop`}
                             className="back-link-premium"
                         >
                             {t.back}
@@ -785,7 +785,11 @@ const ShopProduct = () => {
                         </h2>
                         <div className="related-products-grid">
                             {relatedProducts.map((item) => (
-                                <Link key={item.id} to={`/shop/urun/${item.id}`} className="related-product-card">
+                                <Link
+                                    key={item.id}
+                                    to={`/${language}/shop/${language === 'de' ? 'produkt' : language === 'en' ? 'product' : 'urun'}/${item.id}`}
+                                    className="related-product-card"
+                                >
                                     <div className="related-product-image">
                                         {item.images?.[0] ? (
                                             <img src={item.images[0]} alt={getLocalizedField(item, 'name')} />

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useLanguage } from '../context/LanguageContext';
-import { CATEGORIES, CITIES, getCategoryTranslationKey } from '../constants/vendorData';
+import { CATEGORIES, COUNTRIES, STATES, CITIES_BY_STATE, getCategoryTranslationKey } from '../constants/vendorData';
+import { dictionary } from '../locales/dictionary';
 import './AdminNotifications.css';
 
 const AdminNotifications = () => {
@@ -14,6 +15,8 @@ const AdminNotifications = () => {
         type: 'announcement',
         target_type: 'all',
         target_category: '',
+        target_country: 'DE',
+        target_state: '',
         target_city: '',
         send_email: false
     });
@@ -25,7 +28,7 @@ const AdminNotifications = () => {
 
     useEffect(() => {
         calculateRecipients();
-    }, [formData.target_type, formData.target_category, formData.target_city]);
+    }, [formData.target_type, formData.target_category, formData.target_country, formData.target_state, formData.target_city]);
 
     const calculateRecipients = async () => {
         try {
@@ -36,6 +39,8 @@ const AdminNotifications = () => {
                 body: {
                     target_type: formData.target_type,
                     target_category: formData.target_category,
+                    target_country: formData.target_country,
+                    target_state: formData.target_state,
                     target_city: formData.target_city
                 }
             });
@@ -75,6 +80,8 @@ const AdminNotifications = () => {
                     type: 'announcement',
                     target_type: 'all',
                     target_category: '',
+                    target_country: 'DE',
+                    target_state: '',
                     target_city: '',
                     send_email: false
                 });
@@ -148,7 +155,7 @@ const AdminNotifications = () => {
                             <option value="couples">💑 Sadece Çiftler</option>
                             <option value="vendors">🏢 Sadece Tedarikçiler</option>
                             <option value="category">📂 Kategoriye Göre</option>
-                            <option value="city">📍 Şehre Göre</option>
+                            <option value="city">📍 Lokasyona Göre (Ülke/Eyalet/Şehir)</option>
                         </select>
                     </div>
 
@@ -170,18 +177,45 @@ const AdminNotifications = () => {
                     )}
 
                     {formData.target_type === 'city' && (
-                        <div className="form-group">
-                            <label>Şehir Seçin</label>
-                            <select
-                                value={formData.target_city}
-                                onChange={(e) => setFormData({ ...formData, target_city: e.target.value })}
-                            >
-                                <option value="">Şehir seçin...</option>
-                                {CITIES.map(city => (
-                                    <option key={city} value={city}>{city}</option>
-                                ))}
-                            </select>
-                        </div>
+                        <>
+                            <div className="form-group">
+                                <label>Ülke Seçin</label>
+                                <select
+                                    value={formData.target_country}
+                                    onChange={(e) => setFormData({ ...formData, target_country: e.target.value, target_state: '', target_city: '' })}
+                                >
+                                    {COUNTRIES.map(c => (
+                                        <option key={c.code} value={c.code}>{c[language] || c.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Eyalet Seçin</label>
+                                <select
+                                    value={formData.target_state}
+                                    onChange={(e) => setFormData({ ...formData, target_state: e.target.value, target_city: '' })}
+                                >
+                                    <option value="">Tüm Eyaletler</option>
+                                    {(STATES[formData.target_country] || []).map(s => (
+                                        <option key={s.id} value={s.id}>
+                                            {dictionary.locations.states[s.id]?.[language] || s[language] || s.en}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Şehir Seçin</label>
+                                <select
+                                    value={formData.target_city}
+                                    onChange={(e) => setFormData({ ...formData, target_city: e.target.value })}
+                                >
+                                    <option value="">Tüm Şehirler</option>
+                                    {(CITIES_BY_STATE[formData.target_state] || []).map(city => (
+                                        <option key={city} value={city}>{city}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </>
                     )}
 
                     <div className="recipient-preview">

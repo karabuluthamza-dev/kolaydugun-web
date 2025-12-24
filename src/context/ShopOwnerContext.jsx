@@ -39,19 +39,24 @@ export const ShopOwnerProvider = ({ children }) => {
             console.log('👤 Current user:', user?.id, user?.email);
 
             // Get shop account by user_id or email WITH plan info
-            // NOTE: Using planDetails as alias to avoid overwriting the 'plan' string column
-            const { data, error } = await supabase
-                .from('shop_accounts')
-                .select(`
-                    *,
-                    planDetails:shop_plans(
-                        id, name, display_name_tr, display_name_de, display_name_en,
-                        product_limit, has_priority_listing, has_analytics,
-                        has_featured_homepage, has_vip_badge, has_affiliate_access
-                    )
-                `)
-                .or(`user_id.eq.${user?.id},email.eq.${user?.email}`)
-                .maybeSingle();
+            let query = supabase.from('shop_accounts').select(`
+                *,
+                planDetails:shop_plans(
+                    id, name, display_name_tr, display_name_de, display_name_en,
+                    product_limit, has_priority_listing, has_analytics,
+                    has_featured_homepage, has_vip_badge, has_affiliate_access
+                )
+            `);
+
+            if (user?.id && user?.email) {
+                query = query.or(`user_id.eq.${user.id},email.eq.${user.email}`);
+            } else if (user?.id) {
+                query = query.eq('user_id', user.id);
+            } else {
+                query = query.eq('email', user.email);
+            }
+
+            const { data, error } = await query.maybeSingle();
 
             // DEBUG LOG
             console.log('🏪 Shop account query result:', { data, error });

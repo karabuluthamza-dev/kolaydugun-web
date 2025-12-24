@@ -74,7 +74,7 @@ const ClaimRequestModal = ({ vendor, onClose }) => {
                 ) : (
                     <form onSubmit={handleSubmit}>
                         <p className="modal-intro">
-                            {strings.intro(vendor.business_name, language)}
+                            {strings.intro[language].replace('{{name}}', vendor.business_name)}
                         </p>
 
                         <div className="form-group">

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../../supabaseClient';
 import { useLanguage } from '../../context/LanguageContext';
-import { CATEGORIES, CITIES, getCategoryTranslationKey } from '../../constants/vendorData';
+import { CATEGORIES, CITIES, COUNTRIES, STATES, CITIES_BY_STATE, getCategoryTranslationKey } from '../../constants/vendorData';
+import { dictionary } from '../../locales/dictionary';
 
 // We need a separate client to sign up a new user without logging out the admin
 // Note: This requires the ANON key, which is public.
@@ -15,14 +16,16 @@ const tempClient = createClient(supabaseUrl, supabaseAnonKey, {
 });
 
 const VendorCreateModal = ({ onClose, onSuccess }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         businessName: '',
         category: 'Wedding Venues',
-        city: 'Berlin',
+        country: 'DE',
+        state: '',
+        city: '',
         price: '',
         capacity: 0,
         isClaimable: false // New: if true, no auth user is created
@@ -194,12 +197,43 @@ const VendorCreateModal = ({ onClose, onSuccess }) => {
                             ))}
                         </select>
                     </div>
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label>{t('filters.country') || 'Land'}</label>
+                            <select
+                                name="country"
+                                value={formData.country}
+                                onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value, state: '', city: '' }))}
+                            >
+                                {COUNTRIES.map(c => (
+                                    <option key={c.code} value={c.code}>{c[language] || c.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>{t('filters.state') || 'Bundesland'}</label>
+                            <select
+                                name="state"
+                                value={formData.state}
+                                onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value, city: '' }))}
+                            >
+                                <option value="">-</option>
+                                {(STATES[formData.country] || []).map(s => (
+                                    <option key={s.id} value={s.id}>
+                                        {dictionary.locations.states[s.id]?.[language] || s[language] || s.en}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
                     <div className="form-group">
                         <label>{t('admin.vendors.modal.city')}</label>
-                        <select name="city" value={formData.city} onChange={handleChange}>
-                            {CITIES.map(city => (
+                        <select name="city" value={formData.city} onChange={handleChange} required>
+                            <option value="">-</option>
+                            {(CITIES_BY_STATE[formData.state] || []).map(city => (
                                 <option key={city} value={city}>{city}</option>
                             ))}
+                            {!formData.state && <option disabled>Önce eyalet seçin</option>}
                         </select>
                     </div>
                     <div className="form-group">

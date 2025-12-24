@@ -1,62 +1,95 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { CATEGORIES, CITIES, getCategoryTranslationKey } from '../constants/vendorData';
+import { CATEGORIES, CITIES, COUNTRIES, POPULAR_CITIES, getCategoryTranslationKey } from '../constants/vendorData';
+import { supabase } from '../supabaseClient';
 import FakeOnlineCounter from './FakeOnlineCounter';
 import TrustBadges from './TrustBadges';
 import './Hero.css';
 
 const Hero = ({ title, subtitle, backgroundImage, onlineConfig, trustBadges, heroSettings }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const navigate = useNavigate();
+    const [country, setCountry] = useState('DE');
     const [city, setCity] = useState('');
     const [category, setCategory] = useState('');
+    const [popularCities, setPopularCities] = useState(POPULAR_CITIES); // Start with fallback
     const videoRef = useRef(null);
+
+    // Load popular cities from database
+    useEffect(() => {
+        const loadPopularCities = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('admin_popular_cities')
+                    .select('city_name')
+                    .eq('is_active', true)
+                    .order('display_order', { ascending: true });
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    setPopularCities(data.map(c => c.city_name));
+                }
+            } catch (error) {
+                console.error('Failed to load popular cities, using fallback:', error);
+                // Keep using POPULAR_CITIES fallback
+            }
+        };
+
+        loadPopularCities();
+    }, []);
 
     const handleSearch = (e) => {
         e.preventDefault();
         const params = new URLSearchParams();
+        if (country) params.append('country', country);
         if (city) params.append('city', city);
         if (category) params.append('category', category);
         navigate(`/vendors?${params.toString()}`);
     };
 
     // Check if video background is enabled
-    const hasVideo = heroSettings?.use_video && heroSettings?.video_url;
+    // Support both 'use_video' (boolean) and 'background_type === "video"'
+    const hasVideo = (heroSettings?.use_video || heroSettings?.background_type === 'video') && heroSettings?.video_url;
 
-    // Force video to play - robust approach
+    // Manage video playback state
     useEffect(() => {
         if (!hasVideo) return;
 
         const video = videoRef.current;
         if (!video) return;
 
-        const attemptPlay = () => {
-            if (video.paused) {
-                video.play().catch(() => {
-                    // Silently handle - will retry
-                });
+        // Auto-play attempt
+        const playVideo = async () => {
+            try {
+                if (video.paused) {
+                    await video.play();
+                }
+            } catch (err) {
+                console.warn('Video autoplay failed, will wait for user interaction:', err);
             }
         };
 
-        // Try to play immediately
-        attemptPlay();
+        // Standard canplay event is enough
+        video.addEventListener('canplay', playVideo);
 
-        // Retry every 500ms for first 3 seconds
-        const retryInterval = setInterval(attemptPlay, 500);
-        setTimeout(() => clearInterval(retryInterval), 3000);
-
-        // Also play on user interaction with page
-        const handleInteraction = () => attemptPlay();
-        document.addEventListener('click', handleInteraction, { once: true });
-        document.addEventListener('scroll', handleInteraction, { once: true });
+        // One-time interaction listener as safety net for aggressive autoplay blocks
+        const handleInteraction = () => {
+            playVideo();
+            document.removeEventListener('click', handleInteraction);
+            document.removeEventListener('touchstart', handleInteraction);
+        };
+        document.addEventListener('click', handleInteraction);
+        document.addEventListener('touchstart', handleInteraction);
 
         return () => {
-            clearInterval(retryInterval);
+            video.removeEventListener('canplay', playVideo);
             document.removeEventListener('click', handleInteraction);
-            document.removeEventListener('scroll', handleInteraction);
+            document.removeEventListener('touchstart', handleInteraction);
         };
     }, [hasVideo, heroSettings?.video_url]);
+
 
     // Only show background image when video is NOT enabled
     const heroStyle = hasVideo
@@ -81,6 +114,9 @@ const Hero = ({ title, subtitle, backgroundImage, onlineConfig, trustBadges, her
                     loop
                     playsInline
                     preload="auto"
+                    poster={heroSettings?.hero_image || backgroundImage || ''}
+                    disablePictureInPicture
+                    disableRemotePlayback
                 >
                     <source src={heroSettings.video_url} type="video/mp4" />
                 </video>
@@ -103,13 +139,30 @@ const Hero = ({ title, subtitle, backgroundImage, onlineConfig, trustBadges, her
 
                 <form className="hero-search-form" onSubmit={handleSearch}>
                     <select
+                        className="hero-search-input country-select"
+                        value={country}
+                        onChange={(e) => {
+                            setCountry(e.target.value);
+                            setCity(''); // Reset city when country changes
+                        }}
+                        aria-label="Select Country"
+                    >
+                        {COUNTRIES.map((c) => (
+                            <option key={c.code} value={c.code}>
+                                {c[language] || c.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    <select
                         className="hero-search-input"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
                         aria-label="Select City"
                     >
                         <option value="">{t('search.cityPlaceholder') || 'Stadt wählen'}</option>
-                        {CITIES.map((c) => (
+                        {/* Show Country specific popular cities if available, or just fallback */}
+                        {popularCities.map((c) => (
                             <option key={c} value={c}>
                                 {c}
                             </option>

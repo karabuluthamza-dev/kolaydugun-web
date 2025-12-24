@@ -213,7 +213,19 @@ const BudgetPlanner = () => {
 
                             return (
                                 <tr key={item.id} className="budget-table-row">
-                                    <td className="budget-table-td budget-table-td-category">{t(`budget.categories.${item.category}`) || item.category}</td>
+                                    <td className="budget-table-td budget-table-td-category">
+                                        {(() => {
+                                            // Check if this is a predefined category key
+                                            const predefinedKeys = ['venue', 'food', 'photo', 'dress', 'music', 'flowers', 'invite', 'cake', 'transport', 'honeymoon', 'other', 'catering', 'photography', 'decoration', 'invitation'];
+                                            const categoryKey = item.category.toLowerCase();
+
+                                            if (predefinedKeys.includes(categoryKey)) {
+                                                return t(`budget.categories.${categoryKey}`) || item.category;
+                                            }
+                                            // For custom categories, display as-is
+                                            return item.category;
+                                        })()}
+                                    </td>
                                     <td className="budget-table-td">
                                         <input
                                             type="text"

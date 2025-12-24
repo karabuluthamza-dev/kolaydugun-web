@@ -12,12 +12,14 @@ import VendorShop from '../components/VendorDashboard/VendorShop';
 import VendorWallet from './VendorWallet';
 import { useDragScroll } from '../hooks/useDragScroll';
 import './VendorDashboard.css';
+import './DemoBanner.css';
 
 const VendorDashboard = () => {
     const { user, loading: authLoading } = useAuth();
     const { t, language } = useLanguage();
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
+    const isDemo = searchParams.get('demo') === 'true';
 
     // Initialize tab from URL or default to 'overview'
     const initialTab = searchParams.get('tab') || 'overview';
@@ -44,6 +46,40 @@ const VendorDashboard = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (isDemo) {
+            // Mock Data for Demo Mode
+            setVendor({
+                id: 'demo-v-99',
+                business_name: 'DJ34Istanbul – Wedding & Event DJ',
+                category: 'Wedding DJ',
+                city: 'Ulm',
+                subscription_tier: 'premium',
+                credit_balance: 500,
+                is_claimed: true
+            });
+            setRecentInsight({
+                performance_score: 95,
+                summary: language === 'tr'
+                    ? 'DJ34Istanbul harika bir performans sergiliyor! Görünürlüğünüz geçen aya göre %45 arttı ve ziyaretçilerinizin %12si teklif istedi.'
+                    : (language === 'de'
+                        ? 'DJ34Istanbul zeigt eine großartige Leistung! Ihre Sichtbarkeit hat sich im Vergleich zum Vormonat um 45% erhöht.'
+                        : 'DJ34Istanbul is performing great! Your visibility has increased by 45% compared to last month.'),
+                recommendations: [
+                    'Yeni referans fotoğrafları ekleyerek ivmeyi koruyun.',
+                    'Tedarikçi başarı öykünüzü bizimle paylaşın!',
+                    'Vitrin (Featured) özelliğini aktif ederek trafiği artırın.'
+                ]
+            });
+            setRankInfo({
+                rank: 1,
+                category: 'wedding_dj',
+                city: 'Ulm',
+                points_to_next: 0
+            });
+            setLoading(false);
+            return;
+        }
+
         if (authLoading) return; // Wait for session to recover
 
         if (!user) {
@@ -60,7 +96,7 @@ const VendorDashboard = () => {
             return;
         }
         fetchVendorProfile();
-    }, [user, navigate]);
+    }, [user, navigate, isDemo, language]);
 
     const [recentInsight, setRecentInsight] = useState(null);
     const [rankInfo, setRankInfo] = useState(null);
@@ -94,10 +130,10 @@ const VendorDashboard = () => {
     }, []);
 
     useEffect(() => {
-        if (vendor?.id) {
+        if (vendor?.id && !isDemo) {
             fetchRecentInsight(vendor.id);
         }
-    }, [vendor?.id, fetchRecentInsight]);
+    }, [vendor?.id, fetchRecentInsight, isDemo]);
 
     const fetchVendorProfile = async () => {
         try {
@@ -488,8 +524,25 @@ const VendorDashboard = () => {
                     </button>
                 </div>
 
-                <div className="sidebar-header">
+                <div className="sidebar-header" style={{ position: 'relative' }}>
                     <h3>{t('dashboard.panel')}</h3>
+                    {isDemo && (
+                        <span style={{
+                            position: 'absolute',
+                            right: '-10px',
+                            top: '-5px',
+                            background: '#f43f5e',
+                            color: 'white',
+                            fontSize: '0.65rem',
+                            padding: '3px 8px',
+                            borderRadius: '100px',
+                            fontWeight: 'bold',
+                            boxShadow: '0 4px 10px rgba(244,63,94,0.3)',
+                            border: '2px solid white'
+                        }}>
+                            {t('dashboard.demo.badge')}
+                        </span>
+                    )}
                 </div>
                 <nav className="sidebar-nav">
                     <button
@@ -549,7 +602,7 @@ const VendorDashboard = () => {
                     <hr style={{ margin: '10px 0', border: 'none', borderTop: '1px solid #eee' }} />
                     <button
                         className="support-btn"
-                        onClick={() => window.location.href = '/vendor/dashboard?tab=messages&support=true'}
+                        onClick={() => handleTabChange('messages')}
                         style={{ color: '#007bff', fontWeight: 'bold' }}
                     >
                         🆘 {t('dashboard.liveSupport')}
@@ -559,6 +612,23 @@ const VendorDashboard = () => {
             <main className="dashboard-content">
                 {renderContent()}
             </main>
+            {isDemo && (
+                <div className="demo-cta-banner">
+                    <div className="demo-cta-content">
+                        <div className="demo-cta-icon">🚀</div>
+                        <div className="demo-cta-text">
+                            <h4>{t('dashboard.demo.badge')}</h4>
+                            <p>{t('dashboard.demo.ctaText')}</p>
+                        </div>
+                    </div>
+                    <button
+                        className="demo-cta-button"
+                        onClick={() => navigate('/register')}
+                    >
+                        {t('dashboard.demo.ctaButton')}
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

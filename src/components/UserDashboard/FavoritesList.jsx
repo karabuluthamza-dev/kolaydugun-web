@@ -27,6 +27,7 @@ const FavoritesList = ({ userId }) => {
                     vendor:vendors!inner (
                         id,
                         business_name,
+                        slug,
                         category,
                         city,
                         rating,
@@ -84,7 +85,7 @@ const FavoritesList = ({ userId }) => {
                             <div
                                 key={fav.id}
                                 className="favorite-card"
-                                onClick={() => navigate(`/vendors/${vendor.id}`)}
+                                onClick={() => navigate(`/vendors/${vendor.slug || vendor.id}`)}
                                 style={{ border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden' }}
                             >
                                 <div className="fav-image" style={{ height: '150px', background: '#f0f0f0', backgroundImage: `url(${imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
@@ -98,7 +99,7 @@ const FavoritesList = ({ userId }) => {
                                             className="btn-sm"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                navigate(`/vendors/${vendor.id}`);
+                                                navigate(`/vendors/${vendor.slug || vendor.id}`);
                                             }}
                                             style={{
                                                 flex: 1,

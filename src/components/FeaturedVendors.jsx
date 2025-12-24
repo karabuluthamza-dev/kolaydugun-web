@@ -87,19 +87,15 @@ const FeaturedVendors = () => {
                     };
 
                     const normalizedCat = normalizeCategory(vendor.category);
+                    const categoryName = vendor.category || 'Other';
 
                     // Determine image source with fallback logic
-                    // 1. Vendor's own image
-                    // 2. Category image from Database (admin panel) - lookup by English name
-                    // 3. Category image from Local Constants - lookup by English name
-                    // 4. Default placeholder
-                    const categoryImageFromDb = categoryMap[normalizedCat] || categoryMap[vendor.category];
-                    const categoryDefault = categoryImageFromDb || categoryImages[normalizedCat] || categoryImages[vendor.category] || defaultImage;
-                    // Logic aligned with user preference: Prioritize gallery[0] as it's the most recently updated source
+                    const categoryImageFromDb = categoryMap[normalizedCat] || categoryMap[categoryName];
+                    const categoryDefault = categoryImageFromDb || categoryImages[normalizedCat] || categoryImages[categoryName] || defaultImage;
                     const initialImage = (vendor.gallery && vendor.gallery.length > 0 ? vendor.gallery[0] : vendor.image) || categoryDefault;
 
                     return (
-                        <Link to={`/vendors/${vendor.id}`} key={vendor.id} className="vendor-card">
+                        <Link to={`/vendors/${vendor.slug || vendor.id}`} key={vendor.id} className="vendor-card">
                             <div className="vendor-image-wrapper">
                                 <img
                                     src={initialImage}
@@ -123,9 +119,9 @@ const FeaturedVendors = () => {
                                 <h3 className="vendor-name">{vendor.business_name}</h3>
                                 <div className="vendor-meta">
                                     <span className="vendor-category">
-                                        {t(`categories.${vendor.category.toLowerCase().replace(/ & /g, '_').replace(/ /g, '_')}`) || vendor.category}
+                                        {categoryName && t(`categories.${categoryName.toLowerCase().replace(/ & /g, '_').replace(/ /g, '_')}`) || categoryName}
                                     </span>
-                                    <span className="vendor-city">📍 {vendor.city}</span>
+                                    <span className="vendor-city">📍 {vendor.city || '---'}</span>
                                 </div>
                             </div>
                         </Link>

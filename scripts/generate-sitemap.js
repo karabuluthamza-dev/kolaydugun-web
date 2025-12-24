@@ -21,6 +21,7 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const SITE_URL = 'https://kolaydugun.de';
+const VENDORS_PER_SITEMAP = 1000;
 
 const STATIC_PAGES = [
     { url: '/', changefreq: 'daily', priority: 1.0 },
@@ -33,77 +34,125 @@ const STATIC_PAGES = [
 ];
 
 async function generateSitemap() {
-    console.log('Starting sitemap generation...');
+    console.log('🚀 Starting Advanced Sitemap Generation...');
 
-    // Fetch all vendors
+    const publicDir = path.join(__dirname, '../public');
+    if (!fs.existsSync(publicDir)) {
+        fs.mkdirSync(publicDir, { recursive: true });
+    }
+
+    // 1. Fetch Vendors (Including recently imported ones)
+    // We include verified vendors OR newly imported ones that are not deleted
     const { data: vendors, error } = await supabase
         .from('vendors')
-        .select('id, created_at')
-        .eq('is_verified', true)
-        .is('deleted_at', null);
+        .select('id, slug, created_at, is_verified')
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false });
 
     if (error) {
-        console.error('Error fetching vendors:', error);
+        console.error('❌ Error fetching vendors:', error);
         return;
     }
 
-    console.log(`Found ${vendors.length} vendors.`);
+    console.log(`📊 Found ${vendors.length} vendors in database.`);
 
-    let sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+    const sitemaps = [];
 
-    // Add static pages
-    STATIC_PAGES.forEach(page => {
-        sitemapContent += `
-  <url>
+    // 2. Generate Static Page Sitemap
+    const seoLandingPages = [
+        '/locations/berlin',
+        '/locations/hamburg',
+        '/locations/muenchen',
+        '/locations/koeln',
+        '/locations/frankfurt',
+        '/locations/stuttgart',
+        '/locations/duesseldorf',
+        '/locations/deutschland/dugun-salonlari',
+        '/locations/deutschland/dugun-fotografcilari',
+        '/locations/deutschland/djs',
+        '/locations/deutschland/bridal-fashion',
+        '/locations/deutschland/wedding-planners'
+    ];
+
+    const staticSitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${STATIC_PAGES.map(page => `  <url>
     <loc>${SITE_URL}${page.url}</loc>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>`;
-    });
+  </url>`).join('\n')}
+${seoLandingPages.map(page => `  <url>
+    <loc>${SITE_URL}${page}</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>`).join('\n')}
+</urlset>`;
 
-    // Add vendor pages
-    vendors.forEach(vendor => {
-        const lastMod = vendor.created_at ? new Date(vendor.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-        sitemapContent += `
-  <url>
-    <loc>${SITE_URL}/vendors/${vendor.id}</loc>
+    fs.writeFileSync(path.join(publicDir, 'sitemap-static.xml'), staticSitemap);
+    sitemaps.push('sitemap-static.xml');
+
+    // 3. Generate Vendor Sitemaps (Partitioned)
+    const totalVendorSitemaps = Math.ceil(vendors.length / VENDORS_PER_SITEMAP);
+
+    for (let i = 0; i < totalVendorSitemaps; i++) {
+        const start = i * VENDORS_PER_SITEMAP;
+        const end = start + VENDORS_PER_SITEMAP;
+        const vendorChunk = vendors.slice(start, end);
+        const fileName = `sitemap-vendors-${i + 1}.xml`;
+
+        const vendorSitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${vendorChunk.map(v => {
+            const lastMod = v.created_at ? new Date(v.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+            const path = v.slug ? `/vendors/${v.slug}` : `/vendors/${v.id}`;
+            return `  <url>
+    <loc>${SITE_URL}${path}</loc>
     <lastmod>${lastMod}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>${v.is_verified ? '0.8' : '0.6'}</priority>
   </url>`;
-    });
+        }).join('\n')}
+</urlset>`;
 
-    // Fetch published blog posts
-    const { data: posts, error: postsError } = await supabase
+        fs.writeFileSync(path.join(publicDir, fileName), vendorSitemap);
+        sitemaps.push(fileName);
+        console.log(`✅ Generated ${fileName} (${vendorChunk.length} vendors)`);
+    }
+
+    // 4. Generate Blog Sitemap
+    const { data: posts } = await supabase
         .from('posts')
         .select('slug, updated_at')
         .eq('status', 'published');
 
-    if (postsError) {
-        console.error('Error fetching posts:', postsError);
-    } else {
-        console.log(`Found ${posts.length} published posts.`);
-        posts.forEach(post => {
+    if (posts && posts.length > 0) {
+        const blogSitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${posts.map(post => {
             const lastMod = post.updated_at ? new Date(post.updated_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-            sitemapContent += `
-  <url>
+            return `  <url>
     <loc>${SITE_URL}/blog/${post.slug}</loc>
     <lastmod>${lastMod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>`;
-        });
+        }).join('\n')}
+</urlset>`;
+        fs.writeFileSync(path.join(publicDir, 'sitemap-blog.xml'), blogSitemap);
+        sitemaps.push('sitemap-blog.xml');
     }
 
-    sitemapContent += `
-</urlset>`;
+    // 5. Generate Sitemap Index (The main file for Google)
+    const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemaps.org/schemas/sitemap/0.9">
+${sitemaps.map(sm => `  <sitemap>
+    <loc>${SITE_URL}/${sm}</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+  </sitemap>`).join('\n')}
+</sitemapindex>`;
 
-    const publicDir = path.join(__dirname, '../public');
-    const sitemapPath = path.join(publicDir, 'sitemap.xml');
-
-    fs.writeFileSync(sitemapPath, sitemapContent);
-    console.log(`Sitemap generated successfully at ${sitemapPath}`);
+    fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), sitemapIndex);
+    console.log(`✨ DONE! Root sitemap index generated at ${path.join(publicDir, 'sitemap.xml')}`);
 }
 
 generateSitemap();

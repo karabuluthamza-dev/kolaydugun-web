@@ -25,7 +25,7 @@ const FloatingCTA = ({ settings }) => {
         <button
             className={`floating-cta ${isVisible ? 'visible' : ''}`}
             onClick={() => navigate('/contact')}
-            aria-label="Ücretsiz Teklif Al"
+            aria-label={t('hero.getFreeQuote') || 'Get Free Quote'}
         >
             <span className="floating-cta-icon">💌</span>
             <span className="floating-cta-text">{t('hero.getFreeQuote') || 'Ücretsiz Teklif'}</span>

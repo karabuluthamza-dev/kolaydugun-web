@@ -62,6 +62,11 @@
     letter-spacing: 0.2px;
 }
 
+/* Hide empty badges */
+.vendor-card-badge:empty {
+    display: none !important;
+}
+
 .vendor-card-badge.featured {
     background: linear-gradient(135deg, #FF6B9D, #ff8e53);
     color: white;
@@ -71,6 +76,12 @@
 .vendor-card-badge.top-rated {
     background: linear-gradient(135deg, #fbbf24, #f59e0b);
     color: white;
+}
+
+.vendor-card-badge.claimed-badge {
+    background: #4caf50 !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4) !important;
 }
 
 .vendor-card-favorite {

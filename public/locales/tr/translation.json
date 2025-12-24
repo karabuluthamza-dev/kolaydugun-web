@@ -524,12 +524,13 @@
         "wedding_speakers": "Nikah Memuru / Konuşmacı",
         "flowers_decoration": "Çiçek ve Dekorasyon",
         "invitations_stationery": "Davetiye ve Kırtasiye",
-        "wedding_rings": "Alyans ve Takı",
+        "wedding_rings": "Alyans & Takı",
         "wedding_photography": "Düğün Fotoğrafçısı",
         "wedding_videography": "Düğün Videografisi",
         "photobox": "Fotobox",
         "djs": "DJ",
         "musicians": "Müzik Grupları",
-        "entertainment": "Eğlence"
+        "entertainment": "Eğlence",
+        "jewelry": "Alyans & Takı"
     }
 }

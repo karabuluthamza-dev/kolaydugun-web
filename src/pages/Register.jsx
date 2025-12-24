@@ -3,11 +3,12 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import useSEO from '../hooks/useSEO';
-import { CATEGORIES, CITIES, getCategoryTranslationKey } from '../constants/vendorData';
+import { CATEGORIES, CITIES, COUNTRIES, STATES, CITIES_BY_STATE, getCategoryTranslationKey } from '../constants/vendorData';
+import { dictionary } from '../locales/dictionary';
 import './Register.css';
 
 const Register = () => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     useSEO({
         title: t('register.title'),
         description: 'Create a new account on KolayDugun.de.'
@@ -23,6 +24,8 @@ const Register = () => {
         confirmPassword: '',
         // Vendor specific
         category: 'Wedding Venues',
+        country: 'DE',
+        state: '',
         location: '',
         promoCode: ''
     });
@@ -65,7 +68,11 @@ const Register = () => {
         if (formData.password.length < 6) newErrors.password = t('register.errors.password');
         if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = t('register.errors.confirmPassword');
 
-        if (userType === 'vendor' && !formData.location) newErrors.location = t('register.errors.location');
+        if (userType === 'vendor') {
+            if (!formData.country) newErrors.country = t('register.errors.location');
+            if (!formData.state) newErrors.state = t('register.errors.location');
+            if (!formData.location) newErrors.location = t('register.errors.location');
+        }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -242,9 +249,43 @@ const Register = () => {
                                     ))}
                                 </select>
                             </div>
-                            {/* Location */}
+                            {/* Hierarchical Location Selection */}
                             <div className="form-group">
-                                <label htmlFor="location" className="form-label">{t('register.location')}</label>
+                                <label className="form-label">{t('filters.country') || 'Land'}</label>
+                                <select
+                                    name="country"
+                                    className="form-select"
+                                    value={formData.country}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value, state: '', location: '' }))}
+                                >
+                                    {COUNTRIES.map(c => (
+                                        <option key={c.code} value={c.code}>
+                                            {c[language] || c.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">{t('filters.state') || 'Bundesland'}</label>
+                                <select
+                                    name="state"
+                                    className={`form-select ${errors.state ? 'error' : ''}`}
+                                    value={formData.state}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value, location: '' }))}
+                                >
+                                    <option value="">{t('common.select') || 'Seçiniz'}</option>
+                                    {(STATES[formData.country] || []).map(s => (
+                                        <option key={s.id} value={s.id}>
+                                            {dictionary.locations.states[s.id]?.[language] || s[language] || s.en}
+                                        </option>
+                                    ))}
+                                </select>
+                                {errors.state && <span className="error-text">{errors.state}</span>}
+                            </div>
+
+                            <div className="form-group">
+                                <label htmlFor="location" className="form-label">{t('filters.city') || 'Şehir'}</label>
                                 <select
                                     id="location"
                                     name="location"
@@ -253,7 +294,7 @@ const Register = () => {
                                     onChange={handleChange}
                                 >
                                     <option value="">{t('register.selectCity')}</option>
-                                    {CITIES.map(city => (
+                                    {(CITIES_BY_STATE[formData.state] || []).map(city => (
                                         <option key={city} value={city}>{city}</option>
                                     ))}
                                 </select>

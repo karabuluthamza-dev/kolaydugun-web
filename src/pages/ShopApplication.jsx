@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useLanguage } from '../context/LanguageContext';
 import { Link, useLocation } from 'react-router-dom';
-import { CITIES } from '../constants/vendorData';
+import { COUNTRIES, STATES, CITIES_BY_STATE } from '../constants/vendorData';
+import { dictionary } from '../locales/dictionary';
 import SEO from '../components/SEO';
 import './ShopApplication.css';
 
@@ -22,6 +23,8 @@ const ShopApplication = () => {
         business_name: '',
         email: '',
         phone: '',
+        country: 'DE',
+        state: '',
         city: '',
         product_description: '',
         referred_by_code: '',
@@ -346,18 +349,49 @@ const ShopApplication = () => {
                                         </div>
 
                                         <div className="form-group">
-                                            <label>{txt.city}</label>
+                                            <label>{txt.country || 'Land'}</label>
                                             <select
-                                                value={formData.city}
-                                                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                                                value={formData.country}
+                                                onChange={(e) => setFormData({ ...formData, country: e.target.value, state: '', city: '' })}
                                             >
-                                                <option value="">{txt.cityPlaceholder}</option>
-                                                {CITIES.map(city => (
-                                                    <option key={city} value={city}>
-                                                        {city}
+                                                {COUNTRIES.map(c => (
+                                                    <option key={c.code} value={c.code}>
+                                                        {c[language] || c.name}
                                                     </option>
                                                 ))}
                                             </select>
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group">
+                                                <label>{txt.state || 'Bundesland'}</label>
+                                                <select
+                                                    value={formData.state}
+                                                    onChange={(e) => setFormData({ ...formData, state: e.target.value, city: '' })}
+                                                >
+                                                    <option value="">{txt.cityPlaceholder || '-'}</option>
+                                                    {(STATES[formData.country] || []).map(s => (
+                                                        <option key={s.id} value={s.id}>
+                                                            {dictionary.locations.states[s.id]?.[language] || s[language] || s.en}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>{txt.city}</label>
+                                                <select
+                                                    value={formData.city}
+                                                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                                                >
+                                                    <option value="">{txt.cityPlaceholder}</option>
+                                                    {(CITIES_BY_STATE[formData.state] || []).map(city => (
+                                                        <option key={city} value={city}>
+                                                            {city}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -446,6 +480,12 @@ const ShopApplication = () => {
                                             <div className="review-item">
                                                 <span className="label">{txt.phone}:</span>
                                                 <span className="value">{formData.phone}</span>
+                                            </div>
+                                        )}
+                                        {formData.country && (
+                                            <div className="review-item">
+                                                <span className="label">{txt.country || 'Land'}:</span>
+                                                <span className="value">{COUNTRIES.find(c => c.code === formData.country)?.[language] || formData.country}</span>
                                             </div>
                                         )}
                                         {formData.city && (

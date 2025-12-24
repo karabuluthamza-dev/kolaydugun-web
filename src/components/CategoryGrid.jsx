@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../supabaseClient';
 import { dictionary } from '../locales/dictionary';
 import { categoryImages, defaultImage } from '../constants/categoryImages';
 import './CategoryGrid.css';
 
 const CategoryGrid = () => {
-    const { t, i18n } = useTranslation();
+    const { t, language } = useLanguage();
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -33,7 +34,7 @@ const CategoryGrid = () => {
 
     useEffect(() => {
         fetchCategoriesAndCounts();
-    }, [i18n.language]); // Re-fetch/re-render when language changes
+    }, [language]); // Re-fetch/re-render when language changes
 
     const fetchCategoriesAndCounts = async () => {
         try {
@@ -44,32 +45,35 @@ const CategoryGrid = () => {
                 .order('name');
 
             if (catError) throw catError;
-
-            // 2. Fetch vendor counts per category
-            const { data: vendors, error: vendorError } = await supabase
-                .from('vendors')
-                .select('category')
-                .is('deleted_at', null);
-
-            if (vendorError) throw vendorError;
-
-            // Count vendors per category
-            const counts = {};
-            if (vendors) {
-                vendors.forEach(v => {
-                    counts[v.category] = (counts[v.category] || 0) + 1;
-                });
+            if (!cats) {
+                setCategories([]);
+                return;
             }
+
+            // 2. Fetch EXACT counts for each category in parallel
+            const countPromises = cats.map(async (cat) => {
+                const { count, error } = await supabase
+                    .from('vendors')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('category', cat.name)
+                    .is('deleted_at', null);
+
+                if (error) {
+                    console.error(`Error counting for ${cat.name}:`, error);
+                    return { name: cat.name, count: 0 };
+                }
+                return { name: cat.name, count: count || 0 };
+            });
+
+            const countResults = await Promise.all(countPromises);
+            const counts = {};
+            countResults.forEach(res => {
+                counts[res.name] = res.count;
+            });
 
             // Merge data
             const mappedCategories = cats.map(cat => {
                 const cleanName = cat.name.trim();
-
-                // Logic: 
-                // 1. DB Image (Admin override)
-                // 2. Local Map (Hardcoded defaults)
-                // 3. Fallback logic (Partial matches)
-                // 4. Default Image
 
                 let image = cat.image_url; // 1. Try DB image first
 
@@ -94,11 +98,18 @@ const CategoryGrid = () => {
                 const translationKey = categoryKeys[cleanName];
                 const finalTitle = translationKey ? t(translationKey) : cleanName;
 
+                const categoryCount = counts[cat.name] || 0;
+
+                // Use plural/singular correctly based on count
+                const countLabel = categoryCount === 1
+                    ? t('common.vendor', 'Firma')
+                    : t('common.vendors', 'Firmalar');
+
                 return {
                     id: cat.id,
                     title: cat.name,
                     displayTitle: finalTitle,
-                    count: `${counts[cat.name] || 0} Firma`,
+                    count: `${categoryCount} ${countLabel}`,
                     image: image,
                     link: `/vendors?category=${encodeURIComponent(cat.name)}`
                 };
@@ -136,7 +147,7 @@ const CategoryGrid = () => {
 
                 <div className="category-grid">
                     {categories.map(cat => (
-                        <a href={cat.link} key={cat.id} className="category-card">
+                        <Link to={cat.link} key={cat.id} className="category-card">
                             <div className="category-image">
                                 <img
                                     src={cat.image}
@@ -148,7 +159,7 @@ const CategoryGrid = () => {
                                 <h3>{cat.displayTitle}</h3>
                                 <span>{cat.count}</span>
                             </div>
-                        </a>
+                        </Link>
                     ))}
                 </div>
             </div>

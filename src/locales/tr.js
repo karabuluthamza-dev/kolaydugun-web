@@ -344,7 +344,8 @@ export const tr = {
         "photobox": "Fotoğraf Kabini",
         "djs": "DJ",
         "musicians": "Müzisyenler",
-        "entertainment": "Eğlence"
+        "entertainment": "Eğlence",
+        "jewelry": "Alyans & Takı"
     },
     "Wedding Venues": "Düğün Mekanları",
     "Bridal Fashion": "Gelinlik ve Moda",

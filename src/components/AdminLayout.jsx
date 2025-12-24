@@ -6,12 +6,6 @@ import { dictionary } from '../locales/dictionary';
 import LanguageSwitcher from './LanguageSwitcher';
 import './AdminLayout.css';
 
-// Her modül için açıklama metinleri
-const menuDescriptions = dictionary.adminPanel.sidebar.menuDescriptions;
-
-// Sayfa başlıkları
-const pageTitles = dictionary.adminPanel.sidebar.pageTitles;
-
 // NavItem komponenti - tooltip ile
 const NavItem = ({ to, icon, label, end = false, description = '' }) => {
     const { language } = useLanguage();
@@ -36,7 +30,18 @@ const AdminLayout = () => {
     const location = useLocation();
     const [currentTime, setCurrentTime] = useState(new Date());
 
-    const strings = dictionary.adminPanel.sidebar;
+    // Her modül için açıklama metinleri - component içinde tanımla
+    const menuDescriptions = dictionary?.adminPanel?.sidebar?.menuDescriptions || {};
+
+    // Sayfa başlıkları - component içinde tanımla
+    const pageTitles = dictionary?.adminPanel?.sidebar?.pageTitles || {};
+
+    const strings = dictionary?.adminPanel?.sidebar || {};
+
+    // Safe accessor helpers to prevent "Cannot read properties of undefined" errors
+    const getLabel = (key) => strings?.labels?.[key]?.[language] || key;
+    const getMenu = (key) => strings?.menu?.[key]?.[language] || key;
+    const getBadge = () => dictionary?.adminPanel?.badge?.[language] || 'Admin';
 
     // 🔒 SECURITY: Double-check admin role (defense-in-depth)
     useEffect(() => {
@@ -101,84 +106,85 @@ const AdminLayout = () => {
             <aside className="admin-sidebar">
                 <div className="admin-sidebar-header">
                     <h2>KolayDugun</h2>
-                    <span className="admin-badge">{dictionary.adminPanel.badge[language]}</span>
+                    <span className="admin-badge">{getBadge()}</span>
                 </div>
 
                 <nav className="admin-nav">
-                    <NavItem to="/admin" icon="📊" label={strings.menu.dashboard[language]} end={true} description={menuDescriptions.dashboard} />
+                    <NavItem to="/admin" icon="📊" label={getMenu('dashboard')} end={true} description={menuDescriptions.dashboard} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">{strings.labels.daily[language]}</div>
-                    <NavItem to="/admin/leads" icon="📨" label={strings.menu.leads[language]} />
-                    <NavItem to="/admin/credit-approval" icon="✅" label={strings.menu.creditApproval[language]} />
-                    <NavItem to="/admin/reviews" icon="⭐" label={strings.menu.reviews[language]} />
-                    <NavItem to="/admin/messaging" icon="🆘" label={strings.menu.support[language]} />
+                    <div className="admin-nav-label">{getLabel('daily')}</div>
+                    <NavItem to="/admin/leads" icon="📨" label={getMenu('leads')} />
+                    <NavItem to="/admin/credit-approval" icon="✅" label={getMenu('creditApproval')} />
+                    <NavItem to="/admin/reviews" icon="⭐" label={getMenu('reviews')} />
+                    <NavItem to="/admin/messaging" icon="🆘" label={getMenu('support')} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">{strings.labels.marketplace[language]}</div>
-                    <NavItem to="/admin/vendors" icon="🏪" label={strings.menu.vendors[language]} description={menuDescriptions.vendors} />
-                    <NavItem to="/admin/users" icon="👥" label={strings.menu.users[language]} description={menuDescriptions.users} />
-                    <NavItem to="/admin/categories" icon="🖼️" label={strings.menu.categories[language]} />
-                    <NavItem to="/admin/messages" icon="💬" label={strings.menu.messages[language]} />
-                    <NavItem to="/admin/claims" icon="🛡️" label={strings.menu.claims[language]} description={menuDescriptions.claims} />
+                    <div className="admin-nav-label">{getLabel('marketplace')}</div>
+                    <NavItem to="/admin/vendors" icon="🏪" label={getMenu('vendors')} description={menuDescriptions.vendors} />
+                    <NavItem to="/admin/users" icon="👥" label={getMenu('users')} description={menuDescriptions.users} />
+                    <NavItem to="/admin/categories" icon="🖼️" label={getMenu('categories')} />
+                    <NavItem to="/admin/messages" icon="💬" label={getMenu('messages')} />
+                    <NavItem to="/admin/claims" icon="🛡️" label={getMenu('claims')} description={menuDescriptions.claims} />
+                    <NavItem to="/admin/imports" icon="📥" label={language === 'tr' ? 'Veri Aktarımı' : 'Imports'} description={language === 'tr' ? 'Dış kaynaklardan çekilen verileri onayla/reddet' : 'Manage imported vendors'} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">{strings.labels.content[language]}</div>
-                    <NavItem to="/admin/blog" icon="📝" label={strings.menu.blog[language]} />
-                    <NavItem to="/admin/comments" icon="💬" label={strings.menu.blogComments[language]} />
-                    <NavItem to="/admin/pages" icon="📄" label={strings.menu.pages[language]} />
-                    <NavItem to="/admin/faq" icon="❓" label={strings.menu.faq[language]} />
-                    <NavItem to="/admin/notifications" icon="📢" label={strings.menu.notifications[language]} />
+                    <div className="admin-nav-label">{getLabel('content')}</div>
+                    <NavItem to="/admin/blog" icon="📝" label={getMenu('blog')} />
+                    <NavItem to="/admin/comments" icon="💬" label={getMenu('blogComments')} />
+                    <NavItem to="/admin/pages" icon="📄" label={getMenu('pages')} />
+                    <NavItem to="/admin/faq" icon="❓" label={getMenu('faq')} />
+                    <NavItem to="/admin/notifications" icon="📢" label={getMenu('notifications')} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">{strings.labels.finance[language]}</div>
-                    <NavItem to="/admin/pricing" icon="💰" label={strings.menu.pricing[language]} />
-                    <NavItem to="/admin/finance" icon="📊" label={strings.menu.finance[language]} />
+                    <div className="admin-nav-label">{getLabel('finance')}</div>
+                    <NavItem to="/admin/pricing" icon="💰" label={getMenu('pricing')} />
+                    <NavItem to="/admin/finance" icon="📊" label={getMenu('finance')} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">{strings.labels.shop[language]}</div>
-                    <NavItem to="/admin/shop-applications" icon="📋" label={strings.menu.shopApplications[language]} />
-                    <NavItem to="/admin/shop-accounts" icon="🏪" label={strings.menu.shopAccounts[language]} />
-                    <NavItem to="/admin/shop-categories" icon="🏷️" label={strings.menu.shopCategories[language]} />
-                    <NavItem to="/admin/shop-products" icon="🛍️" label={strings.menu.shopProducts[language]} />
-                    <NavItem to="/admin/shop-product-requests" icon="📥" label={strings.menu.shopProductRequests[language]} />
-                    <NavItem to="/admin/shop-inquiries" icon="📩" label={strings.menu.shopInquiries[language]} />
-                    <NavItem to="/admin/shop-plans" icon="💎" label={strings.menu.shopPlans[language]} />
-                    <NavItem to="/admin/shop-faqs" icon="❓" label={strings.menu.shopFaq[language]} />
-                    <NavItem to="/admin/shop-announcements" icon="📢" label={strings.menu.shopAnnouncements[language]} />
-                    <NavItem to="/admin/shop-commissions" icon="💸" label={strings.menu.shopCommissions[language]} />
-                    <NavItem to="/admin/shop-settings" icon="⚙️" label={strings.menu.shopSettings[language]} />
+                    <div className="admin-nav-label">{getLabel('title')}</div>
+                    <NavItem to="/admin/shop-applications" icon="📋" label={getMenu('shopApplications')} />
+                    <NavItem to="/admin/shop-accounts" icon="🏪" label={getMenu('shopAccounts')} />
+                    <NavItem to="/admin/shop-categories" icon="🏷️" label={getMenu('shopCategories')} />
+                    <NavItem to="/admin/shop-products" icon="🛍️" label={getMenu('shopProducts')} />
+                    <NavItem to="/admin/shop-product-requests" icon="📥" label={getMenu('shopProductRequests')} />
+                    <NavItem to="/admin/shop-inquiries" icon="📩" label={getMenu('shopInquiries')} />
+                    <NavItem to="/admin/shop-plans" icon="💎" label={getMenu('shopPlans')} />
+                    <NavItem to="/admin/shop-faqs" icon="❓" label={getMenu('shopFaq')} />
+                    <NavItem to="/admin/shop-announcements" icon="📢" label={getMenu('shopAnnouncements')} />
+                    <NavItem to="/admin/shop-commissions" icon="💸" label={getMenu('shopCommissions')} />
+                    <NavItem to="/admin/shop-settings" icon="⚙️" label={getMenu('shopSettings')} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">{strings.labels.amazon[language]}</div>
-                    <NavItem to="/admin/amazon" icon="💰" label={strings.menu.amazonDashboard[language]} />
-                    <NavItem to="/admin/amazon/products" icon="📦" label={strings.menu.amazonProducts[language]} />
-                    <NavItem to="/admin/amazon/add" icon="➕" label={strings.menu.amazonAdd[language]} />
-                    <NavItem to="/admin/amazon/settings" icon="⚙️" label={strings.menu.amazonSettings[language]} />
+                    <div className="admin-nav-label">{getLabel('amazon')}</div>
+                    <NavItem to="/admin/amazon" icon="💰" label={getMenu('amazonDashboard')} />
+                    <NavItem to="/admin/amazon/products" icon="📦" label={getMenu('amazonProducts')} />
+                    <NavItem to="/admin/amazon/add" icon="➕" label={getMenu('amazonAdd')} />
+                    <NavItem to="/admin/amazon/settings" icon="⚙️" label={getMenu('amazonSettings')} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">{strings.labels.settings[language]}</div>
-                    <NavItem to="/admin/config" icon="⚙️" label={strings.menu.globalSettings[language]} />
-                    <NavItem to="/admin/translations" icon="🌍" label={strings.menu.translations[language]} />
-                    <NavItem to="/admin/help" icon="❓" label={strings.menu.helpGuide[language]} description={menuDescriptions.helpGuide} />
+                    <div className="admin-nav-label">{getLabel('settings')}</div>
+                    <NavItem to="/admin/config" icon="⚙️" label={getMenu('globalSettings')} />
+                    <NavItem to="/admin/translations" icon="🌍" label={getMenu('translations')} />
+                    <NavItem to="/admin/help" icon="❓" label={getMenu('helpGuide')} description={menuDescriptions.helpGuide} />
 
                     <div className="admin-nav-divider"></div>
-                    <div className="admin-nav-label">{strings.labels.community[language]}</div>
-                    <NavItem to="/admin/forum" icon="🎮" label={strings.menu.forumSettings[language]} />
-                    <NavItem to="/admin/forum-categories" icon="📂" label={strings.menu.forumCategories[language]} />
-                    <NavItem to="/admin/avatars" icon="🎨" label={strings.menu.avatars[language]} />
-                    <NavItem to="/admin/forum-ghosts" icon="👻" label={strings.menu.ghostMode[language]} />
-                    <NavItem to="/admin/forum-bots" icon="🤖" label={strings.menu.botManagement[language]} />
-                    <NavItem to="/admin/forum-moderation" icon="🛡️" label={strings.menu.moderation[language]} />
+                    <div className="admin-nav-label">{getLabel('community')}</div>
+                    <NavItem to="/admin/forum" icon="🎮" label={getMenu('forumSettings')} />
+                    <NavItem to="/admin/forum-categories" icon="📂" label={getMenu('forumCategories')} />
+                    <NavItem to="/admin/avatars" icon="🎨" label={getMenu('avatars')} />
+                    <NavItem to="/admin/forum-ghosts" icon="👻" label={getMenu('ghostMode')} />
+                    <NavItem to="/admin/forum-bots" icon="🤖" label={getMenu('botManagement')} />
+                    <NavItem to="/admin/forum-moderation" icon="🛡️" label={getMenu('moderation')} />
                 </nav>
 
                 <div className="admin-sidebar-footer">
                     <button onClick={handleLogout} className="admin-logout-btn">
                         <span className="icon">🚪</span>
-                        {strings.menu.logout[language]}
+                        {getMenu('logout')}
                     </button>
                     <a href="/" className="back-to-site">
-                        ← {strings.menu.backToSite[language]}
+                        ← {getMenu('backToSite')}
                     </a>
                 </div>
             </aside>
@@ -187,7 +193,7 @@ const AdminLayout = () => {
             <main className="admin-content">
                 <header className="admin-topbar">
                     <div className="admin-breadcrumbs">
-                        <span className="breadcrumb-home">🏠 {dictionary.adminPanel.topbar.admin[language]}</span>
+                        <span className="breadcrumb-home">🏠 {dictionary?.adminPanel?.topbar?.admin?.[language] || 'Admin'}</span>
                         <span className="breadcrumb-separator">›</span>
                         <span className="breadcrumb-current">{getCurrentPageTitle()}</span>
                     </div>

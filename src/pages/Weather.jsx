@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import usePageTitle from '../hooks/usePageTitle';
-import { CITIES } from '../constants/vendorData';
+import { COUNTRIES, STATES, CITIES_BY_STATE } from '../constants/vendorData';
+import { dictionary } from '../locales/dictionary';
 import './Weather.css';
 
 const Weather = () => {
     usePageTitle('Weather Forecast');
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const [country, setCountry] = useState('DE');
+    const [state, setState] = useState('');
     const [city, setCity] = useState('');
     const [weddingDate, setWeddingDate] = useState('');
     const [forecast, setForecast] = useState(null);
@@ -168,6 +171,39 @@ const Weather = () => {
                 <form onSubmit={handleForecast}>
                     <div className="weather-form-grid">
                         <div className="weather-form-field">
+                            <label className="weather-form-label">
+                                {t('filters.country') || 'Ülke'}
+                            </label>
+                            <select
+                                value={country}
+                                onChange={(e) => { setCountry(e.target.value); setState(''); setCity(''); }}
+                                className="weather-form-select"
+                            >
+                                {COUNTRIES.map(c => (
+                                    <option key={c.code} value={c.code}>{c[language] || c.name}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="weather-form-field">
+                            <label className="weather-form-label">
+                                {t('filters.state') || 'Eyalet'}
+                            </label>
+                            <select
+                                value={state}
+                                onChange={(e) => { setState(e.target.value); setCity(''); }}
+                                className="weather-form-select"
+                            >
+                                <option value="">{t('common.select') || 'Seçiniz'}</option>
+                                {(STATES[country] || []).map(s => (
+                                    <option key={s.id} value={s.id}>
+                                        {dictionary.locations.states[s.id]?.[language] || s[language] || s.en}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="weather-form-field">
                             <label htmlFor="weather-city" className="weather-form-label">
                                 {t('weather.cityLabel') || 'Düğün Şehri'}
                             </label>
@@ -181,9 +217,10 @@ const Weather = () => {
                                 aria-invalid={error && !city ? "true" : "false"}
                             >
                                 <option value="">{t('register.selectCity') || 'Şehir seçin...'}</option>
-                                {CITIES.map(cityName => (
+                                {(CITIES_BY_STATE[state] || []).map(cityName => (
                                     <option key={cityName} value={cityName}>{cityName}</option>
                                 ))}
+                                {!state && <option disabled>Önce eyalet seçin</option>}
                             </select>
                         </div>
 

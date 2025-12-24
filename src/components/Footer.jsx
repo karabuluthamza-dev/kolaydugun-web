@@ -5,77 +5,102 @@ import { useSiteSettings } from '../hooks/useSiteSettings';
 import './Footer.css';
 
 const Footer = () => {
-    const { language } = useLanguage();
+    const { language, t } = useLanguage();
     const { settings } = useSiteSettings();
 
-    const texts = {
-        tr: {
-            vendors: 'Tedarikçiler',
-            shop: 'Shop',
-            blog: 'Blog',
-            forum: 'Forum',
-            faq: 'S.S.S.',
-            impressum: 'Künye',
-            privacy: 'Gizlilik',
-            terms: 'Koşullar',
-            rights: 'Tüm hakları saklıdır.'
-        },
-        de: {
-            vendors: 'Dienstleister',
-            shop: 'Shop',
-            blog: 'Blog',
-            forum: 'Forum',
-            faq: 'FAQ',
-            impressum: 'Impressum',
-            privacy: 'Datenschutz',
-            terms: 'AGB',
-            rights: 'Alle Rechte vorbehalten.'
-        },
-        en: {
-            vendors: 'Vendors',
-            shop: 'Shop',
-            blog: 'Blog',
-            forum: 'Forum',
-            faq: 'FAQ',
-            impressum: 'Imprint',
-            privacy: 'Privacy',
-            terms: 'Terms',
-            rights: 'All rights reserved.'
-        }
-    };
+    const topCategories = [
+        { label: t('categories.wedding_venues'), to: '/locations/deutschland/dugun-salonlari' },
+        { label: t('categories.wedding_photography'), to: '/locations/deutschland/dugun-fotografcilari' },
+        { label: t('categories.djs'), to: '/locations/deutschland/djs' },
+        { label: t('categories.bridal_fashion'), to: '/locations/deutschland/bridal-fashion' },
+        { label: t('categories.wedding_planners'), to: '/locations/deutschland/wedding-planners' },
+    ];
 
-    const txt = texts[language] || texts.tr;
+    const topCities = [
+        { label: 'Berlin', to: '/locations/berlin' },
+        { label: 'Hamburg', to: '/locations/hamburg' },
+        { label: 'München', to: '/locations/muenchen' },
+        { label: 'Köln', to: '/locations/koeln' },
+        { label: 'Frankfurt', to: '/locations/frankfurt' },
+        { label: 'Stuttgart', to: '/locations/stuttgart' },
+        { label: 'Düsseldorf', to: '/locations/duesseldorf' },
+    ];
+
+    const planningLinks = [
+        { label: t('mobileNav.vendors'), to: '/vendors' },
+        { label: t('mobileNav.shop'), to: '/shop' },
+        { label: t('mobileNav.forum'), to: '/community' },
+        { label: t('faq.title'), to: '/faq' },
+        { label: t('sitemapLink') || 'Site Haritası', to: '/directory' },
+    ];
+
+    const legalLinks = [
+        { label: t('footer.impressum') || 'Impressum', to: '/p/impressum' },
+        { label: t('footer.privacy') || 'Privacy', to: '/p/datenschutz' },
+        { label: t('footer.terms') || 'Terms', to: '/p/agb' },
+        { label: t('common.about'), to: '/p/ueber-uns' },
+    ];
 
     return (
-        <footer className="footer-compact">
+        <footer className="footer-expanded">
             <div className="container">
-                {/* Top Row - Logo & Links */}
-                <div className="footer-top">
-                    <Link to="/" className="footer-logo">KolayDugun.de</Link>
+                <div className="footer-grid">
+                    {/* Column 1: Planning */}
+                    <div className="footer-col">
+                        <h4>{t('footer.planning', language === 'tr' ? 'PLANLAMA' : (language === 'en' ? 'PLANNING' : 'HOCHZEITSPLANUNG'))}</h4>
+                        <ul className="footer-links">
+                            {planningLinks.map((link, i) => (
+                                <li key={i}><Link to={link.to}>{link.label}</Link></li>
+                            ))}
+                        </ul>
+                    </div>
 
-                    <div className="footer-nav">
-                        <Link to="/vendors">{txt.vendors}</Link>
-                        <Link to="/shop">{txt.shop}</Link>
-                        <Link to="/blog">{txt.blog}</Link>
-                        <Link to="/community">{txt.forum}</Link>
-                        <Link to="/faq">{txt.faq}</Link>
-                        <span className="footer-divider">|</span>
-                        <Link to="/p/impressum">{txt.impressum}</Link>
-                        <Link to="/p/datenschutz">{txt.privacy}</Link>
-                        <Link to="/p/agb">{txt.terms}</Link>
+                    {/* Column 2: Services */}
+                    <div className="footer-col">
+                        <h4>{t('footer.services', language === 'tr' ? 'HİZMETLER' : (language === 'en' ? 'TOP SERVICES' : 'TOP DIENSTLEISTER'))}</h4>
+                        <ul className="footer-links">
+                            {topCategories.map((link, i) => (
+                                <li key={i}><Link to={link.to}>{link.label}</Link></li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Column 3: Cities */}
+                    <div className="footer-col">
+                        <h4>{t('footer.cities', language === 'tr' ? 'ŞEHİRLER' : (language === 'en' ? 'CITIES' : 'TOP LOCATIONS'))}</h4>
+                        <ul className="footer-links">
+                            {topCities.map((link, i) => (
+                                <li key={i}><Link to={link.to}>{link.label}</Link></li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Column 4: About/Legal */}
+                    <div className="footer-col">
+                        <h4>{t('footer.corporate', language === 'tr' ? 'KURUMSAL' : (language === 'en' ? 'CORPORATE' : 'ÜBER UNS & RECHTLICHES'))}</h4>
+                        <ul className="footer-links">
+                            {legalLinks.map((link, i) => (
+                                <li key={i}><Link to={link.to}>{link.label}</Link></li>
+                            ))}
+                        </ul>
                     </div>
                 </div>
 
-                {/* Bottom Row - Copyright & Social */}
-                <div className="footer-bottom">
-                    <span className="footer-copy">© {new Date().getFullYear()} KolayDugun.de · {txt.rights}</span>
+                <div className="footer-divider-line"></div>
 
-                    <a href="mailto:kontakt@kolaydugun.de" className="footer-email">📧 kontakt@kolaydugun.de</a>
+                <div className="footer-bottom-row">
+                    <div className="footer-brand">
+                        <Link to="/" className="footer-logo">KolayDugun.de</Link>
+                        <p className="footer-copy">© {new Date().getFullYear()} KolayDugun.de · {t('footer.rights') || 'Alle Rechte vorbehalten.'}</p>
+                    </div>
 
-                    <div className="footer-social">
-                        {settings?.social_media && (
-                            <SocialMediaLinks socialMedia={settings.social_media} />
-                        )}
+                    <div className="footer-contact-info">
+                        <a href="mailto:kontakt@kolaydugun.de" className="footer-email">📧 kontakt@kolaydugun.de</a>
+                        <div className="footer-social-wrapper">
+                            {settings?.social_media && (
+                                <SocialMediaLinks socialMedia={settings.social_media} />
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

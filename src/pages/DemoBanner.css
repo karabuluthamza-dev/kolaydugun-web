@@ -1,0 +1,102 @@
+.demo-cta-banner {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 800px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.demo-cta-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.demo-cta-icon {
+    font-size: 24px;
+    background: #fdf2f8;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+}
+
+.demo-cta-text h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e1b4b;
+}
+
+.demo-cta-text p {
+    margin: 2px 0 0;
+    font-size: 0.9rem;
+    color: #4f46e5;
+    font-weight: 500;
+}
+
+.demo-cta-button {
+    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+}
+
+.demo-cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(244, 63, 94, 0.4);
+    filter: brightness(1.1);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translate(-50%, 100px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 640px) {
+    .demo-cta-banner {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+        padding: 20px;
+        bottom: 16px;
+    }
+
+    .demo-cta-content {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .demo-cta-button {
+        width: 100%;
+    }
+}

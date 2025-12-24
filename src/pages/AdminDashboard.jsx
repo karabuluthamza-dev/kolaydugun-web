@@ -439,10 +439,11 @@ const AdminDashboard = () => {
                             switch (item.type) {
                                 case 'lead':
                                     icon = '📋';
-                                    title = `${t('adminPanel.dashboard.recentActivity.newLead', 'Yeni Lead')}: ${item.contact_name}`;
+                                    title = `${t('adminPanel.dashboard.recentActivity.types.lead', 'Yeni Lead')}: ${item.contact_name}`;
                                     description = item.category?.name || t('adminPanel.dashboard.recentActivity.noCategory', 'Kategori Yok');
                                     navPath = '/admin/leads';
                                     statusBadge = item.status === 'won' ? t('adminPanel.dashboard.recentActivity.won', 'Kazanıldı') : item.status === 'lost' ? t('adminPanel.dashboard.recentActivity.lost', 'Kaybedildi') : item.status === 'new' ? t('adminPanel.dashboard.recentActivity.new', 'Yeni') : item.status;
+
                                     break;
 
                                 case 'couple_vendor_message':
@@ -567,7 +568,8 @@ const AdminDashboard = () => {
                     >
                         <div className="action-icon">✅</div>
                         <h3>{t('adminPanel.dashboard.quickActions.creditApproval', 'Kredi Onayları')}</h3>
-                        <p>{stats.pendingCreditRequests} {t('adminPanel.dashboard.quickActions.pendingRequests', 'bekleyen talep')}</p>
+                        <p>{stats.pendingCreditRequests} {t('common.pendingTask' || 'bekleyen talep')}</p>
+
                     </button>
 
                     <button
@@ -622,6 +624,15 @@ const AdminDashboard = () => {
                         <div className="action-icon">🏷️</div>
                         <h3>{t('adminPanel.dashboard.quickActions.categoryFeatures', 'Kategori Özellikleri')}</h3>
                         <p>{t('adminPanel.dashboard.quickActions.manageCustomFields', 'Özel alanları yönet')}</p>
+                    </button>
+
+                    <button
+                        className="action-card"
+                        onClick={() => navigate('/admin/popular-cities')}
+                    >
+                        <div className="action-icon">⭐</div>
+                        <h3>{t('adminPanel.dashboard.quickActions.popularCities', 'Popüler Şehirler')}</h3>
+                        <p>{t('adminPanel.dashboard.quickActions.manageHomepageCities', 'Ana sayfa şehir dropdown\'ını yönet')}</p>
                     </button>
 
                     <button

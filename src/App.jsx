@@ -23,6 +23,7 @@ import Checkout from './pages/Checkout';
 
 
 import VendorLanding from './pages/VendorLanding';
+import SeoLandingPage from './pages/SeoLandingPage';
 
 // Lazy load heavy dashboard components
 const VendorDashboard = lazy(() => import('./pages/VendorDashboard'));
@@ -42,6 +43,7 @@ const AdminVendors = lazy(() => import('./pages/AdminVendors'));
 const AdminConfig = lazy(() => import('./pages/AdminConfig'));
 const AdminTranslations = lazy(() => import('./pages/AdminTranslations'));
 const AdminCategories = lazy(() => import('./pages/AdminCategories'));
+const AdminPopularCities = lazy(() => import('./pages/AdminPopularCities'));
 const AdminAvatars = lazy(() => import('./pages/AdminAvatars'));
 const AdminBlog = lazy(() => import('./pages/AdminBlog'));
 const AdminLeads = lazy(() => import('./pages/AdminLeads'));
@@ -97,6 +99,11 @@ const AdminShopProductRequests = lazy(() => import('./pages/AdminShopProductRequ
 const AdminShopCommissions = lazy(() => import('./pages/AdminShopCommissions'));
 const AdminHelp = lazy(() => import('./pages/AdminHelp'));
 const AdminClaims = lazy(() => import('./pages/AdminClaims'));
+const AdminPoachedInquiries = lazy(() => import('./pages/AdminPoachedInquiries'));
+const AdminCityAliases = React.lazy(() => import('./pages/AdminCityAliases'));
+const AdminImports = React.lazy(() => import('./pages/AdminImports'));
+const DirectoryPage = lazy(() => import('./pages/DirectoryPage'));
+
 
 // Amazon Affiliate Pages
 const AdminAmazonDashboard = lazy(() => import('./pages/AdminAmazonDashboard'));
@@ -180,11 +187,14 @@ function App() {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/vendors" element={<VendorList />} />
             <Route path="/vendors/:slug" element={<VendorDetail />} />
+            <Route path="/locations/:city/:categorySlug" element={<SeoLandingPage />} />
+            <Route path="/locations/:city" element={<SeoLandingPage />} />
             <Route path="/vendor-landing" element={<VendorLanding />} />
             <Route path="/tedarikci-basvuru" element={<VendorLanding />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/faq" element={<FAQPage />} />
+            <Route path="/directory" element={<DirectoryPage />} />
 
             <Route path="/de/shop" element={<Shop />} />
             <Route path="/de/shop/produkt/:id" element={<ShopProduct />} />
@@ -253,6 +263,7 @@ function App() {
               <Route path="config" element={<AdminConfig />} />
               <Route path="translations" element={<AdminTranslations />} />
               <Route path="categories" element={<AdminCategories />} />
+              <Route path="popular-cities" element={<AdminPopularCities />} />
               <Route path="avatars" element={<AdminAvatars />} />
               <Route path="blog" element={<AdminBlog />} />
               <Route path="pricing" element={<AdminPricing />} />
@@ -289,7 +300,11 @@ function App() {
               <Route path="faq" element={<AdminFAQ />} />
               <Route path="messaging" element={<AdminMessaging />} />
               <Route path="claims" element={<AdminClaims />} />
+              <Route path="poached-inquiries" element={<AdminPoachedInquiries />} />
+              <Route path="city-aliases" element={<AdminCityAliases />} />
+              <Route path="imports" element={<AdminImports />} />
               <Route path="help" element={<AdminHelp />} />
+
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

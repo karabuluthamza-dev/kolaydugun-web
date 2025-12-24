@@ -12,36 +12,58 @@ export const LanguageProvider = ({ children }) => {
 
     // Update i18n resources when translations change
     useEffect(() => {
+        // Re-generate resources for i18next
+        const newResources = {
+            en: { translation: {} },
+            de: { translation: {} },
+            tr: { translation: {} }
+        };
+
+        // 1. First add local dictionary to resources
+        const mergeDictionary = (obj, prefix = '') => {
+            Object.entries(obj).forEach(([key, values]) => {
+                const fullKey = prefix ? `${prefix}.${key}` : key;
+                if (values && typeof values === 'object' && ('en' in values || 'de' in values || 'tr' in values)) {
+                    // This is a translation leaf
+                    ['en', 'de', 'tr'].forEach(lang => {
+                        const parts = fullKey.split('.');
+                        let current = newResources[lang].translation;
+                        for (let i = 0; i < parts.length - 1; i++) {
+                            if (!current[parts[i]]) current[parts[i]] = {};
+                            current = current[parts[i]];
+                        }
+                        current[parts[parts.length - 1]] = values[lang] || values['de'] || values['en'] || key;
+                    });
+                } else if (values && typeof values === 'object') {
+                    // Nested object
+                    mergeDictionary(values, fullKey);
+                }
+            });
+        };
+        mergeDictionary(dictionary);
+
+        // 2. Then add DB translations (override dictionary)
         if (!loading && translations) {
-            // Re-generate resources for i18next
-            const newResources = {
-                en: { translation: {} },
-                de: { translation: {} },
-                tr: { translation: {} }
-            };
-
             Object.entries(translations).forEach(([key, values]) => {
-                // Handle nested keys (e.g. "nav.services")
                 const parts = key.split('.');
-
                 ['en', 'de', 'tr'].forEach(lang => {
                     let current = newResources[lang].translation;
                     for (let i = 0; i < parts.length - 1; i++) {
                         if (!current[parts[i]]) current[parts[i]] = {};
                         current = current[parts[i]];
                     }
-                    current[parts[parts.length - 1]] = values[lang] || values['en']; // Fallback to EN
+                    current[parts[parts.length - 1]] = values[lang] || values['en'];
                 });
             });
-
-            // Update i18next
-            Object.keys(newResources).forEach(lang => {
-                i18n.addResourceBundle(lang, 'translation', newResources[lang].translation, true, true);
-            });
-
-            // Force update
-            i18n.changeLanguage(language);
         }
+
+        // Update i18next
+        Object.keys(newResources).forEach(lang => {
+            i18n.addResourceBundle(lang, 'translation', newResources[lang].translation, true, true);
+        });
+
+        // Force update
+        i18n.changeLanguage(language);
     }, [translations, loading, language]);
 
     const changeLanguage = (lng) => {
@@ -68,12 +90,26 @@ export const LanguageProvider = ({ children }) => {
                 // Try direct dictionary lookup as safety net
                 const parts = key.split('.');
                 let current = dictionary;
+
+                // First try in main dictionary
                 for (const part of parts) {
                     if (current[part] === undefined) {
                         current = null;
                         break;
                     }
                     current = current[part];
+                }
+
+                // If not found in dictionary, try in community object
+                if (current === null && parts[0] === 'community') {
+                    current = community;
+                    for (let i = 1; i < parts.length; i++) {
+                        if (current[parts[i]] === undefined) {
+                            current = null;
+                            break;
+                        }
+                        current = current[parts[i]];
+                    }
                 }
 
                 let finalString = '';

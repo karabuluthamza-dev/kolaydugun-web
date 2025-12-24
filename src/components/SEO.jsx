@@ -1,5 +1,3 @@
-import React from 'react';
-import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 
@@ -16,38 +14,60 @@ const SEO = ({
     const { language } = useLanguage();
     const { settings } = useSiteSettings() || { settings: {} }; // Safety fallback
 
+
     const siteName = 'KolayDugun.de';
     const defaultDescription = 'Find the best wedding vendors in Germany. Turkish & International weddings made easy.';
 
     // Use the provided image, then settings images, then default fallback
     const defaultImage = settings?.og_image_url || settings?.logo_url || '/og-image.jpg';
     const siteUrl = 'https://kolaydugun.de';
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 
     const fullTitle = title ? `${title} | ${siteName}` : siteName;
     const fullDescription = description || defaultDescription;
     const fullUrl = url ? `${siteUrl}${url}` : siteUrl;
 
     // Ensure image is an absolute URL
-    let fullImage = image || defaultImage;
+    let fullImage = typeof image === 'string' ? image : defaultImage;
 
     // Support for Supabase Storage paths if they don't start with http
-    if (fullImage && !fullImage.startsWith('http')) {
-        // If it starts with vendors/ or similar, it might be a Supabase path. 
-        // For now, assume it's relative to the main site or needs the full origin.
-        fullImage = `${siteUrl}${fullImage.startsWith('/') ? '' : '/'}${fullImage}`;
+    if (typeof fullImage === 'string' && !fullImage.startsWith('http')) {
+        // If it starts with vendors/ or posts/ it's a Supabase path
+        if (fullImage.startsWith('vendors/') || fullImage.startsWith('posts/') || fullImage.startsWith('shop/')) {
+            fullImage = `${supabaseUrl}/storage/v1/object/public/${fullImage}`;
+        } else {
+            // Otherwise assume it's relative to the main site
+            fullImage = `${siteUrl}${fullImage.startsWith('/') ? '' : '/'}${fullImage}`;
+        }
     }
 
+    // Canonical: Ensure no trailing slashes and always absolute
+    const safeUrl = typeof url === 'string' ? url : '';
+    const canonicalUrl = `${siteUrl}${safeUrl === '/' ? '' : safeUrl.replace(/\/$/, '')}`;
+
+    // Hreflang for multi-language SEO - ensuring absolute URLs
+    const renderHreflang = () => {
+        if (!hreflangUrls) return null;
+        return (
+            <>
+                {hreflangUrls.de && <link rel="alternate" hrefLang="de-DE" href={`${siteUrl}${hreflangUrls.de}`} />}
+                {hreflangUrls.tr && <link rel="alternate" hrefLang="tr-TR" href={`${siteUrl}${hreflangUrls.tr}`} />}
+                {hreflangUrls.en && <link rel="alternate" hrefLang="en-US" href={`${siteUrl}${hreflangUrls.en}`} />}
+                <link rel="alternate" hrefLang="x-default" href={`${siteUrl}${hreflangUrls.de || hreflangUrls.tr || '/'}`} />
+            </>
+        );
+    };
+
     return (
-        <Helmet>
+        <>
             {/* Standard metadata */}
             <title>{fullTitle}</title>
             <meta name="description" content={fullDescription} />
             <meta name="keywords" content={keywords} />
-            <html lang={language} />
 
             {/* Open Graph / Facebook */}
             <meta property="og:type" content={type} />
-            <meta property="og:url" content={fullUrl} />
+            <meta property="og:url" content={canonicalUrl} />
             <meta property="og:title" content={fullTitle} />
             <meta property="og:description" content={fullDescription} />
             <meta property="og:image" content={fullImage} />
@@ -56,23 +76,16 @@ const SEO = ({
 
             {/* Twitter */}
             <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:url" content={fullUrl} />
+            <meta name="twitter:url" content={canonicalUrl} />
             <meta name="twitter:title" content={fullTitle} />
             <meta name="twitter:description" content={fullDescription} />
             <meta name="twitter:image" content={fullImage} />
 
             {/* Canonical */}
-            <link rel="canonical" href={fullUrl} />
+            <link rel="canonical" href={canonicalUrl} />
 
             {/* Hreflang for multi-language SEO */}
-            {hreflangUrls && (
-                <>
-                    {hreflangUrls.de && <link rel="alternate" hrefLang="de" href={`${siteUrl}${hreflangUrls.de}`} />}
-                    {hreflangUrls.tr && <link rel="alternate" hrefLang="tr" href={`${siteUrl}${hreflangUrls.tr}`} />}
-                    {hreflangUrls.en && <link rel="alternate" hrefLang="en" href={`${siteUrl}${hreflangUrls.en}`} />}
-                    <link rel="alternate" hrefLang="x-default" href={`${siteUrl}${hreflangUrls.de || hreflangUrls.tr}`} />
-                </>
-            )}
+            {renderHreflang()}
 
             {/* Structured Data (JSON-LD) */}
             {structuredData && (
@@ -80,7 +93,7 @@ const SEO = ({
                     {JSON.stringify(structuredData)}
                 </script>
             )}
-        </Helmet>
+        </>
     );
 };
 

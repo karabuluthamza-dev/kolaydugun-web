@@ -50,8 +50,8 @@ const ToolsDashboard = () => {
                 />
                 <ToolCard
                     t={t}
-                    title={`📅 ${t('planningTools.timeline.title') || 'Ajandam'}`}
-                    desc={t('planningTools.timeline.desc') || 'Düğün tarihinize göre aylık yapılacaklar listesi. Görevleri kişiselleştirin, not ekleyin ve ilerlemenizi takip edin.'}
+                    title={`📅 ${t('planningTools.agenda.title') || t('planningTools.agenda') || 'Ajandam'}`}
+                    desc={t('planningTools.agenda.desc') || t('planningTools.agendaDesc') || 'Düğün tarihinize göre aylık yapılacaklar listesi.'}
                     icon="📋"
                     link="/tools/timeline"
                     progress={0}

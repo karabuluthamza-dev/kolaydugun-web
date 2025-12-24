@@ -166,11 +166,12 @@ const WeddingWebsiteSetup = () => {
 
             if (error) {
                 console.error('Supabase save error:', error);
+                alert('❌ ' + (t('saveError') || 'Kaydedilirken bir hata oluştu: ') + (error.message || ''));
                 throw error;
             }
 
             console.log('Save successful, data:', data);
-            alert('✅ ' + t('saved'));
+            alert('✅ ' + (t('saved') || 'Başarıyla kaydedildi!'));
 
             // Update local state with returned data
             if (data && data.length > 0) {

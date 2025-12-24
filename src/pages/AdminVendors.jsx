@@ -7,7 +7,9 @@ import VendorEditModal from '../components/Admin/VendorEditModal';
 import VendorImportModal from '../components/Admin/VendorImportModal';
 import { useLanguage } from '../context/LanguageContext';
 import { getCategoryTranslationKey } from '../constants/vendorData';
-import { Brain, Layout, BarChart, TrendingUp, X, Sparkles } from 'lucide-react';
+import { formatExternalUrl } from '../utils/urlUtils';
+import { Brain, Layout, BarChart, TrendingUp, X, Sparkles, ExternalLink } from 'lucide-react';
+import { categoryImages, defaultImage } from '../constants/categoryImages';
 import './AdminVendors.css';
 
 const AdminVendors = () => {
@@ -17,6 +19,8 @@ const AdminVendors = () => {
     const [vendors, setVendors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all'); // all, premium, free
+    const [sourceFilter, setSourceFilter] = useState('all'); // all, organic, imported
+    const [visualFilter, setVisualFilter] = useState('all'); // all, has_image, no_image
 
     // Search & Pagination State
     const [searchTerm, setSearchTerm] = useState('');
@@ -36,6 +40,7 @@ const AdminVendors = () => {
     const [showcaseDuration, setShowcaseDuration] = useState('1_month'); // 1_week, 1_month, 3_months, custom, unlimited
     const [showcaseCustomDate, setShowcaseCustomDate] = useState('');
     const [showcaseOrder, setShowcaseOrder] = useState(0);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null); // Inline delete confirmation state
 
     // AI Insight State
     const [aiInsightVendor, setAiInsightVendor] = useState(null);
@@ -44,6 +49,17 @@ const AdminVendors = () => {
     const [isPublishing, setIsPublishing] = useState(false);
     const [isBulkGenerating, setIsBulkGenerating] = useState(false);
     const [sortConfig, setSortConfig] = useState({ column: 'created_at', direction: 'desc' });
+
+    // Dashboard Metrics State
+    const [dashboardMetrics, setDashboardMetrics] = useState({
+        totalVendors: 0,
+        verifiedVendors: 0,
+        claimedVendors: 0,
+        weeklyViews: 0,
+        totalLeads: 0
+    });
+    const [vendorIdsWithImages, setVendorIdsWithImages] = useState([]);
+    const [categoryMap, setCategoryMap] = useState({});
 
     const handleSort = (column) => {
         let direction = 'desc';
@@ -56,7 +72,25 @@ const AdminVendors = () => {
 
     useEffect(() => {
         fetchVendors();
+        fetchCategories();
     }, [filter]);
+
+    const fetchCategories = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('categories')
+                .select('name, image_url');
+            if (error) throw error;
+
+            const map = {};
+            data.forEach(cat => {
+                map[cat.name] = cat.image_url;
+            });
+            setCategoryMap(map);
+        } catch (error) {
+            console.error('Error fetching categories for map:', error);
+        }
+    };
 
     // Fetch existing AI insight when a vendor is selected
     useEffect(() => {
@@ -104,7 +138,7 @@ const AdminVendors = () => {
             }, 300);
             return () => clearTimeout(timer);
         }
-    }, [user, filter, searchTerm, page, sortConfig]);
+    }, [user, filter, sourceFilter, visualFilter, searchTerm, page, sortConfig]);
 
     const fetchVendors = async () => {
         setLoading(true);
@@ -112,7 +146,7 @@ const AdminVendors = () => {
 
         let query = supabase
             .from('vendors')
-            .select('*, vendor_insights(performance_score, updated_at)', { count: 'exact' })
+            .select('*, vendor_insights(performance_score, updated_at, metrics)', { count: 'exact' })
             .is('deleted_at', null);
 
         // Apply Ordering
@@ -129,9 +163,28 @@ const AdminVendors = () => {
             query = query.eq('subscription_tier', filter);
         }
 
+        if (sourceFilter === 'organic') {
+            query = query.eq('is_claimed', true);
+        } else if (sourceFilter === 'imported') {
+            query = query.eq('is_claimed', false);
+        }
+
+        // Visual Filter will be applied using pre-fetched vendor IDs
+        // This is more efficient than client-side filtering
+
         // Apply Search Filter
         if (searchTerm) {
             query = query.ilike('business_name', `%${searchTerm}%`);
+        }
+
+        // Apply Visual Filter using vendor IDs from dashboard metrics
+        if (visualFilter === 'has_image' && vendorIdsWithImages.length > 0) {
+            console.log('🖼️ Applying HAS_IMAGE filter with', vendorIdsWithImages.length, 'IDs');
+            query = query.in('id', vendorIdsWithImages);
+        } else if (visualFilter === 'no_image' && vendorIdsWithImages.length > 0) {
+            console.log('⚠️ Applying NO_IMAGE filter (excluding', vendorIdsWithImages.length, 'IDs)');
+            // For no_image, we need to exclude vendors with images
+            // This is tricky with Supabase, so we'll do it differently
         }
 
         // Apply Pagination
@@ -142,16 +195,120 @@ const AdminVendors = () => {
         const { data: vendorsData, count, error: vendorsError } = await query;
 
         if (vendorsError) {
-            console.error('Error fetching vendors:', vendorsError);
-            alert(t('common.error', 'Hata: ') + vendorsError.message);
+            console.error('❌ Error fetching vendors:', vendorsError);
             setLoading(false);
             return;
         }
 
-        setVendors(vendorsData || []);
-        setTotalCount(count || 0);
+        // For no_image filter, we need to apply client-side filtering
+        let filteredVendors = vendorsData || [];
+        if (visualFilter === 'no_image') {
+            filteredVendors = filteredVendors.filter(v =>
+                !vendorIdsWithImages.includes(v.id)
+            );
+        }
+
+        setVendors(filteredVendors);
+
+        // Adjust total count based on filter
+        if (visualFilter === 'has_image') {
+            setTotalCount(vendorIdsWithImages.length);
+        } else if (visualFilter === 'no_image') {
+            setTotalCount((count || 0) - vendorIdsWithImages.length);
+        } else {
+            setTotalCount(count || 0);
+        }
         setLoading(false);
     };
+
+    // Fetch Dashboard Metrics
+    const fetchDashboardMetrics = async () => {
+        try {
+            // Total vendors
+            const { count: total } = await supabase
+                .from('vendors')
+                .select('*', { count: 'exact', head: true })
+                .is('deleted_at', null);
+
+            // Verified vendors
+            const { count: verified } = await supabase
+                .from('vendors')
+                .select('*', { count: 'exact', head: true })
+                .is('deleted_at', null)
+                .eq('is_verified', true);
+
+            // Claimed vendors
+            const { count: claimed } = await supabase
+                .from('vendors')
+                .select('*', { count: 'exact', head: true })
+                .is('deleted_at', null)
+                .eq('is_claimed', true);
+
+            // Total leads this month
+            const startOfMonth = new Date();
+            startOfMonth.setDate(1);
+            startOfMonth.setHours(0, 0, 0, 0);
+
+            const { count: leads } = await supabase
+                .from('leads')
+                .select('*', { count: 'exact', head: true })
+                .gte('created_at', startOfMonth.toISOString());
+
+            // Count vendors with/without images (fetch id and gallery columns)
+            // We need to fetch ALL vendors in chunks because Supabase limits to 1000 rows
+            let allGalleryData = [];
+            let offset = 0;
+            const batchSize = 1000;
+            let hasMore = true;
+
+            while (hasMore) {
+                const { data, error } = await supabase
+                    .from('vendors')
+                    .select('id, gallery')
+                    .is('deleted_at', null)
+                    .range(offset, offset + batchSize - 1);
+
+                if (error) {
+                    console.error('Error fetching gallery chunk:', error);
+                    break;
+                }
+
+                if (data && data.length > 0) {
+                    allGalleryData = [...allGalleryData, ...data];
+                    offset += batchSize;
+                    if (data.length < batchSize) hasMore = false;
+                } else {
+                    hasMore = false;
+                }
+            }
+
+            const vendorsWithGallery = allGalleryData.filter(v =>
+                v.gallery && Array.isArray(v.gallery) && v.gallery.length > 0
+            ) || [];
+            const withImages = vendorsWithGallery.length;
+            const withoutImages = (total || 0) - withImages;
+
+            // Save IDs of vendors with images for filtering
+            setVendorIdsWithImages(vendorsWithGallery.map(v => v.id));
+
+            setDashboardMetrics({
+                totalVendors: total || 0,
+                verifiedVendors: verified || 0,
+                claimedVendors: claimed || 0,
+                weeklyViews: 0,
+                totalLeads: leads || 0,
+                withImages,
+                withoutImages
+            });
+        } catch (error) {
+            console.error('Error fetching dashboard metrics:', error);
+        }
+    };
+
+    // Fetch metrics on mount
+    useEffect(() => {
+        fetchDashboardMetrics();
+    }, []);
 
     // Bulk Selection State
     const [selectedVendors, setSelectedVendors] = useState(new Set());
@@ -370,7 +527,6 @@ const AdminVendors = () => {
         }
     };
 
-    const [vendorToDelete, setVendorToDelete] = useState(null);
 
     const handleGenerateInsight = async (vendor) => {
         setIsAnalyzing(true);
@@ -465,16 +621,12 @@ const AdminVendors = () => {
         }
     };
 
-    const handleDeleteClick = (vendor) => {
-        console.log('🖱️ Delete Clicked for:', vendor.id);
-        setVendorToDelete(vendor);
-    };
-
     const confirmDelete = async (vendorId) => {
         console.log('🔴 HARD DELETE BAŞLADI - Vendor ID:', vendorId);
 
         try {
             // Use RPC function for hard delete to handle all dependencies
+            // Note: definitive migration uses target_vendor_id as parameter name
             const { error } = await supabase.rpc('force_delete_vendor', {
                 target_vendor_id: vendorId
             });
@@ -486,12 +638,13 @@ const AdminVendors = () => {
             }
 
             console.log('✅ SİLME BAŞARILI');
-            alert('✅ ' + t('adminPanel.vendors.feedback.hardDeleteSuccess', 'Tedarikçi ve ilişkili tüm veriler başarıyla silindi.'));
-            setVendorToDelete(null);
+            // alert('✅ ' + t('adminPanel.vendors.feedback.hardDeleteSuccess', 'Tedarikçi ve ilişkili tüm veriler başarıyla silindi.'));
+            setConfirmDeleteId(null);
             fetchVendors();
         } catch (err) {
             console.error('Beklenmeyen hata:', err);
             alert(t('common.error', 'Hata: ') + err.message);
+            setConfirmDeleteId(null);
         }
     };
 
@@ -509,7 +662,7 @@ const AdminVendors = () => {
         <div className="section container admin-vendors-container">
             <div className="admin-vendors-header">
                 <div>
-                    <h1>{t('adminPanel.vendors.title', 'Vendor Yönetimi')}</h1>
+                    <h1>{t('adminPanel.vendors.title', 'Vendor Yönetimi')} ({totalCount})</h1>
                     <p>{t('adminPanel.vendors.subtitle', 'Tüm tedarikçileri görüntüleyin ve yönetin')}</p>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
@@ -530,6 +683,38 @@ const AdminVendors = () => {
                 </div>
             </div>
 
+            {/* Dashboard Metrics */}
+            <div className="dashboard-metrics">
+                <div className="metric-card">
+                    <div className="metric-icon purple">📊</div>
+                    <div className="metric-content">
+                        <div className="metric-value">{dashboardMetrics.totalVendors}</div>
+                        <div className="metric-label">{t('adminPanel.vendors.metrics.total', 'Toplam Tedarikçi')}</div>
+                    </div>
+                </div>
+                <div className="metric-card">
+                    <div className="metric-icon green">✅</div>
+                    <div className="metric-content">
+                        <div className="metric-value">{dashboardMetrics.verifiedVendors}</div>
+                        <div className="metric-label">{t('adminPanel.vendors.metrics.verified', 'Onaylı')}</div>
+                    </div>
+                </div>
+                <div className="metric-card">
+                    <div className="metric-icon blue">👤</div>
+                    <div className="metric-content">
+                        <div className="metric-value">{dashboardMetrics.claimedVendors}</div>
+                        <div className="metric-label">{t('adminPanel.vendors.metrics.claimed', 'Sahipli')}</div>
+                    </div>
+                </div>
+                <div className="metric-card">
+                    <div className="metric-icon orange">📈</div>
+                    <div className="metric-content">
+                        <div className="metric-value">{dashboardMetrics.totalLeads}</div>
+                        <div className="metric-label">{t('adminPanel.vendors.metrics.monthlyLeads', 'Bu Ay Lead')}</div>
+                    </div>
+                </div>
+            </div>
+
             {/* Filters & Search - NEW Flex Container */}
             <div style={{
                 display: 'flex',
@@ -544,25 +729,88 @@ const AdminVendors = () => {
                 borderRadius: '8px',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
             }}>
-                <div className="filter-tabs">
-                    <button
-                        className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
-                        onClick={() => { setFilter('all'); setPage(1); }}
-                    >
-                        📋 {t('adminPanel.vendors.filters.all', 'Tümü')}
-                    </button>
-                    <button
-                        className={`filter-tab ${filter === 'premium' ? 'active' : ''}`}
-                        onClick={() => { setFilter('premium'); setPage(1); }}
-                    >
-                        👑 {t('adminPanel.vendors.filters.premium', 'Premium')}
-                    </button>
-                    <button
-                        className={`filter-tab ${filter === 'free' ? 'active' : ''}`}
-                        onClick={() => { setFilter('free'); setPage(1); }}
-                    >
-                        🆓 {t('adminPanel.vendors.filters.free', 'Free')}
-                    </button>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                    <div className="filter-tabs" style={{ marginBottom: 0 }}>
+                        <button
+                            className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
+                            onClick={() => { setFilter('all'); setPage(1); }}
+                        >
+                            📋 {t('adminPanel.vendors.filters.all', 'Tümü')}
+                        </button>
+                        <button
+                            className={`filter-tab ${filter === 'premium' ? 'active' : ''}`}
+                            onClick={() => { setFilter('premium'); setPage(1); }}
+                        >
+                            👑 {t('adminPanel.vendors.filters.premium', 'Premium')}
+                        </button>
+                        <button
+                            className={`filter-tab ${filter === 'free' ? 'active' : ''}`}
+                            onClick={() => { setFilter('free'); setPage(1); }}
+                        >
+                            🆓 {t('adminPanel.vendors.filters.free', 'Free')}
+                        </button>
+                    </div>
+
+                    <div className="filter-tabs" style={{ marginBottom: 0 }}>
+                        <button
+                            className={`filter-tab ${sourceFilter === 'all' ? 'active' : ''}`}
+                            onClick={() => { setSourceFilter('all'); setPage(1); }}
+                        >
+                            🌐 {t('common.all', 'Tümü')}
+                        </button>
+                        <button
+                            className={`filter-tab ${sourceFilter === 'organic' ? 'active' : ''}`}
+                            onClick={() => { setSourceFilter('organic'); setPage(1); }}
+                        >
+                            👤 {t('adminPanel.vendors.filters.organic', 'Üyeler')}
+                        </button>
+                        <button
+                            className={`filter-tab ${sourceFilter === 'imported' ? 'active' : ''}`}
+                            onClick={() => { setSourceFilter('imported'); setPage(1); }}
+                        >
+                            📥 {t('adminPanel.vendors.filters.imported', 'Adaylar')}
+                        </button>
+                    </div>
+
+                    {/* Visual Filter Buttons - Clickable to filter by photo status */}
+                    <div className="filter-tabs" style={{ marginBottom: 0, gap: '8px' }}>
+                        <button
+                            onClick={() => { setVisualFilter(visualFilter === 'has_image' ? 'all' : 'has_image'); setPage(1); }}
+                            style={{
+                                padding: '6px 12px',
+                                borderRadius: '8px',
+                                background: visualFilter === 'has_image' ? '#10b981' : 'rgba(16, 185, 129, 0.1)',
+                                color: visualFilter === 'has_image' ? 'white' : '#10b981',
+                                fontSize: '0.85rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            📸 <strong>{dashboardMetrics.withImages || 0}</strong> {t('adminPanel.vendors.filters.hasImage', 'Fotoğraflı')}
+                        </button>
+                        <button
+                            onClick={() => { setVisualFilter(visualFilter === 'no_image' ? 'all' : 'no_image'); setPage(1); }}
+                            style={{
+                                padding: '6px 12px',
+                                borderRadius: '8px',
+                                background: visualFilter === 'no_image' ? '#ef4444' : 'rgba(239, 68, 68, 0.1)',
+                                color: visualFilter === 'no_image' ? 'white' : '#ef4444',
+                                fontSize: '0.85rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            ⚠️ <strong>{dashboardMetrics.withoutImages || 0}</strong> {t('adminPanel.vendors.filters.noImage', 'Fotoğrafsız')}
+                        </button>
+                    </div>
                 </div>
 
                 {/* SEARCH BAR */}
@@ -663,6 +911,7 @@ const AdminVendors = () => {
                                         />
                                     </th>
                                     <th style={{ width: '50px', textAlign: 'center', color: '#888' }}>#</th>
+                                    <th style={{ width: '80px' }}>{t('adminPanel.vendors.table.thumbnail', 'Önizleme')}</th>
                                     <th onClick={() => handleSort('business_name')} style={{ cursor: 'pointer' }}>
                                         {t('adminPanel.vendors.table.businessName', 'İşletme Adı')} {sortConfig.column === 'business_name' && (sortConfig.direction === 'asc' ? '🔼' : '🔽')}
                                     </th>
@@ -678,9 +927,11 @@ const AdminVendors = () => {
                                     <th onClick={() => handleSort('ai_performance_score')} style={{ cursor: 'pointer' }}>
                                         {t('adminPanel.vendors.table.aiReport', 'AI Rapor')} {sortConfig.column === 'ai_performance_score' && (sortConfig.direction === 'asc' ? '🔼' : '🔽')}
                                     </th>
+                                    <th>{t('adminPanel.vendors.table.source', 'Kaynak')}</th>
                                     <th onClick={() => handleSort('is_featured')} style={{ cursor: 'pointer' }}>
                                         {t('adminPanel.vendors.table.showcase', 'Vitrin')} {sortConfig.column === 'is_featured' && (sortConfig.direction === 'asc' ? '🔼' : '🔽')}
                                     </th>
+                                    <th style={{ textAlign: 'center' }}>🖼️ {t('adminPanel.vendors.table.visual', 'Görsel')}</th>
                                     <th onClick={() => handleSort('is_verified')} style={{ cursor: 'pointer' }}>
                                         {t('adminPanel.vendors.table.status', 'Durum')} {sortConfig.column === 'is_verified' && (sortConfig.direction === 'asc' ? '🔼' : '🔽')}
                                     </th>
@@ -697,12 +948,106 @@ const AdminVendors = () => {
                                                 onChange={() => toggleSelectVendor(vendor.id)}
                                             />
                                         </td>
+                                        <td>
+                                            <div style={{
+                                                width: '50px',
+                                                height: '50px',
+                                                borderRadius: '8px',
+                                                overflow: 'hidden',
+                                                backgroundColor: '#f3f4f6',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                border: '1px solid #e5e7eb',
+                                                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                                            }}>
+                                                {(() => {
+                                                    const normalizedCat = vendor.category?.trim();
+                                                    const dbCategoryImage = categoryMap[normalizedCat] || categoryMap[vendor.category];
+                                                    const categoryDefault = dbCategoryImage || categoryImages[normalizedCat] || defaultImage;
+                                                    const validImage = vendor.image || (Array.isArray(vendor.gallery) && vendor.gallery.length > 0 ? vendor.gallery[0] : categoryDefault);
+
+                                                    return (
+                                                        <img
+                                                            src={validImage}
+                                                            alt={vendor.business_name}
+                                                            style={{
+                                                                width: '100%',
+                                                                height: '100%',
+                                                                objectFit: 'cover'
+                                                            }}
+                                                            onError={(e) => {
+                                                                e.target.src = categoryDefault;
+                                                            }}
+                                                        />
+                                                    );
+                                                })()}
+                                            </div>
+                                        </td>
                                         <td style={{ textAlign: 'center', fontWeight: 'bold', color: '#888' }}>
                                             {vendors.length - index}
                                         </td>
                                         <td>
-                                            <div style={{ fontWeight: 'bold' }}>{vendor.business_name}</div>
-                                            <div style={{ fontSize: '0.8rem', color: '#666' }}>{vendor.id}</div>
+                                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                                                {/* Vendor Thumbnail */}
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                        <a
+                                                            href={`/vendors/${vendor.slug || vendor.id}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            style={{
+                                                                fontWeight: 'bold',
+                                                                color: '#4f46e5',
+                                                                textDecoration: 'none',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '6px'
+                                                            }}
+                                                            className="vendor-link-hover"
+                                                            title={t('adminPanel.vendors.actions.viewProfile', 'Profili Görüntüle')}
+                                                        >
+                                                            🏢 {vendor.business_name}
+                                                        </a>
+                                                        {vendor.is_claimed ? (
+                                                            <span title={t('common.claimed', 'Sahipli')} style={{ fontSize: '0.65rem', backgroundColor: '#f3e8ff', color: '#7e22ce', padding: '1px 5px', borderRadius: '4px', fontWeight: 'bold' }}>👤 {t('common.claimed', 'Sahipli')}</span>
+                                                        ) : (
+                                                            <span title={t('common.unclaimed', 'Sahipsiz')} style={{ fontSize: '0.65rem', backgroundColor: '#f1f5f9', color: '#64748b', padding: '1px 5px', borderRadius: '4px', fontWeight: 'bold' }}>👤 {t('common.unclaimed', 'Sahipsiz')}</span>
+                                                        )}
+                                                    </div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+                                                        {vendor.contact_phone && (
+                                                            <a href={`tel:${vendor.contact_phone}`}
+                                                                style={{ fontSize: '0.7rem', color: '#059669', textDecoration: 'none', fontWeight: '600', backgroundColor: '#ecfdf5', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d1fae5' }}
+                                                                title={vendor.contact_phone}
+                                                            >📞 Ara</a>
+                                                        )}
+                                                        {vendor.contact_email && (
+                                                            <a href={`mailto:${vendor.contact_email}`}
+                                                                style={{ fontSize: '0.7rem', color: '#2563eb', textDecoration: 'none', fontWeight: '600', backgroundColor: '#eff6ff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #dbeafe' }}
+                                                                title={vendor.contact_email}
+                                                            >📧 Mail</a>
+                                                        )}
+                                                        {(vendor.scraper_source_url || vendor.website_url) && (
+                                                            <a href={formatExternalUrl(vendor.scraper_source_url || vendor.website_url)}
+                                                                target="_blank" rel="noopener noreferrer"
+                                                                style={{ fontSize: '0.7rem', color: '#7c3aed', textDecoration: 'none', fontWeight: '600', backgroundColor: '#f5f3ff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #ede9fe' }}
+                                                                title={vendor.scraper_source_url ? 'Scraper Kaynak' : 'Web Sitesi'}
+                                                            >🔗 Kaynak</a>
+                                                        )}
+                                                        {(vendor.is_verified || vendor.is_claimed) && (() => {
+                                                            const insight = (vendor.vendor_insights && Array.isArray(vendor.vendor_insights)) ? vendor.vendor_insights[0] : (vendor.vendor_insights && typeof vendor.vendor_insights === 'object' ? vendor.vendor_insights : null);
+                                                            const viewCount = insight?.metrics?.view_count || 0;
+                                                            return (
+                                                                <span title={t('adminPanel.vendors.table.viewCount', 'Toplam Görüntülenme')} style={{ fontSize: '0.7rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                                    👁️ {viewCount}
+                                                                </span>
+                                                            );
+                                                        })()}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.65rem', color: '#9ca3af', marginTop: '2px' }}>{vendor.id.substring(0, 8)}...</div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
                                             {t('categories.' + getCategoryTranslationKey(vendor.category))}
@@ -721,9 +1066,9 @@ const AdminVendors = () => {
                                         </td>
                                         <td>
                                             {(() => {
-                                                const insight = Array.isArray(vendor.vendor_insights)
+                                                const insight = (vendor.vendor_insights && Array.isArray(vendor.vendor_insights))
                                                     ? vendor.vendor_insights[0]
-                                                    : vendor.vendor_insights;
+                                                    : (vendor.vendor_insights && typeof vendor.vendor_insights === 'object' ? vendor.vendor_insights : null);
 
                                                 return insight ? (
                                                     <div style={{ display: 'flex', flexDirection: 'column', fontSize: '0.8rem' }}>
@@ -743,22 +1088,51 @@ const AdminVendors = () => {
                                             })()}
                                         </td>
                                         <td>
+                                            {(() => {
+                                                const sourceUrl = vendor.scraper_source_url || vendor.website_url;
+                                                const isScraper = !!vendor.scraper_source_url;
+
+                                                return sourceUrl ? (
+                                                    <a
+                                                        href={formatExternalUrl(sourceUrl)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn-sm btn-outline-secondary"
+                                                        style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem' }}
+                                                        title={isScraper ? 'Orijinal Kaynak (Scraper)' : 'İşletme Web Sitesi'}
+                                                    >
+                                                        <ExternalLink size={12} />
+                                                        {isScraper ? 'Scraper' : 'Web site'}
+                                                    </a>
+                                                ) : (
+                                                    <span style={{ fontSize: '0.7rem', color: '#ccc' }}>{t('adminPanel.vendors.ai.noReport', 'Henüz yok')}</span>
+                                                );
+                                            })()}
+                                        </td>
+                                        <td>
                                             {vendor.is_featured ? (
                                                 <div>
                                                     <span className="badge badge-success">{t('adminPanel.vendors.status.featured', 'Vitrinde')}</span>
                                                     {vendor.featured_expires_at && (
-                                                        <div style={{ fontSize: '0.7rem', color: '#666', marginTop: '4px' }}>
+                                                        <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
                                                             {t('adminPanel.vendors.table.expires', 'Bitiş')}: {new Date(vendor.featured_expires_at).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'de-DE')}
                                                         </div>
                                                     )}
                                                     {vendor.featured_sort_order > 0 && (
-                                                        <div style={{ fontSize: '0.7rem', color: '#666' }}>
+                                                        <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
                                                             {t('adminPanel.vendors.modals.order', 'Sıra')}: {vendor.featured_sort_order}
                                                         </div>
                                                     )}
                                                 </div>
                                             ) : (
                                                 <span className="badge badge-secondary">{t('adminPanel.vendors.status.passive', 'Pasif')}</span>
+                                            )}
+                                        </td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            {(vendor.image || vendor.image_url || (Array.isArray(vendor.gallery) && vendor.gallery.length > 0)) ? (
+                                                <span title="Görsel Mevcut" style={{ color: '#10b981', fontSize: '1.2rem', cursor: 'help' }}>✅</span>
+                                            ) : (
+                                                <span title="Görsel Eksik (Kategori Fallback Aktif)" style={{ color: '#ef4444', fontSize: '1.2rem', cursor: 'help' }}>❌</span>
                                             )}
                                         </td>
                                         <td>
@@ -827,13 +1201,33 @@ const AdminVendors = () => {
                                                 >
                                                     ✏️
                                                 </button>
-                                                <button
-                                                    className="btn-sm btn-danger"
-                                                    onClick={() => handleDeleteClick(vendor)}
-                                                    title={t('adminPanel.vendors.actions.delete', 'Sil')}
-                                                >
-                                                    🗑️
-                                                </button>
+                                                {confirmDeleteId === vendor.id ? (
+                                                    <>
+                                                        <button
+                                                            className="btn-sm btn-danger pulsing-delete"
+                                                            onClick={() => confirmDelete(vendor.id)}
+                                                            title="Kesin Sil"
+                                                            style={{ animation: 'pulse 1s infinite' }}
+                                                        >
+                                                            🗑️ ONAYLA
+                                                        </button>
+                                                        <button
+                                                            className="btn-sm btn-secondary"
+                                                            onClick={() => setConfirmDeleteId(null)}
+                                                            title="İptal"
+                                                        >
+                                                            ❌
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <button
+                                                        className="btn-sm btn-danger"
+                                                        onClick={() => setConfirmDeleteId(vendor.id)}
+                                                        title={t('adminPanel.vendors.actions.delete', 'Sil')}
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -843,246 +1237,232 @@ const AdminVendors = () => {
                     </div>
 
                     {/* Pagination Controls */}
-                    {totalPages > 1 && (
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', gap: '15px' }}>
-                            <button
-                                onClick={() => setPage(p => Math.max(1, p - 1))}
-                                disabled={page === 1}
-                                style={{
-                                    padding: '8px 16px',
-                                    border: '1px solid #d1d5db',
-                                    background: page === 1 ? '#f3f4f6' : '#fff',
-                                    color: page === 1 ? '#9ca3af' : '#374151',
-                                    borderRadius: '6px',
-                                    cursor: page === 1 ? 'not-allowed' : 'pointer'
-                                }}
-                            >
-                                ← {t('adminPanel.vendors.pagination.previous', 'Önceki')}
-                            </button>
-                            <span style={{ fontSize: '14px', color: '#4b5563' }}>
-                                {t('adminPanel.vendors.pagination.page', 'Sayfa')} <strong>{page}</strong> / {totalPages}
-                            </span>
-                            <button
-                                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                disabled={page === totalPages}
-                                style={{
-                                    padding: '8px 16px',
-                                    border: '1px solid #d1d5db',
-                                    background: page === totalPages ? '#f3f4f6' : '#fff',
-                                    color: page === totalPages ? '#9ca3af' : '#374151',
-                                    borderRadius: '6px',
-                                    cursor: page === totalPages ? 'not-allowed' : 'pointer'
-                                }}
-                            >
-                                {t('adminPanel.vendors.pagination.next', 'Sonraki')} →
-                            </button>
-                        </div>
-                    )}
+                    {
+                        totalPages > 1 && (
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', gap: '15px' }}>
+                                <button
+                                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                                    disabled={page === 1}
+                                    style={{
+                                        padding: '8px 16px',
+                                        border: '1px solid #d1d5db',
+                                        background: page === 1 ? '#f3f4f6' : '#fff',
+                                        color: page === 1 ? '#9ca3af' : '#374151',
+                                        borderRadius: '6px',
+                                        cursor: page === 1 ? 'not-allowed' : 'pointer'
+                                    }}
+                                >
+                                    ← {t('adminPanel.vendors.pagination.previous', 'Önceki')}
+                                </button>
+                                <span style={{ fontSize: '14px', color: '#4b5563' }}>
+                                    {t('adminPanel.vendors.pagination.page', 'Sayfa')} <strong>{page}</strong> / {totalPages}
+                                </span>
+                                <button
+                                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={page === totalPages}
+                                    style={{
+                                        padding: '8px 16px',
+                                        border: '1px solid #d1d5db',
+                                        background: page === totalPages ? '#f3f4f6' : '#fff',
+                                        color: page === totalPages ? '#9ca3af' : '#374151',
+                                        borderRadius: '6px',
+                                        cursor: page === totalPages ? 'not-allowed' : 'pointer'
+                                    }}
+                                >
+                                    {t('adminPanel.vendors.pagination.next', 'Sonraki')} →
+                                </button>
+                            </div>
+                        )
+                    }
                 </>
             )}
 
             {/* Modals */}
-            {showCreateModal && (
-                <VendorCreateModal
-                    onClose={() => setShowCreateModal(false)}
-                    onSuccess={() => {
-                        setShowCreateModal(false);
-                        fetchVendors();
-                    }}
-                />
-            )}
+            {
+                showCreateModal && (
+                    <VendorCreateModal
+                        onClose={() => setShowCreateModal(false)}
+                        onSuccess={() => {
+                            setShowCreateModal(false);
+                            fetchVendors();
+                        }}
+                    />
+                )
+            }
 
-            {showImportModal && (
-                <VendorImportModal
-                    onClose={() => setShowImportModal(false)}
-                    onSuccess={() => {
-                        setShowImportModal(false);
-                        fetchVendors();
-                    }}
-                />
-            )}
+            {
+                showImportModal && (
+                    <VendorImportModal
+                        onClose={() => setShowImportModal(false)}
+                        onSuccess={() => {
+                            setShowImportModal(false);
+                            fetchVendors();
+                        }}
+                    />
+                )
+            }
 
-            {editingVendor && (
-                <VendorEditModal
-                    vendor={editingVendor}
-                    onClose={() => setEditingVendor(null)}
-                    onSuccess={() => {
-                        setEditingVendor(null);
-                        fetchVendors();
-                    }}
-                />
-            )}
+            {
+                editingVendor && (
+                    <VendorEditModal
+                        isOpen={!!editingVendor}
+                        vendor={editingVendor}
+                        onClose={() => setEditingVendor(null)}
+                        onSaveSuccess={() => {
+                            setEditingVendor(null);
+                            fetchVendors();
+                        }}
+                    />
+                )
+            }
 
             {/* Showcase Modal */}
-            {showShowcaseModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content" style={{ maxWidth: '400px' }}>
-                        <h3>{t('adminPanel.vendors.modals.showcaseTitle', 'Vitrine Ekle')}: {showcaseVendor?.business_name}</h3>
+            {
+                showShowcaseModal && (
+                    <div className="modal-overlay">
+                        <div className="modal-content" style={{ maxWidth: '400px' }}>
+                            <h3>{t('adminPanel.vendors.modals.showcaseTitle', 'Vitrine Ekle')}: {showcaseVendor?.business_name}</h3>
 
-                        <div className="form-group">
-                            <label>{t('adminPanel.vendors.modals.duration', 'Süre')}</label>
-                            <select
-                                value={showcaseDuration}
-                                onChange={(e) => setShowcaseDuration(e.target.value)}
-                                className="form-control"
-                            >
-                                <option value="1_week">{t('adminPanel.vendors.modals.durations.week', '1 Hafta')}</option>
-                                <option value="1_month">{t('adminPanel.vendors.modals.durations.month', '1 Ay')}</option>
-                                <option value="3_months">{t('adminPanel.vendors.modals.durations.threeMonths', '3 Ay')}</option>
-                                <option value="unlimited">{t('adminPanel.vendors.modals.durations.unlimited', 'Süresiz')}</option>
-                                <option value="custom">{t('adminPanel.vendors.modals.durations.custom', 'Özel Tarih')}</option>
-                            </select>
-                        </div>
-
-                        {showcaseDuration === 'custom' && (
                             <div className="form-group">
-                                <label>{t('adminPanel.vendors.modals.expiryDate', 'Bitiş Tarihi')}</label>
-                                <input
-                                    type="date"
-                                    value={showcaseCustomDate}
-                                    onChange={(e) => setShowcaseCustomDate(e.target.value)}
+                                <label>{t('adminPanel.vendors.modals.duration', 'Süre')}</label>
+                                <select
+                                    value={showcaseDuration}
+                                    onChange={(e) => setShowcaseDuration(e.target.value)}
                                     className="form-control"
-                                />
+                                >
+                                    <option value="1_week">{t('adminPanel.vendors.modals.durations.week', '1 Hafta')}</option>
+                                    <option value="1_month">{t('adminPanel.vendors.modals.durations.month', '1 Ay')}</option>
+                                    <option value="3_months">{t('adminPanel.vendors.modals.durations.threeMonths', '3 Ay')}</option>
+                                    <option value="unlimited">{t('adminPanel.vendors.modals.durations.unlimited', 'Süresiz')}</option>
+                                    <option value="custom">{t('adminPanel.vendors.modals.durations.custom', 'Özel Tarih')}</option>
+                                </select>
                             </div>
-                        )}
 
-                        <div className="form-group">
-                            <label>{t('adminPanel.vendors.modals.order', 'Sıralama Önceliği (1 = En Üst)')}</label>
-                            <input
-                                type="number"
-                                value={showcaseOrder}
-                                onChange={(e) => setShowcaseOrder(parseInt(e.target.value))}
-                                className="form-control"
-                                min="0"
-                            />
-                            <small className="text-muted">{t('adminPanel.vendors.modals.orderHint', 'Düşük numara daha üstte görünür.')}</small>
-                        </div>
+                            {showcaseDuration === 'custom' && (
+                                <div className="form-group">
+                                    <label>{t('adminPanel.vendors.modals.expiryDate', 'Bitiş Tarihi')}</label>
+                                    <input
+                                        type="date"
+                                        value={showcaseCustomDate}
+                                        onChange={(e) => setShowcaseCustomDate(e.target.value)}
+                                        className="form-control"
+                                    />
+                                </div>
+                            )}
 
-                        <div className="modal-actions">
-                            <button className="btn btn-secondary" onClick={() => setShowShowcaseModal(false)}>{t('common.cancel', 'İptal')}</button>
-                            <button className="btn btn-primary" onClick={handleShowcaseSubmit}>{t('adminPanel.vendors.modals.saveAndAdd', 'Kaydet ve Ekle')}</button>
+                            <div className="form-group">
+                                <label>{t('adminPanel.vendors.modals.order', 'Sıralama Önceliği (1 = En Üst)')}</label>
+                                <input
+                                    type="number"
+                                    value={showcaseOrder}
+                                    onChange={(e) => setShowcaseOrder(parseInt(e.target.value))}
+                                    className="form-control"
+                                    min="0"
+                                />
+                                <small className="text-muted">{t('adminPanel.vendors.modals.orderHint', 'Düşük numara daha üstte görünür.')}</small>
+                            </div>
+
+                            <div className="modal-actions">
+                                <button className="btn btn-secondary" onClick={() => setShowShowcaseModal(false)}>{t('common.cancel', 'İptal')}</button>
+                                <button className="btn btn-primary" onClick={handleShowcaseSubmit}>{t('adminPanel.vendors.modals.saveAndAdd', 'Kaydet ve Ekle')}</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* AI Insight Sidebar */}
-            {aiInsightVendor && (
-                <div className={`ai-insight-sidebar ${aiInsightVendor ? 'open' : ''}`}>
-                    <div className="sidebar-header">
-                        <div className="header-title">
-                            <Brain className="brain-icon" />
-                            <h3>{aiInsightVendor.business_name} - {t('adminPanel.vendors.ai.reportTitle', 'AI Analiz')}</h3>
+            {
+                aiInsightVendor && (
+                    <div className={`ai-insight-sidebar ${aiInsightVendor ? 'open' : ''}`}>
+                        <div className="sidebar-header">
+                            <div className="header-title">
+                                <Brain className="brain-icon" />
+                                <h3>{aiInsightVendor.business_name} - {t('adminPanel.vendors.ai.reportTitle', 'AI Analiz')}</h3>
+                            </div>
+                            <button className="close-btn" onClick={() => { setAiInsightVendor(null); setAiReport(null); }}>
+                                <X size={20} />
+                            </button>
                         </div>
-                        <button className="close-btn" onClick={() => { setAiInsightVendor(null); setAiReport(null); }}>
-                            <X size={20} />
-                        </button>
-                    </div>
 
-                    <div className="sidebar-content">
-                        {isAnalyzing ? (
-                            <div className="sidebar-loading">
-                                <div className="loading-spinner"></div>
-                                <p>{t('adminPanel.vendors.ai.analyzing', 'Veriler analiz ediliyor...')}</p>
-                                <span className="scanning-line"></span>
-                            </div>
-                        ) : aiReport ? (
-                            <div className="ai-report-body fade-in">
-                                <div className="report-card primary">
-                                    <h4><Sparkles size={16} /> {t('adminPanel.vendors.ai.summary', 'Performans Özeti')}</h4>
-                                    <p>{aiReport.summary}</p>
+                        <div className="sidebar-content">
+                            {isAnalyzing ? (
+                                <div className="sidebar-loading">
+                                    <div className="loading-spinner"></div>
+                                    <p>{t('adminPanel.vendors.ai.analyzing', 'Veriler analiz ediliyor...')}</p>
+                                    <span className="scanning-line"></span>
                                 </div>
+                            ) : aiReport ? (
+                                <div className="ai-report-body fade-in">
+                                    <div className="report-card primary">
+                                        <h4><Sparkles size={16} /> {t('adminPanel.vendors.ai.summary', 'Performans Özeti')}</h4>
+                                        <p>{aiReport.summary}</p>
+                                    </div>
 
-                                <div className="metrics-grid">
-                                    <div className="mini-card">
-                                        <TrendingUp size={14} />
-                                        <span>{t('adminPanel.vendors.ai.visibility', 'Görünürlük')}</span>
-                                        <strong>{aiReport.visibility_score}/100</strong>
+                                    <div className="metrics-grid">
+                                        <div className="mini-card">
+                                            <TrendingUp size={14} />
+                                            <span>{t('adminPanel.vendors.ai.visibility', 'Görünürlük')}</span>
+                                            <strong>{aiReport.visibility_score}/100</strong>
+                                        </div>
+                                        <div className="mini-card">
+                                            <BarChart size={14} />
+                                            <span>{t('adminPanel.vendors.ai.conversion', 'Dönüşüm')}</span>
+                                            <strong>{aiReport.conversion_rate}%</strong>
+                                        </div>
+                                        <div className="mini-card">
+                                            <Sparkles size={14} style={{ color: '#f59e0b' }} />
+                                            <span>{t('adminPanel.vendors.ai.rating', 'Puan / Yorum')}</span>
+                                            <strong>{aiReport.avg_rating} / {aiReport.review_count}</strong>
+                                        </div>
+                                        <div className="mini-card">
+                                            <Layout size={14} style={{ color: '#ec4899' }} />
+                                            <span>{t('adminPanel.vendors.ai.favorites', 'Favoriler')}</span>
+                                            <strong>{aiReport.favorite_count}</strong>
+                                        </div>
                                     </div>
-                                    <div className="mini-card">
-                                        <BarChart size={14} />
-                                        <span>{t('adminPanel.vendors.ai.conversion', 'Dönüşüm')}</span>
-                                        <strong>{aiReport.conversion_rate}%</strong>
+
+                                    <div className="report-card">
+                                        <h4>🎯 {t('adminPanel.vendors.ai.recommendations', 'Tavsiyeler')}</h4>
+                                        <ul>
+                                            {aiReport.recommendations.map((rec, i) => (
+                                                <li key={i}>{rec}</li>
+                                            ))}
+                                        </ul>
                                     </div>
-                                    <div className="mini-card">
-                                        <Sparkles size={14} style={{ color: '#f59e0b' }} />
-                                        <span>{t('adminPanel.vendors.ai.rating', 'Puan / Yorum')}</span>
-                                        <strong>{aiReport.avg_rating} / {aiReport.review_count}</strong>
-                                    </div>
-                                    <div className="mini-card">
-                                        <Layout size={14} style={{ color: '#ec4899' }} />
-                                        <span>{t('adminPanel.vendors.ai.favorites', 'Favoriler')}</span>
-                                        <strong>{aiReport.favorite_count}</strong>
+
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <button
+                                            className="btn btn-success flex-1"
+                                            onClick={handlePublishInsight}
+                                            disabled={isPublishing || aiReport.is_published}
+                                        >
+                                            {isPublishing ? t('adminPanel.vendors.ai.publishing', 'Yayınlanıyor...') : aiReport.is_published ? '✅ ' + t('adminPanel.vendors.ai.published', 'Yayında') : '🚀 ' + t('adminPanel.vendors.ai.publish', 'Yayınla ve Paylaş')}
+                                        </button>
+                                        <button className="btn btn-secondary" onClick={() => setAiInsightVendor(null)}>
+                                            {t('common.close', 'Kapat')}
+                                        </button>
                                     </div>
                                 </div>
-
-                                <div className="report-card">
-                                    <h4>🎯 {t('adminPanel.vendors.ai.recommendations', 'Tavsiyeler')}</h4>
-                                    <ul>
-                                        {aiReport.recommendations.map((rec, i) => (
-                                            <li key={i}>{rec}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '10px' }}>
+                            ) : (
+                                <div className="sidebar-start">
+                                    <p>{t('adminPanel.vendors.ai.sidebarDesc', 'Bu tedarikçinin son 30 günlük verileri (Google Trafik + Local Talepler) harmanlanarak bir rapor oluşturulacaktır.')}</p>
                                     <button
-                                        className="btn btn-success flex-1"
-                                        onClick={handlePublishInsight}
-                                        disabled={isPublishing || aiReport.is_published}
+                                        className="btn btn-primary w-full"
+                                        onClick={() => handleGenerateInsight(aiInsightVendor)}
                                     >
-                                        {isPublishing ? t('adminPanel.vendors.ai.publishing', 'Yayınlanıyor...') : aiReport.is_published ? '✅ ' + t('adminPanel.vendors.ai.published', 'Yayında') : '🚀 ' + t('adminPanel.vendors.ai.publish', 'Yayınla ve Paylaş')}
-                                    </button>
-                                    <button className="btn btn-secondary" onClick={() => setAiInsightVendor(null)}>
-                                        {t('common.close', 'Kapat')}
+                                        {t('adminPanel.vendors.ai.startAnalysis', 'Analizi Başlat')}
                                     </button>
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="sidebar-start">
-                                <p>{t('adminPanel.vendors.ai.sidebarDesc', 'Bu tedarikçinin son 30 günlük verileri (Google Trafik + Local Talepler) harmanlanarak bir rapor oluşturulacaktır.')}</p>
-                                <button
-                                    className="btn btn-primary w-full"
-                                    onClick={() => handleGenerateInsight(aiInsightVendor)}
-                                >
-                                    {t('adminPanel.vendors.ai.startAnalysis', 'Analizi Başlat')}
-                                </button>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
             {aiInsightVendor && <div className="sidebar-overlay" onClick={() => setAiInsightVendor(null)}></div>}
 
-            {/* Delete Confirmation Modal */}
-            {vendorToDelete && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <h3>{t('adminPanel.vendors.modals.deleteTitle', 'Tedarikçiyi Sil?')}</h3>
-                        <p>
-                            <strong>{vendorToDelete.business_name}</strong> {t('adminPanel.vendors.modals.deleteConfirm', 'isimli tedarikçiyi silmek istediğinize emin misiniz?')}
-                        </p>
-                        <div className="alert alert-danger">
-                            ⚠️ {t('adminPanel.vendors.modals.deleteWarning', 'Bu işlem geri alınamaz!')} {t('adminPanel.vendors.modals.deleteWarningExtra', 'Tedarikçiye ait tüm veriler (abonelikler, leadler, vb.) silinecektir.')}
-                        </div>
-                        <div className="modal-actions">
-                            <button
-                                className="btn btn-secondary"
-                                onClick={() => setVendorToDelete(null)}
-                            >
-                                {t('common.cancel', 'İptal')}
-                            </button>
-                            <button
-                                className="btn btn-danger"
-                                onClick={() => confirmDelete(vendorToDelete.id)}
-                            >
-                                {t('common.yes', 'Evet')}, {t('common.delete', 'Sil')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
+
+        </div >
     );
 };
 

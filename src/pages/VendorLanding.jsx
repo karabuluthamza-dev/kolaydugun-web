@@ -4,6 +4,7 @@ import { useSiteSettings } from '../context/SiteSettingsContext';
 import { useLanguage } from '../context/LanguageContext';
 
 import CategoryGrid from '../components/CategoryGrid';
+import VendorAcceleratorBanner from '../components/VendorAcceleratorBanner';
 
 const VendorLanding = () => {
     const { t, language } = useLanguage();
@@ -108,120 +109,130 @@ const VendorLanding = () => {
             {/* Category Grid */}
             <CategoryGrid />
 
-            {/* Shop Marketplace Promo Section */}
+            {/* Premium CTA Section */}
             <div style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                padding: '3rem 1rem',
-                textAlign: 'center'
-            }}>
-                <div className="container">
-                    <h3 style={{
-                        color: 'white',
-                        fontSize: 'clamp(1.4rem, 3vw, 1.8rem)',
-                        marginBottom: '0.75rem',
-                        textShadow: '0 2px 10px rgba(0,0,0,0.2)'
-                    }}>
-                        🛍️ {language === 'tr' ? 'Kendi Mağazanızı da Açabilirsiniz!' :
-                            language === 'de' ? 'Eröffnen Sie auch Ihren eigenen Shop!' :
-                                'You Can Also Open Your Own Shop!'}
-                    </h3>
-                    <p style={{
-                        color: 'rgba(255,255,255,0.9)',
-                        marginBottom: '1.5rem',
-                        maxWidth: '600px',
-                        margin: '0 auto 1.5rem',
-                        fontSize: '1rem'
-                    }}>
-                        {language === 'tr' ? 'KolayDugun Shop Marketplace\'te dijital davetiyeler, süslemeler ve hediyeler satın. İlk 10 tedarikçiye özel avantajlar!' :
-                            language === 'de' ? 'Verkaufen Sie digitale Einladungen, Dekorationen und Geschenke im KolayDugun Shop Marketplace. Exklusive Vorteile für die ersten 10 Anbieter!' :
-                                'Sell digital invitations, decorations and gifts in KolayDugun Shop Marketplace. Exclusive benefits for first 10 vendors!'}
-                    </p>
-                    <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
-                        <a
-                            href="/shop/magaza/wedding-essentials-demo-mj7uva80"
-                            target="_blank"
-                            style={{
-                                color: 'rgba(255,255,255,0.95)',
-                                fontSize: '0.95rem',
-                                textDecoration: 'underline'
-                            }}
-                        >
-                            🎨 {language === 'tr' ? 'Demo Mağazayı İncele' :
-                                language === 'de' ? 'Demo-Shop ansehen' :
-                                    'View Demo Shop'}
-                        </a>
-                        <a
-                            href="/shop-panel/demo"
-                            target="_blank"
-                            style={{
-                                color: 'rgba(255,255,255,0.95)',
-                                fontSize: '0.95rem',
-                                textDecoration: 'underline'
-                            }}
-                        >
-                            ⚙️ {language === 'tr' ? 'Demo Paneli Gör' :
-                                language === 'de' ? 'Demo-Panel ansehen' :
-                                    'View Demo Panel'}
-                        </a>
-                    </div>
-                    <Link
-                        to="/shop/basvuru"
-                        style={{
-                            display: 'inline-block',
-                            padding: '14px 36px',
-                            background: 'white',
-                            color: '#667eea',
-                            borderRadius: '50px',
-                            fontWeight: '600',
-                            fontSize: '1rem',
-                            textDecoration: 'none',
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-                            transition: 'all 0.3s ease'
-                        }}
-                    >
-                        {language === 'tr' ? 'Mağaza Başvurusu Yap →' :
-                            language === 'de' ? 'Shop-Bewerbung einreichen →' :
-                                'Apply for Shop →'}
-                    </Link>
-                </div>
-            </div>
-
-            {/* CTA Section */}
-            <div style={{
-                background: 'linear-gradient(135deg, #f0f9ff 0%, #fdf4ff 100%)',
-                padding: '3.5rem 1rem',
+                background: 'linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%)',
+                padding: '6rem 1rem',
                 textAlign: 'center',
-                borderTop: '1px solid rgba(255, 107, 157, 0.1)'
+                position: 'relative',
+                overflow: 'hidden'
             }}>
-                <div className="container">
-                    <h3 style={{
-                        fontSize: 'clamp(1.2rem, 3vw, 1.6rem)',
-                        marginBottom: '0.75rem',
-                        color: '#374151'
+                {/* Background decorative elements */}
+                <div style={{
+                    position: 'absolute',
+                    top: '-50px',
+                    right: '-50px',
+                    width: '300px',
+                    height: '300px',
+                    background: 'radial-gradient(circle, rgba(192, 132, 252, 0.1) 0%, transparent 70%)',
+                    borderRadius: '50%',
+                    zIndex: 0
+                }}></div>
+                <div style={{
+                    position: 'absolute',
+                    bottom: '-100px',
+                    left: '-100px',
+                    width: '400px',
+                    height: '400px',
+                    background: 'radial-gradient(circle, rgba(255, 107, 157, 0.1) 0%, transparent 70%)',
+                    borderRadius: '50%',
+                    zIndex: 0
+                }}></div>
+
+                <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+                    <div style={{
+                        maxWidth: '800px',
+                        margin: '0 auto',
+                        background: 'rgba(255, 255, 255, 0.6)',
+                        backdropFilter: 'blur(10px)',
+                        padding: '3rem 2rem',
+                        borderRadius: '32px',
+                        border: '1px solid rgba(255, 255, 255, 0.8)',
+                        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.05)'
                     }}>
-                        {t('vendorLanding.ctaTitle')}
-                    </h3>
-                    <p style={{
-                        color: '#6b7280',
-                        marginBottom: '1.25rem',
-                        maxWidth: '450px',
-                        margin: '0 auto 1.25rem'
-                    }}>
-                        {t('vendorLanding.ctaSubtitle')}
-                    </p>
-                    <Link
-                        to="/register"
-                        className="btn btn-primary"
-                        style={{
-                            padding: '12px 32px',
-                            fontSize: '1rem',
+                        <div style={{
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '8px'
-                        }}
-                    >
-                        <span>🚀</span> {t('nav.registerBtn')}
-                    </Link>
+                            gap: '8px',
+                            background: 'white',
+                            padding: '8px 16px',
+                            borderRadius: '50px',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            color: '#FF6B9D',
+                            marginBottom: '1.5rem',
+                            boxShadow: '0 4px 12px rgba(255, 107, 157, 0.15)'
+                        }}>
+                            <span style={{ fontSize: '1.2rem' }}>✨</span>
+                            4500+ Tedarikçiye Katılın
+                        </div>
+
+                        <h3 style={{
+                            fontSize: 'clamp(1.5rem, 4vw, 2.2rem)',
+                            fontWeight: '800',
+                            marginBottom: '1rem',
+                            color: '#1f2937',
+                            lineHeight: '1.2'
+                        }}>
+                            {t('vendorLanding.ctaTitle')}
+                        </h3>
+
+                        <p style={{
+                            color: '#6b7280',
+                            fontSize: '1.1rem',
+                            lineHeight: '1.7',
+                            marginBottom: '2.5rem',
+                            maxWidth: '600px',
+                            margin: '0 auto 2.5rem'
+                        }}>
+                            {t('vendorLanding.ctaSubtitle')}
+                        </p>
+
+                        <div style={{
+                            display: 'flex',
+                            gap: '1rem',
+                            justifyContent: 'center',
+                            flexWrap: 'wrap'
+                        }}>
+                            <Link
+                                to="/register?type=vendor"
+                                className="btn btn-primary"
+                                style={{
+                                    padding: '16px 40px',
+                                    fontSize: '1.1rem',
+                                    fontWeight: '700',
+                                    borderRadius: '16px',
+                                    boxShadow: '0 10px 30px rgba(255, 107, 157, 0.3)',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    transition: 'all 0.3s ease'
+                                }}
+                            >
+                                <span>🚀</span> {t('nav.registerBtn')}
+                            </Link>
+
+                            <Link
+                                to="/vendors"
+                                className="btn btn-outline"
+                                style={{
+                                    padding: '16px 40px',
+                                    fontSize: '1.1rem',
+                                    fontWeight: '700',
+                                    borderRadius: '16px',
+                                    border: '2px solid #e5e7eb',
+                                    background: 'white',
+                                    color: '#4b5563',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    transition: 'all 0.3s ease'
+                                }}
+                            >
+                                {t('nav.services')}
+                            </Link>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

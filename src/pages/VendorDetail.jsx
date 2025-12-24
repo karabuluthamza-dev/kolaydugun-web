@@ -13,7 +13,7 @@ import VideoEmbed from '../components/VideoEmbed';
 import SocialMediaLinks from '../components/SocialMediaLinks';
 import ClaimBusinessButton from '../components/ClaimBusinessButton';
 import { categoryImages, defaultImage } from '../constants/categoryImages';
-import { getCategoryTranslationKey } from '../constants/vendorData';
+import { getCategoryTranslationKey, getStateName } from '../constants/vendorData';
 import VendorReviews from '../components/Reviews/VendorReviews';
 import { trackLeadContact, trackFunnelStep } from '../utils/analytics';
 import './VendorDetail.css';
@@ -33,7 +33,9 @@ const VendorDetail = () => {
     const [formSuccess, setFormSuccess] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [vendorShop, setVendorShop] = useState(null);
-    const [categorySchema, setCategorySchema] = useState(null); // Schema for translation
+    const [categorySchema, setCategorySchema] = useState(null);
+    const [formError, setFormError] = useState('');
+
 
     // Check if vendor has a shop account
     useEffect(() => {
@@ -177,6 +179,47 @@ const VendorDetail = () => {
                 category: vendor.category,
                 city: vendor.city
             });
+
+            // Increment view count in vendor_insights (for Admin metrics)
+            const incrementViewCount = async () => {
+                try {
+                    // First, check if vendor_insights exists for this vendor
+                    const { data: existingInsight } = await supabase
+                        .from('vendor_insights')
+                        .select('id, metrics')
+                        .eq('vendor_id', vendor.id)
+                        .maybeSingle();
+
+                    if (existingInsight) {
+                        // Update existing record - increment view_count in metrics JSONB
+                        const currentMetrics = existingInsight.metrics || {};
+                        const newViewCount = (currentMetrics.view_count || 0) + 1;
+
+                        await supabase
+                            .from('vendor_insights')
+                            .update({
+                                metrics: { ...currentMetrics, view_count: newViewCount },
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('id', existingInsight.id);
+                    } else {
+                        // Create new record with initial view count
+                        await supabase
+                            .from('vendor_insights')
+                            .insert({
+                                vendor_id: vendor.id,
+                                metrics: { view_count: 1 },
+                                performance_score: 0,
+                                updated_at: new Date().toISOString()
+                            });
+                    }
+                } catch (error) {
+                    console.error('Error incrementing view count:', error);
+                    // Non-blocking - don't affect user experience
+                }
+            };
+
+            incrementViewCount();
         }
     }, [vendor?.id]);
 
@@ -200,7 +243,7 @@ const VendorDetail = () => {
     }
 
     // Determine default image based on category
-    const categoryDefault = categoryImage || categoryImages[vendor.category] || defaultImage;
+    const categoryDefault = categoryImage || categoryImages[vendor.category] || categoryImages[getCategoryTranslationKey(vendor.category)] || defaultImage;
     const mainImage = vendor.image || categoryDefault;
 
     // Fallback for images if not array (for newly added vendors)
@@ -236,36 +279,57 @@ const VendorDetail = () => {
         try {
             setSubmitting(true);
 
-            // 1. Prepare Lead Data - Always fetch IDs by name to ensure UUID type
+            // 1. Prepare Data
             let categoryId = null;
             let cityId = null;
 
-            // Fetch category ID by name (returns UUID)
             if (vendor.category) {
-                const { data: catData, error: catError } = await supabase
+                const { data: catData } = await supabase
                     .from('categories')
                     .select('id')
                     .ilike('name', vendor.category)
                     .single();
-                if (catData && !catError) {
-                    categoryId = catData.id;
-                    console.log('📂 Category ID (UUID):', categoryId);
-                }
+                if (catData) categoryId = catData.id;
             }
 
-            // Fetch city ID by name (returns UUID)
             if (vendor.city) {
-                const { data: cityData, error: cityError } = await supabase
+                const { data: cityData } = await supabase
                     .from('cities')
                     .select('id')
                     .ilike('name', vendor.city)
                     .single();
-                if (cityData && !cityError) {
-                    cityId = cityData.id;
-                    console.log('🏙️ City ID (UUID):', cityId);
-                }
+                if (cityData) cityId = cityData.id;
             }
 
+            // ==========================================
+            // POACHING INTERCEPTION LOGIC
+            // If vendor is NOT claimed AND NOT verified, intercept message
+            // ==========================================
+            if (!(vendor.is_claimed || vendor.is_verified)) {
+                console.log('🛡️ Intercepting message for unclaimed/poached vendor...');
+
+                const inquiryData = {
+                    vendor_id: vendor.id,
+                    sender_name: formData.get('name'),
+                    sender_email: formData.get('email'),
+                    sender_phone: formData.get('phone'),
+                    message: formData.get('message'),
+                    status: 'pending'
+                };
+
+                const { error: poachError } = await supabase
+                    .from('poached_inquiries')
+                    .insert([inquiryData]);
+
+                if (poachError) throw poachError;
+
+                setFormSuccess(true);
+                form.reset();
+                setTimeout(() => setFormSuccess(false), 5000);
+                return; // STOP HERE, don't create a real lead
+            }
+
+            // Normal Lead Process (Original)
             const leadData = {
                 contact_name: formData.get('name'),
                 contact_email: formData.get('email'),
@@ -280,71 +344,37 @@ const VendorDetail = () => {
                 user_id: (await supabase.auth.getUser()).data.user?.id || null
             };
 
-            console.log('📝 Lead Data to Insert:', leadData); // Debug log
-
-            // 2. Insert into leads table
             const { data: newLead, error: leadError } = await supabase
                 .from('leads')
                 .insert([leadData])
                 .select()
                 .single();
 
-            if (leadError) {
-                console.error('❌ Lead insertion error:', leadError);
-                throw leadError;
-            }
+            if (leadError) throw leadError;
 
-            console.log('✅ Lead created successfully:', newLead); // Debug log
-
-
-            // 3. Insert into vendor_leads
             if (newLead && vendor.id) {
-                console.log('📌 Attempting to create vendor_lead with:', {
-                    vendor_id: vendor.id,
-                    lead_id: newLead.id,
-                    is_unlocked: false
-                });
-
-                const { data: vlData, error: vlError } = await supabase
+                await supabase
                     .from('vendor_leads')
                     .insert([{
                         vendor_id: vendor.id,
                         lead_id: newLead.id,
                         is_unlocked: false
-                    }])
-                    .select();
-
-                if (vlError) {
-                    console.error('❌ CRITICAL: vendor_lead insert FAILED:', vlError);
-                    alert(`HATA: Teklif tedarikçiye bağlanamadı!\nDetay: ${vlError.message}\nKod: ${vlError.code}`);
-                } else {
-                    console.log('✅ Vendor-lead relationship created:', vlData);
-                }
-            } else {
-                console.error('❌ Missing data for vendor_lead:', { newLead, vendorId: vendor.id });
+                    }]);
             }
 
-
-
             setFormSuccess(true);
-
-            // Tracking: Lead Form Success
             trackLeadContact('form_submission', vendor.name, vendor.id);
-            trackFunnelStep('lead_form_submitted', 2, {
-                vendor_id: vendor.id,
-                vendor_name: vendor.name
-            });
-
             form.reset();
-            setTimeout(() => setFormSuccess(false), 5000); // Hide after 5 seconds
+            setTimeout(() => setFormSuccess(false), 5000);
         } catch (err) {
             console.error('💥 Error sending quote:', err);
-            alert(t('vendorDetail.error') || 'Bir hata oluştu: ' + err.message);
-            setFormSuccess(false); // Hide success message on error
+            setFormError(t('poaching.concierge.errorMsg'));
+            setTimeout(() => setFormError(''), 5000);
         } finally {
             setSubmitting(false);
         }
     };
+
 
     // Structured Data (JSON-LD)
     // Structured Data (JSON-LD)
@@ -359,39 +389,65 @@ const VendorDetail = () => {
         return 'LocalBusiness'; // Fallback
     };
 
-    const structuredData = vendor ? {
-        "@context": "https://schema.org",
-        "@type": getSchemaType(vendor.category),
-        "name": vendor.name,
-        "image": Array.isArray(vendor.images) && vendor.images.length > 0 ? vendor.images : [vendor.image],
-        "description": vendor.description,
-        "address": {
-            "@type": "PostalAddress",
-            "addressLocality": vendor.city,
-            "addressCountry": "DE"
+    const structuredData = vendor ? [
+        {
+            "@context": "https://schema.org",
+            "@type": getSchemaType(vendor.category),
+            "name": vendor.name,
+            "image": Array.isArray(vendor.images) && vendor.images.length > 0 ? vendor.images : [vendor.image],
+            "description": vendor.description,
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": vendor.city,
+                "addressCountry": "DE"
+            },
+            "geo": (vendor.latitude && vendor.longitude) ? {
+                "@type": "GeoCoordinates",
+                "latitude": vendor.latitude,
+                "longitude": vendor.longitude
+            } : undefined,
+            "priceRange": vendor.price_range || "€€",
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": vendor.rating || 5,
+                "reviewCount": vendor.reviews || 1
+            },
+            "url": `https://kolaydugun.de/vendors/${vendor.slug || id}`
         },
-        "geo": (vendor.latitude && vendor.longitude) ? {
-            "@type": "GeoCoordinates",
-            "latitude": vendor.latitude,
-            "longitude": vendor.longitude
-        } : undefined,
-        "priceRange": vendor.price_range || "€€",
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": vendor.rating || 5,
-            "reviewCount": vendor.reviews || 1
-        },
-        "url": `https://kolaydugun.de/vendors/${vendor.slug || id}`
-    } : null;
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": t('nav.home') || 'Home',
+                    "item": "https://kolaydugun.de"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": t('categories.' + getCategoryTranslationKey(vendor.category)) || vendor.category,
+                    "item": `https://kolaydugun.de/vendors?category=${encodeURIComponent(vendor.category)}`
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": vendor.name,
+                    "item": `https://kolaydugun.de/vendors/${vendor.slug || id}`
+                }
+            ]
+        }
+    ] : null;
 
     return (
         <div className="vendor-detail-page">
             <div className="section container" style={{ marginTop: '80px' }}>
                 <SEO
-                    title={vendor ? vendor.name : 'Vendor Details'}
-                    description={vendor ? (vendor.description?.substring(0, 160) + '...') : 'Vendor details page'}
-                    keywords={`${vendor?.category}, ${vendor?.city}, Wedding, Düğün, Hochzeit`}
-                    image={vendor?.image}
+                    title={vendor ? `${vendor.name} - ${t('categories.' + getCategoryTranslationKey(vendor.category))} ${vendor.city || ''}` : 'Vendor Details'}
+                    description={vendor ? `${vendor.name}: ${vendor.description?.substring(0, 150)}... ${vendor.city} düğün hazırlıkları için en iyi seçenekler.` : 'Vendor details page'}
+                    keywords={`${vendor?.category}, ${vendor?.city}, Wedding, Düğün, Hochzeit, ${vendor?.name}`}
+                    image={mainImage}
                     url={`/vendors/${vendor?.slug || id}`}
                     structuredData={structuredData}
                 />
@@ -440,7 +496,7 @@ const VendorDetail = () => {
 
                             <div className="vendor-meta-row">
                                 <div className="meta-item">
-                                    <span>📍</span> {vendor.location}
+                                    <span>📍</span> {vendor.zip_code && <strong style={{ marginRight: '4px' }}>{vendor.zip_code}</strong>} {vendor.location || vendor.city} {vendor.state && <span className="state-tag" style={{ marginLeft: '4px', opacity: 0.8, fontSize: '0.9em' }}>• {getStateName(vendor.state, vendor.country, language)}</span>}
                                 </div>
                                 <div className="meta-item">
                                     <span>⭐</span> <strong>{vendor.rating}</strong> ({vendor.reviews} {t('vendorDetail.reviews') || 'reviews'})
@@ -753,7 +809,43 @@ const VendorDetail = () => {
                                 </div>
                             )}
 
-                            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>{t('vendorDetail.requestQuote') || 'Ücretsiz Teklif Al'}</h3>
+                            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>
+                                {!vendor.is_claimed ? t('poaching.concierge.title') : (t('vendorDetail.requestQuote') || 'Ücretsiz Teklif Al')}
+                            </h3>
+
+                            {!vendor.is_claimed && (
+                                <>
+                                    <div style={{
+                                        padding: '12px',
+                                        backgroundColor: 'rgba(79, 70, 229, 0.05)',
+                                        borderRadius: '10px',
+                                        fontSize: '0.85rem',
+                                        color: '#4f46e5',
+                                        marginBottom: '1rem',
+                                        border: '1px dashed #4f46e5'
+                                    }}>
+                                        ✨ {t('poaching.concierge.unclaimedNote')}
+                                    </div>
+
+                                    {/* Social Proof / Live Activity */}
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        marginBottom: '1.5rem',
+                                        padding: '8px 12px',
+                                        backgroundColor: '#fff7ed',
+                                        borderRadius: '8px',
+                                        border: '1px solid #ffedd5',
+                                        animation: 'pulse 2s infinite'
+                                    }}>
+                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#f97316' }}></div>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#9a3412' }}>
+                                            {language === 'tr' ? `Şu an ${Math.floor(Math.random() * 5) + 2} çift bu işletmeyi inceliyor` : `Currently ${Math.floor(Math.random() * 5) + 2} couples are viewing this vendor`}
+                                        </span>
+                                    </div>
+                                </>
+                            )}
 
                             <form onSubmit={handleQuoteRequest} className="booking-form">
                                 <label>{t('contact.name')}</label>
@@ -768,6 +860,34 @@ const VendorDetail = () => {
                                 <label>{t('vendorDetail.date') || 'Düğün Tarihi'}</label>
                                 <input type="date" name="date" required />
 
+                                {/* Real-time Assistant Status */}
+                                {!vendor.is_claimed && (
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        padding: '10px 15px',
+                                        backgroundColor: '#f0f9ff',
+                                        borderRadius: '12px',
+                                        border: '1px solid #bae6fd',
+                                        marginBottom: '1.5rem',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                                    }}>
+                                        <div style={{ position: 'relative' }}>
+                                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#0ea5e9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>👩‍💼</div>
+                                            <div style={{ position: 'absolute', bottom: '0', right: '0', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', border: '2px solid white' }}></div>
+                                        </div>
+                                        <div>
+                                            <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: '800', color: '#0369a1' }}>
+                                                {language === 'tr' ? 'Düğün Asistanı (Ayşe)' : 'Wedding Assistant (Ayşe)'}
+                                            </p>
+                                            <p style={{ margin: 0, fontSize: '0.7rem', color: '#0284c7' }}>
+                                                {language === 'tr' ? 'Şu an çevrimiçi, size yardımcı olacak' : 'Online now, ready to help you'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <label>{t('contact.message')}</label>
                                 <textarea name="message" rows="4" placeholder={t('contact.messagePlaceholder') || "Merhaba, fiyat teklifi almak istiyorum..."} required></textarea>
 
@@ -776,7 +896,7 @@ const VendorDetail = () => {
                                     className="booking-submit-btn"
                                     disabled={submitting}
                                     style={{
-                                        background: 'linear-gradient(135deg, #FF6B9D 0%, #FF8E53 100%)',
+                                        background: !vendor.is_claimed ? 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)' : 'linear-gradient(135deg, #FF6B9D 0%, #FF8E53 100%)',
                                         color: '#ffffff',
                                         width: '100%',
                                         padding: '1rem',
@@ -785,27 +905,63 @@ const VendorDetail = () => {
                                         fontWeight: '600',
                                         fontSize: '1rem',
                                         cursor: 'pointer',
-                                        boxShadow: '0 4px 15px rgba(255, 107, 157, 0.3)',
+                                        boxShadow: !vendor.is_claimed ? '0 4px 15px rgba(79, 70, 233, 0.3)' : '0 4px 15px rgba(255, 107, 157, 0.3)',
                                         opacity: submitting ? 0.7 : 1
                                     }}
                                 >
-                                    {submitting ? (t('vendorLeads.processing') || 'Gönderiliyor...') : (t('vendorDetail.send') || 'Fiyat Teklifi İste')}
+                                    {submitting
+                                        ? (t('vendorLeads.processing') || 'Gönderiliyor...')
+                                        : (!vendor.is_claimed ? t('poaching.concierge.submitButton') : (t('vendorDetail.send') || 'Fiyat Teklifi İste'))
+                                    }
                                 </button>
+
+                                {!vendor.is_claimed && (
+                                    <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                                        <p style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                            {language === 'tr' ? 'Bu işletmenin sahibi misiniz?' : 'Are you the owner?'}
+                                            <button
+                                                type="button"
+                                                onClick={() => document.querySelector('.claim-business-btn')?.click()}
+                                                style={{ marginLeft: '4px', background: 'none', border: 'none', color: '#4f46e5', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline' }}
+                                            >
+                                                {language === 'tr' ? 'Hemen Sahiplenin' : 'Claim Now'}
+                                            </button>
+                                        </p>
+                                    </div>
+                                )}
 
                                 {formSuccess && (
                                     <div style={{
                                         marginTop: '1rem',
-                                        padding: '10px',
+                                        padding: '12px',
                                         backgroundColor: '#dcfce7',
                                         color: '#166534',
                                         borderRadius: '8px',
-                                        textAlign: 'center',
                                         fontSize: '0.9rem',
-                                        border: '1px solid #bbf7d0'
+                                        textAlign: 'center',
+                                        fontWeight: 600,
+                                        border: '1px solid #16a34a'
                                     }}>
-                                        ✅ {t('vendorDetail.success') || 'Talebiniz başarıyla gönderildi!'}
+                                        {!(vendor.is_claimed || vendor.is_verified) ? t('poaching.concierge.successMsg') : (t('vendorDetail.success') || 'Talebiniz başarıyla iletildi!')}
                                     </div>
                                 )}
+
+                                {formError && (
+                                    <div style={{
+                                        marginTop: '1rem',
+                                        padding: '12px',
+                                        backgroundColor: '#fee2e2',
+                                        color: '#991b1b',
+                                        borderRadius: '8px',
+                                        fontSize: '0.9rem',
+                                        textAlign: 'center',
+                                        fontWeight: 600,
+                                        border: '1px solid #ef4444'
+                                    }}>
+                                        {formError}
+                                    </div>
+                                )}
+
 
                                 <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '1rem', textAlign: 'center' }}>
                                     {t('vendorDetail.noObligation') || 'Teklif isteği ücretsizdir ve bağlayıcılığı yoktur.'}

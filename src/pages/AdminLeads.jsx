@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -28,7 +29,21 @@ const AdminLeads = () => {
             .select(`
                 *,
                 category:categories(name),
-                city:cities(name)
+                city:cities(name),
+                vendor_leads(
+                    vendors(
+                        id,
+                        business_name,
+                        slug,
+                        contact_email,
+                        contact_phone,
+                        website_url,
+                        scraper_source_url,
+                        is_claimed,
+                        is_verified,
+                        vendor_insights(performance_score, metrics)
+                    )
+                )
             `)
             .order('created_at', { ascending: false });
 
@@ -150,6 +165,7 @@ const AdminLeads = () => {
                             <tr>
                                 <th style={{ width: '140px' }}>{t('adminPanel.leads.table.status', 'Durum')}</th>
                                 <th>{t('adminPanel.leads.table.date', 'Tarih')}</th>
+                                <th>{t('adminPanel.leads.table.vendor', 'İşletme')}</th>
                                 <th>{t('adminPanel.leads.table.details', 'İsim & Detaylar')}</th>
                                 <th>{t('adminPanel.leads.table.contact', 'İletişim')}</th>
                                 <th style={{ width: '300px' }}>{t('adminPanel.leads.table.adminNote', 'Admin Notu')}</th>
@@ -179,6 +195,88 @@ const AdminLeads = () => {
                                         <div style={{ fontSize: '0.8rem', color: '#999' }}>
                                             {new Date(lead.created_at).toLocaleTimeString(language === 'tr' ? 'tr-TR' : 'de-DE', { hour: '2-digit', minute: '2-digit' })}
                                         </div>
+                                    </td>
+                                    <td>
+                                        {lead.vendor_leads?.[0]?.vendors ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <Link
+                                                        to={`/vendors/${lead.vendor_leads[0].vendors.slug || lead.vendor_leads[0].vendors.id}`}
+                                                        style={{ fontWeight: '700', color: '#4f46e5', textDecoration: 'none', fontSize: '1rem' }}
+                                                        className="vendor-link-hover"
+                                                    >
+                                                        🏢 {lead.vendor_leads[0].vendors.business_name}
+                                                    </Link>
+                                                    {lead.vendor_leads[0].vendors.is_claimed ? (
+                                                        <span style={{
+                                                            fontSize: '0.7rem',
+                                                            backgroundColor: '#e0e7ff',
+                                                            color: '#4338ca',
+                                                            padding: '2px 6px',
+                                                            borderRadius: '4px',
+                                                            fontWeight: '600'
+                                                        }} title="Bu işletme bir kullanıcı tarafından sahiplenildi">
+                                                            👤 Sahipli
+                                                        </span>
+                                                    ) : (
+                                                        <span style={{
+                                                            fontSize: '0.7rem',
+                                                            backgroundColor: '#f1f5f9',
+                                                            color: '#64748b',
+                                                            padding: '2px 6px',
+                                                            borderRadius: '4px',
+                                                            fontWeight: '600'
+                                                        }} title="Bu işletme henüz kimse tarafından sahiplenilmedi">
+                                                            👤 Sahipsiz
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '2px' }}>
+                                                    {lead.vendor_leads[0].vendors.contact_phone && (
+                                                        <a href={`tel:${lead.vendor_leads[0].vendors.contact_phone}`}
+                                                            style={{ fontSize: '0.75rem', color: '#059669', textDecoration: 'none', fontWeight: '600', backgroundColor: '#ecfdf5', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d1fae5' }}>
+                                                            📞 {lead.vendor_leads[0].vendors.contact_phone}
+                                                        </a>
+                                                    )}
+                                                    {lead.vendor_leads[0].vendors.contact_email && (
+                                                        <a href={`mailto:${lead.vendor_leads[0].vendors.contact_email}`}
+                                                            style={{ fontSize: '0.75rem', color: '#2563eb', textDecoration: 'none', fontWeight: '600', backgroundColor: '#eff6ff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #dbeafe' }}>
+                                                            📧 Mail
+                                                        </a>
+                                                    )}
+                                                    {(lead.vendor_leads[0].vendors.scraper_source_url || lead.vendor_leads[0].vendors.website_url) && (
+                                                        <a href={lead.vendor_leads[0].vendors.scraper_source_url || lead.vendor_leads[0].vendors.website_url}
+                                                            target="_blank" rel="noopener noreferrer"
+                                                            style={{ fontSize: '0.75rem', color: '#7c3aed', textDecoration: 'none', fontWeight: '600', backgroundColor: '#f5f3ff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #ede9fe' }}
+                                                            title={lead.vendor_leads[0].vendors.scraper_source_url ? "Orijinal Kaynak (Scraper)" : "İşletme Web Sitesi"}
+                                                        >
+                                                            🔗 {t('common.source', 'Kaynak')}
+                                                        </a>
+                                                    )}
+                                                    {(lead.vendor_leads[0].vendors.is_verified || lead.vendor_leads[0].vendors.is_claimed) && (
+                                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '500' }} title="Toplam Görüntülenme">
+                                                                👁️ {lead.vendor_leads[0].vendors.vendor_insights?.[0]?.metrics?.view_count || 0}
+                                                            </span>
+                                                            {lead.vendor_leads[0].vendors.vendor_insights?.[0]?.performance_score && (
+                                                                <span style={{
+                                                                    fontSize: '0.75rem',
+                                                                    color: lead.vendor_leads[0].vendors.vendor_insights[0].performance_score > 70 ? '#10b981' : '#f59e0b',
+                                                                    fontWeight: '700'
+                                                                }} title="AI Performans Puanı">
+                                                                    🌟 {lead.vendor_leads[0].vendors.vendor_insights[0].performance_score}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div style={{ color: '#94a3b8', fontSize: '0.85rem' }}>
+                                                {t('common.directLead', 'Genel Talep')}
+                                            </div>
+                                        )}
                                     </td>
                                     <td>
                                         <div style={{ fontWeight: '600', marginBottom: '4px' }}>{lead.contact_name}</div>

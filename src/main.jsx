@@ -1,7 +1,6 @@
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
-import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -11,7 +10,7 @@ import { VendorProvider } from './context/VendorContext';
 import { PlanningProvider } from './context/PlanningContext';
 import App from './App';
 import './index.css';
-import './i18n'; // Import i18n configuration
+import i18n from './i18n'; // Import i18n configuration
 import LoadingSpinner from './components/LoadingSpinner';
 
 class ErrorBoundary extends React.Component {
@@ -40,52 +39,40 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      const lang = this.getLanguage();
-
-      const texts = {
-        tr: {
-          title: 'Bir Şeyler Ters Gitti',
-          message: 'Özür dileriz, beklenmeyen bir hata oluştu.',
-          refresh: 'Sayfayı Yenile',
-          home: 'Ana Sayfaya Dön'
-        },
-        de: {
-          title: 'Etwas ist schief gelaufen',
-          message: 'Entschuldigung, ein unerwarteter Fehler ist aufgetreten.',
-          refresh: 'Seite aktualisieren',
-          home: 'Zur Startseite'
-        },
-        en: {
-          title: 'Something Went Wrong',
-          message: 'Sorry, an unexpected error occurred.',
-          refresh: 'Refresh Page',
-          home: 'Go to Home'
-        }
+      // Use i18next directly for ErrorBoundary since it's outside LanguageProvider
+      const t = {
+        title: i18n.t('error.title', 'Bir şeyler ters gitti'),
+        message: i18n.t('error.message', 'Sayfa yüklenirken beklenmedik bir hata oluştu.'),
+        refresh: i18n.t('error.refresh', 'Sayfayı Yenile'),
+        home: i18n.t('error.home', 'Ana Sayfaya Dön')
       };
-
-      const t = texts[lang];
 
       return (
         <div style={{
           minHeight: '100vh',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)',
-          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          backgroundColor: '#fdf2f8',
           padding: '20px',
-          textAlign: 'center'
+          fontFamily: 'system-ui, -apple-system, sans-serif'
         }}>
           <div style={{
-            background: 'white',
-            borderRadius: '16px',
+            backgroundColor: 'white',
             padding: '48px',
-            boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+            borderRadius: '16px',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
             maxWidth: '500px',
-            width: '100%'
+            width: '100%',
+            textAlign: 'center'
           }}>
-            <div style={{ fontSize: '64px', marginBottom: '24px' }}>😕</div>
+            <div style={{
+              fontSize: '64px',
+              marginBottom: '24px',
+              animation: 'bounce 2s infinite'
+            }}>
+              ⚠️
+            </div>
             <h1 style={{
               color: '#831843',
               fontSize: '28px',
@@ -161,23 +148,21 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ErrorBoundary>
       <AuthProvider>
         <PayPalScriptProvider options={paypalOptions}>
-          <HelmetProvider>
-            <LanguageProvider>
-              <PWAInstallProvider>
-                <SiteSettingsProvider>
-                  <VendorProvider>
-                    <PlanningProvider>
-                      <Router>
-                        <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><LoadingSpinner /></div>}>
-                          <App />
-                        </Suspense>
-                      </Router>
-                    </PlanningProvider>
-                  </VendorProvider>
-                </SiteSettingsProvider>
-              </PWAInstallProvider>
-            </LanguageProvider>
-          </HelmetProvider>
+          <LanguageProvider>
+            <PWAInstallProvider>
+              <SiteSettingsProvider>
+                <VendorProvider>
+                  <PlanningProvider>
+                    <Router>
+                      <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><LoadingSpinner /></div>}>
+                        <App />
+                      </Suspense>
+                    </Router>
+                  </PlanningProvider>
+                </VendorProvider>
+              </SiteSettingsProvider>
+            </PWAInstallProvider>
+          </LanguageProvider>
         </PayPalScriptProvider>
       </AuthProvider>
     </ErrorBoundary>

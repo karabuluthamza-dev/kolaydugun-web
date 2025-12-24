@@ -1,7 +1,7 @@
 import { supabase } from '../supabaseClient';
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { CATEGORIES, CITIES, getCategoryTranslationKey } from '../constants/vendorData';
+import { CATEGORIES, CITIES, COUNTRIES, STATES, CITIES_BY_STATE, POPULAR_CITIES, getCategoryTranslationKey } from '../constants/vendorData';
 import { dictionary } from '../locales/dictionary';
 import '../pages/VendorList.css';
 
@@ -123,8 +123,11 @@ const VendorFilters = ({ filters, onFilterChange, userLocation, onLocationReques
 
             {/* Location Filter */}
             {/* ... rest of the filters ... */}
-            <div className="filter-group">
-                <label className="filter-label">📍 Konum</label>
+            <div className="filter-group location-group" style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '8px', border: '1px solid #edf2f7' }}>
+                <label className="filter-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#4a5568' }}>
+                    📍 {t('filters.location') || 'Konum'}
+                </label>
+
                 <button
                     className={`filter-button ${userLocation ? 'active' : ''}`}
                     onClick={onLocationRequest}
@@ -135,68 +138,128 @@ const VendorFilters = ({ filters, onFilterChange, userLocation, onLocationReques
                         backgroundColor: userLocation ? '#28a745' : '#007bff',
                         color: 'white',
                         border: 'none',
-                        borderRadius: '4px',
+                        borderRadius: '6px',
                         cursor: locationLoading ? 'wait' : 'pointer',
                         fontSize: '14px',
-                        fontWeight: '500'
+                        fontWeight: '600',
+                        marginBottom: '12px',
+                        transition: 'all 0.2s'
                     }}
                 >
-                    {locationLoading ? '⏳ Konum alınıyor...' :
-                        userLocation ? '✓ Konumum Kullanılıyor' :
-                            '📍 Konumumu Kullan'}
+                    {locationLoading ? '⏳ ' + (t('filters.gettingLocation') || 'Konum alınıyor...') :
+                        userLocation ? '✓ ' + (t('filters.locationUsed') || 'Konumum Kullanılıyor') :
+                            '📍 ' + (t('filters.useLocation') || 'Konumumu Kullan')}
                 </button>
+
                 {locationError && (
-                    <p style={{ color: '#dc3545', fontSize: '12px', marginTop: '5px' }}>
+                    <p style={{ color: '#dc3545', fontSize: '11px', marginTop: '-8px', marginBottom: '10px' }}>
                         {locationError}
                     </p>
                 )}
-                {userLocation && (
-                    <div style={{ marginTop: '10px' }}>
-                        <label className="filter-label" style={{ fontSize: '13px' }}>Mesafe (km)</label>
+
+                <div className="location-inputs" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div>
+                        <label className="filter-label" style={{ fontSize: '11px', textTransform: 'uppercase', color: '#a0aec0', marginBottom: '4px' }}>
+                            {t('filters.country') || 'Ülke'}
+                        </label>
                         <select
                             className="filter-select"
-                            value={filters.radius || ''}
-                            onChange={(e) => handleChange('radius', e.target.value)}
+                            value={filters.country || 'DE'}
+                            onChange={(e) => {
+                                const newCountry = e.target.value;
+                                onFilterChange({ ...filters, country: newCountry, state: '', city: '' });
+                            }}
                         >
-                            <option value="">Tümü</option>
-                            <option value="5">5 km</option>
-                            <option value="10">10 km</option>
-                            <option value="25">25 km</option>
-                            <option value="50">50 km</option>
-                            <option value="100">100 km</option>
+                            {COUNTRIES.map(c => (
+                                <option key={c.code} value={c.code}>
+                                    {c[language] || c.name}
+                                </option>
+                            ))}
                         </select>
                     </div>
-                )}
-            </div>
 
-            <div className="filter-group">
-                <label className="filter-label">{t('filters.sort') || 'Sıralama'}</label>
-                <select
-                    className="filter-select"
-                    value={filters.sort || 'recommended'}
-                    onChange={(e) => handleChange('sort', e.target.value)}
-                    aria-label="Sort vendors"
-                >
-                    <option value="recommended">{t('filters.sortRecommended') || 'Önerilen'}</option>
-                    <option value="price_asc">{t('filters.sortPriceAsc') || 'Fiyat: Düşükten Yükseğe'}</option>
-                    <option value="price_desc">{t('filters.sortPriceDesc') || 'Fiyat: Yüksekten Düşüğe'}</option>
-                    <option value="rating">{t('filters.sortRating') || 'Puan: Yüksekten Düşüğe'}</option>
-                </select>
-            </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        <div>
+                            <label className="filter-label" style={{ fontSize: '11px', textTransform: 'uppercase', color: '#a0aec0', marginBottom: '4px' }}>
+                                {t('filters.state') || 'Eyalet'}
+                            </label>
+                            <select
+                                className="filter-select"
+                                value={filters.state || ''}
+                                onChange={(e) => {
+                                    const newState = e.target.value;
+                                    onFilterChange({ ...filters, state: newState, city: '' });
+                                }}
+                            >
+                                <option value="">{t('filters.all') || 'Tümü'}</option>
+                                {(STATES[filters.country || 'DE'] || []).map(s => (
+                                    <option key={s.id} value={s.id}>
+                                        {dictionary.locations.states[s.id]?.[language] || s[language] || s.en}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="filter-label" style={{ fontSize: '11px', textTransform: 'uppercase', color: '#a0aec0', marginBottom: '4px' }}>
+                                {t('filters.zipCode') || 'Posta Kodu'}
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Örn: 45127"
+                                className="filter-input"
+                                value={filters.zip_code || ''}
+                                onChange={(e) => handleChange('zip_code', e.target.value)}
+                            />
+                        </div>
+                    </div>
 
+                    <div>
+                        <label className="filter-label" style={{ fontSize: '11px', textTransform: 'uppercase', color: '#a0aec0', marginBottom: '4px' }}>
+                            {t('filters.city') || 'Şehir'}
+                        </label>
+                        <select
+                            className="filter-select"
+                            value={filters.city || ''}
+                            onChange={(e) => handleChange('city', e.target.value)}
+                        >
+                            <option value="">{t('filters.all') || 'Tümü'}</option>
+                            {!filters.state && (
+                                <optgroup label={dictionary.locations.popularCities?.[language] || "Popüler Şehirler"}>
+                                    {POPULAR_CITIES.map(city => (
+                                        <option key={`pop-${city}`} value={city}>{city}</option>
+                                    ))}
+                                </optgroup>
+                            )}
+                            {filters.state && (
+                                <optgroup label={dictionary.locations.states[filters.state]?.[language] || filters.state}>
+                                    {(CITIES_BY_STATE[filters.state] || []).map(city => (
+                                        <option key={city} value={city}>{city}</option>
+                                    ))}
+                                </optgroup>
+                            )}
+                        </select>
+                    </div>
 
-
-            <div className="filter-group">
-                <label className="filter-label">{t('filters.city') || 'Şehir'}</label>
-                <select
-                    className="filter-select"
-                    value={filters.city}
-                    onChange={(e) => handleChange('city', e.target.value)}
-                    aria-label="Filter by city"
-                >
-                    <option value="">{t('filters.all') || 'Tümü'}</option>
-                    {CITIES.map(city => <option key={city} value={city}>{city}</option>)}
-                </select>
+                    {userLocation && (
+                        <div style={{ marginTop: '5px' }}>
+                            <label className="filter-label" style={{ fontSize: '11px', textTransform: 'uppercase', color: '#a0aec0', marginBottom: '4px' }}>
+                                {t('filters.radiusLabel') || 'Mesafe (km)'}
+                            </label>
+                            <select
+                                className="filter-select"
+                                value={filters.radius || ''}
+                                onChange={(e) => handleChange('radius', e.target.value)}
+                            >
+                                <option value="">{t('filters.all') || 'Tümü'}</option>
+                                <option value="5">5 km</option>
+                                <option value="10">10 km</option>
+                                <option value="25">25 km</option>
+                                <option value="50">50 km</option>
+                                <option value="100">100 km</option>
+                            </select>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="filter-group">
@@ -225,6 +288,21 @@ const VendorFilters = ({ filters, onFilterChange, userLocation, onLocationReques
                     onChange={(e) => handleChange('capacity', e.target.value)}
                     aria-label="Filter by minimum capacity"
                 />
+            </div>
+
+            <div className="filter-group">
+                <label className="filter-label">{t('filters.sort') || 'Sıralama'}</label>
+                <select
+                    className="filter-select"
+                    value={filters.sort || 'recommended'}
+                    onChange={(e) => handleChange('sort', e.target.value)}
+                    aria-label="Sort vendors"
+                >
+                    <option value="recommended">{t('filters.sortRecommended') || 'Önerilen'}</option>
+                    <option value="price_asc">{t('filters.sortPriceAsc') || 'Fiyat: Düşükten Yükseğe'}</option>
+                    <option value="price_desc">{t('filters.sortPriceDesc') || 'Fiyat: Yüksekten Düşüğe'}</option>
+                    <option value="rating">{t('filters.sortRating') || 'Puan: Yüksekten Düşüğe'}</option>
+                </select>
             </div>
         </aside>
     );

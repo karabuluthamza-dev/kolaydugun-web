@@ -474,3 +474,62 @@ html {
     transform: translateY(-4px) scale(1.1);
     box-shadow: 0 8px 25px rgba(255, 107, 157, 0.5);
 }
+
+
+/* ============================================
+   9. GLASSMORPHISM & PREMIUM UI
+   ============================================ */
+
+/* Navbar Glassmorphism */
+.navbar,
+header[class*="nav"],
+nav[class*="main-nav"] {
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(12px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+    position: fixed !important;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+/* Footer Glassmorphism - Dark Theme */
+footer.footer-expanded,
+.footer-expanded {
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    position: relative;
+    overflow: hidden;
+    border-top: 4px solid #FF6B9D !important;
+    color: #ffffff !important;
+}
+
+.footer-expanded::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 107, 157, 0.3), transparent);
+}
+
+/* Enhanced Buttons */
+.btn-primary {
+    border: none !important;
+    background: linear-gradient(135deg, #FF6B9D 0%, #E5537A 100%) !important;
+    box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3) !important;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 8px 25px rgba(255, 107, 157, 0.4) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Card Improvements */
+[class*="-card"] {
+    border: 1px solid rgba(255, 107, 157, 0.05) !important;
+    background: white !important;
+}

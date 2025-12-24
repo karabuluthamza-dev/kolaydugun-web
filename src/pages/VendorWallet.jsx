@@ -108,9 +108,9 @@ const VendorWallet = () => {
                     </div>
 
                     {vendorProfile?.subscription_tier !== 'premium' && (
-                        <a href="/vendor/pricing" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+                        <Link to="/pricing" className="btn btn-primary" style={{ textDecoration: 'none' }}>
                             {t('vendorWallet.upgradeToPremium')}
-                        </a>
+                        </Link>
                     )}
                 </div>
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { trackLeadContact } from '../utils/analytics';
+import { formatExternalUrl } from '../utils/urlUtils';
 import './SocialMediaLinks.css';
 
 const SocialMediaLinks = ({ socialMedia, targetName, targetId }) => {
@@ -53,7 +54,7 @@ const SocialMediaLinks = ({ socialMedia, targetName, targetId }) => {
                 return (
                     <a
                         key={platform}
-                        href={url}
+                        href={formatExternalUrl(url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={`social-link social-${platform}`}

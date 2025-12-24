@@ -32,7 +32,7 @@ const CommunityLayout = () => {
                 if (cats) setCategories(cats);
 
                 // 2. Fetch Settings
-                const { data: settings } = await supabase.from('forum_settings').select('*').single();
+                const { data: settings } = await supabase.from('forum_settings').select('*').maybeSingle();
                 if (settings) setForumSettings(settings);
 
                 // 3. Fetch NEW Posts (Top 5 by created_at)
@@ -95,8 +95,16 @@ const CommunityLayout = () => {
 
     // Helper for rendering icons
     const renderIcon = (name) => {
-        const Icon = LucideIcons[name] || LucideIcons.MessageCircle;
-        return <Icon size={20} />;
+        try {
+            const IconComponent = LucideIcons[name] || LucideIcons.MessageCircle;
+            if (typeof IconComponent !== 'function' && typeof IconComponent !== 'object') {
+                return <LucideIcons.MessageCircle size={20} />;
+            }
+            return <IconComponent size={20} />;
+        } catch (e) {
+            console.error("Icon render error:", e);
+            return <LucideIcons.MessageCircle size={20} />;
+        }
     };
 
     return (

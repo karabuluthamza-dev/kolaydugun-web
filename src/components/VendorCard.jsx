@@ -3,21 +3,48 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { dictionary } from '../locales/dictionary';
-import { getCategoryTranslationKey } from '../constants/vendorData';
+import { getCategoryTranslationKey, getStateName } from '../constants/vendorData';
 import { categoryImages, defaultImage } from '../constants/categoryImages';
 import { supabase } from '../supabaseClient';
 import { formatDistance } from '../utils/geoUtils';
 import './VendorCard.css';
 
-const VendorCard = ({ id, name, slug, category, location, price, image, rating, reviews, isFeatured, gallery, categoryImage, distance, ai_performance_score, is_claimed, is_verified, user_id }) => {
+const VendorCard = ({ id, name, slug, category, location, city, zip_code, state, country, price, image, rating, reviews, isFeatured, gallery, categoryImage, distance, ai_performance_score, is_claimed, is_verified, user_id }) => {
     const { t, language } = useLanguage();
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    // Use main image, or fallback to first gallery image, or DB category image, or category default constant, or generic default
-    const categoryDefault = categoryImage || categoryImages[category] || defaultImage;
-    const validImage = image || (gallery && gallery.length > 0 ? gallery[0] : categoryDefault);
+    // Category normalization for fallback images
+    const getNormalizedCategory = (cat) => {
+        if (!cat) return null;
+        const normalized = cat.trim();
+        // Handle common variations
+        if (normalized.toLowerCase() === 'dj' || normalized.toLowerCase() === 'djs') return 'DJs';
+        if (normalized.toLowerCase() === 'wedding photography' || normalized.toLowerCase() === 'photography') return 'Wedding Photography';
+        if (normalized.toLowerCase() === 'wedding videography' || normalized.toLowerCase() === 'videography') return 'Wedding Videography';
+        return normalized;
+    };
+
+    const normalizedCat = getNormalizedCategory(category);
+    const categoryDefault = categoryImage || categoryImages[normalizedCat] || categoryImages[category] || defaultImage;
+
+    const getValidImage = () => {
+        if (image) return image;
+        if (Array.isArray(gallery) && gallery.length > 0 && gallery[0]) return gallery[0];
+        return categoryDefault;
+    };
+
+    const validImage = getValidImage();
     const [currentImage, setCurrentImage] = useState(validImage);
+    const [imageError, setImageError] = useState(false);
+
+    // If constructed URL fails, fallback to category default
+    const handleImageError = () => {
+        if (!imageError) {
+            setCurrentImage(categoryDefault);
+            setImageError(true);
+        }
+    };
     const [isHovered, setIsHovered] = useState(false);
 
     // Favorites state
@@ -136,18 +163,23 @@ const VendorCard = ({ id, name, slug, category, location, price, image, rating, 
             onMouseLeave={handleMouseLeave}
         >
             <div className="vendor-card-image-wrapper">
-                <img src={currentImage} alt={name} className="vendor-card-image" />
-                {isFeatured && (
+                <img
+                    src={currentImage}
+                    alt={name}
+                    className="vendor-card-image"
+                    onError={handleImageError}
+                />
+                {isFeatured === true && (
                     <span className="vendor-card-badge featured">
                         {t('vendorDetail.featured') || 'Öne Çıkan'}
                     </span>
                 )}
-                {rating >= 4.8 && (
+                {typeof rating === 'number' && rating >= 4.8 && (
                     <span className="vendor-card-badge top-rated">
                         {t('vendorDetail.topRated') || 'En İyiler'}
                     </span>
                 )}
-                {ai_performance_score >= 90 && (
+                {typeof ai_performance_score === 'number' && ai_performance_score >= 90 && (
                     <span className="vendor-card-badge perfect-service" style={{
                         background: 'linear-gradient(45deg, #FFD700, #FFA500)',
                         color: '#000',
@@ -179,16 +211,10 @@ const VendorCard = ({ id, name, slug, category, location, price, image, rating, 
                     </Link>
                 )}
 
-                {/* Claim Indicator for Unclaimed Profiles */}
-                {!is_claimed && !is_verified && !user_id ? (
-                    <Link
-                        to={`/vendors/${slug || id}`}
-                        className="vendor-card-badge claim-badge"
-                    >
-                        🛡️ {t('common.vendorClaim.badge')}
-                    </Link>
-                ) : (is_claimed || is_verified) ? (
+                {/* Verified Badge for Claimed Profiles */}
+                {(is_claimed === true || is_verified === true) && (
                     <span className="vendor-card-badge claimed-badge" style={{
+                        position: 'absolute',
                         background: '#4caf50',
                         color: 'white',
                         top: '10px',
@@ -200,11 +226,12 @@ const VendorCard = ({ id, name, slug, category, location, price, image, rating, 
                         display: 'flex',
                         alignItems: 'center',
                         gap: '4px',
-                        boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)'
+                        boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
+                        zIndex: 5
                     }}>
-                        ✓ {t('common.claimed')}
+                        ✓ {t('common.claimed') || 'Doğrulanmış'}
                     </span>
-                ) : null}
+                )}
             </div>
 
             <div className="vendor-card-content">
@@ -223,31 +250,31 @@ const VendorCard = ({ id, name, slug, category, location, price, image, rating, 
 
                 <div className="vendor-card-location">
                     <span className="icon">📍</span>
-                    {location}
-                    {distance !== null && distance !== undefined && (
-                        <span className="distance-badge" style={{
-                            marginLeft: '8px',
-                            padding: '2px 8px',
-                            backgroundColor: '#e3f2fd',
-                            color: '#1976d2',
-                            borderRadius: '12px',
-                            fontSize: '12px',
-                            fontWeight: '500'
-                        }}>
-                            {formatDistance(distance)} uzakta
-                        </span>
-                    )}
+                    {zip_code && <span className="zip-code" style={{ marginRight: '4px', fontWeight: 'bold' }}>{zip_code}</span>}
+                    {location || city} {state && <span className="state-name" style={{ marginLeft: '4px', opacity: 0.7, fontSize: '0.85em' }}>• {getStateName(state, country, language)}</span>}
                 </div>
+                {distance !== null && distance !== undefined && (
+                    <span className="distance-badge" style={{
+                        marginLeft: '8px',
+                        padding: '2px 8px',
+                        backgroundColor: '#e3f2fd',
+                        color: '#1976d2',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        fontWeight: '500'
+                    }}>
+                        {formatDistance(distance)} uzakta
+                    </span>
+                )}
+            </div>
 
-                <div className="vendor-card-footer">
-                    <div className="vendor-card-price">
-                        {price}
-                    </div>
-                    <Link to={`/vendors/${slug || id}`} className="vendor-card-cta">
-                        {t('vendorDetail.requestQuote') || 'Teklif Al'}
-                    </Link>
+            <div className="vendor-card-footer">
+                <div className="vendor-card-price">
+                    {price}
                 </div>
-
+                <Link to={`/vendors/${slug || id}`} className="vendor-card-cta">
+                    {t('vendorDetail.requestQuote') || 'Teklif Al'}
+                </Link>
             </div>
         </div>
     );

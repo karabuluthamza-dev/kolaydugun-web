@@ -3,10 +3,11 @@ import { supabase } from '../../supabaseClient';
 import { useAuth } from '../../context/AuthContext';
 import { useVendors } from '../../context/VendorContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { CITIES, getCategoryTranslationKey } from '../../constants/vendorData';
+import { CATEGORIES, CITIES, COUNTRIES, STATES, CITIES_BY_STATE, getCategoryTranslationKey } from '../../constants/vendorData';
 import { dictionary } from '../../locales/dictionary';
 import MapView from '../MapView';
 import i18n from '../../i18n';
+import './ProfileEditor.css';
 
 const ProfileEditor = ({ vendor, onUpdate }) => {
     const { user } = useAuth();
@@ -71,6 +72,8 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
     const [formData, setFormData] = useState({
         name: '',
         category: '',
+        country: 'DE',
+        state: '',
         location: '',
         description: '',
         price: '',
@@ -84,6 +87,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
         details: {}, // Dynamic details
         latitude: '',
         longitude: '',
+        zip_code: '', // Add zip_code support
         additional_categories: [] // New field
     });
 
@@ -109,9 +113,32 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 });
             }
 
+            // Infer country and state from city if possible
+            let inferredCountry = 'DE';
+            let inferredState = '';
+
+            // Look up the city in the state mapping
+            for (const stateCode in CITIES_BY_STATE) {
+                // Updated for object structure: [{id, en, de, tr}, ...]
+                if (CITIES_BY_STATE[stateCode].some(c => c.id === vendor.city || c.en === vendor.city || c.de === vendor.city || c.tr === vendor.city)) {
+                    inferredState = stateCode;
+                    // Determine country by state code
+                    if (['B', 'K', 'N', 'O', 'S', 'ST', 'T', 'V', 'W'].includes(stateCode)) {
+                        inferredCountry = 'AT';
+                    } else if (['ZH', 'BE_CH', 'LU', 'UR', 'SZ', 'OW', 'NW_CH', 'GL', 'ZG', 'FR', 'SO', 'BS', 'BL', 'SH_CH', 'AR', 'AI', 'SG', 'GR', 'AG', 'TG', 'TI', 'VD', 'VS', 'NE', 'GE', 'JU'].includes(stateCode)) {
+                        inferredCountry = 'CH';
+                    } else {
+                        inferredCountry = 'DE';
+                    }
+                    break;
+                }
+            }
+
             setFormData({
                 name: vendor.business_name || vendor.name || '',
                 category: vendor.category || '',
+                country: vendor.country || inferredCountry,
+                state: vendor.state || inferredState,
                 location: vendor.city || '', // Map city to location field
                 description: vendor.description || '',
                 price: vendor.price_range || '', // Map price_range to price field
@@ -123,6 +150,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 languages: vendor.languages || [],
                 social_media: vendor.social_media || { instagram: '', facebook: '' },
                 faq: vendor.faq || [],
+                zip_code: vendor.zip_code || '', // Add zip_code support
                 details: cleanDetails,
                 latitude: vendor.latitude || '',
                 longitude: vendor.longitude || '',
@@ -222,6 +250,8 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 user_id: user.id,
                 business_name: formData.name,
                 category: formData.category,
+                country: formData.country,
+                state: formData.state,
                 city: formData.location,
                 description: formData.description,
                 price_range: formData.price,
@@ -236,6 +266,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                 details: formData.details, // Save dynamic details
                 latitude: formData.latitude || null,
                 longitude: formData.longitude || null,
+                zip_code: formData.zip_code || null, // Add zip_code to payload
                 additional_categories: formData.additional_categories // Submit new field
             };
 
@@ -295,29 +326,32 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
     };
 
     return (
-        <div className="profile-editor">
-            <h2>{t('dashboard.profile.businessName')}</h2>
-
-            <div className="tier-badge-container">
-                <span className={`badge badge-${currentTier}`}>
-                    {t(`dashboard.tiers.${currentTier}.name`)}
-                </span>
-                <p className="text-muted">{t(`dashboard.tiers.${currentTier}.desc`)}</p>
+        <div className="profile-editor-premium">
+            <div className="profile-header-card">
+                <div className="header-info">
+                    <h2>{t('dashboard.profile.businessName')}</h2>
+                    <div className="tier-badge-group">
+                        <span className={`badge-premium badge-${currentTier}`}>
+                            {t(`dashboard.tiers.${currentTier}.name`)}
+                        </span>
+                        <span className="tier-desc">{t(`dashboard.tiers.${currentTier}.desc`)}</span>
+                    </div>
+                </div>
             </div>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="premium-form">
                 {/* Basic Info */}
                 <div className="form-section">
                     <h3>{t('dashboard.profile.description')}</h3>
                     <div className="form-group">
                         <label>{t('dashboard.profile.businessName')} *</label>
-                        <input type="text" name="name" value={formData.name} onChange={handleChange} required className="form-control" />
+                        <input type="text" name="name" value={formData.name} onChange={handleChange} required className="form-control-premium" />
                     </div>
 
                     <div className="form-row">
                         <div className="form-group">
                             <label>{t('dashboard.profile.category')} *</label>
-                            <select name="category" value={formData.category} onChange={handleChange} required className="form-control">
+                            <select name="category" value={formData.category} onChange={handleChange} required className="form-control-premium">
                                 <option value="">-</option>
                                 {categories.map(c => <option key={c.id} value={c.name}>{t('categories.' + getCategoryTranslationKey(c.name))}</option>)}
                             </select>
@@ -329,7 +363,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                 name="additional_categories"
                                 value={formData.additional_categories || []}
                                 onChange={(e) => handleMultiSelect(e, 'additional_categories')}
-                                className="form-control"
+                                className="form-control-premium"
                                 style={{ height: '100px' }}
                             >
                                 {categories.map(c => (
@@ -339,27 +373,84 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                     </option>
                                 ))}
                             </select>
-                            <small className="text-muted" style={{ fontSize: '0.8rem' }}>
-                                {t('dashboard.profile.multiSelectHint') || 'Birden fazla seçim için CTRL (Mac için CMD) tuşuna basılı tutun.'}
+                            <small className="text-muted" style={{ fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>
+                                {t('dashboard.profile.multiSelectHint')}
                             </small>
                         </div>
                     </div>
 
                     <div className="form-row">
-                        <div className="form-group">
-                            <label>{t('dashboard.profile.city')} *</label>
-                            <select name="location" value={formData.location} onChange={handleChange} required className="form-control">
-                                <option value="">-</option>
-                                {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                        <div className="form-group country-select">
+                            <label>{t('filters.country')} *</label>
+                            <select
+                                name="country"
+                                value={formData.country}
+                                onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value, state: '', location: '' }))}
+                                required
+                                className="form-control-premium"
+                            >
+                                {COUNTRIES.map(c => (
+                                    <option key={c.code} value={c.code}>{c[i18n.language] || c.name}</option>
+                                ))}
                             </select>
+                        </div>
+                        <div className="form-group state-select">
+                            <label>{t('filters.state')} *</label>
+                            <select
+                                name="state"
+                                value={formData.state}
+                                onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value, location: '' }))}
+                                required
+                                className="form-control-premium"
+                            >
+                                <option value="">-</option>
+                                {(STATES[formData.country] || []).map(s => (
+                                    <option key={s.id} value={s.id}>
+                                        {dictionary.locations?.states?.[s.id]?.[i18n.language] || s[i18n.language] || s.en}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="form-group city-select">
+                            <label>{t('dashboard.profile.city')} *</label>
+                            <select
+                                name="location"
+                                value={formData.location}
+                                onChange={handleChange}
+                                required
+                                className="form-control-premium"
+                            >
+                                <option value="">-</option>
+                                {(CITIES_BY_STATE[formData.state] || []).map(c => (
+                                    <option key={c.id} value={c.id}>
+                                        {c[i18n.language] || c.en || c.id}
+                                    </option>
+                                ))}
+                                {!formData.state && (
+                                    <option disabled>
+                                        {t('dashboard.profile.selectStateFirst')}
+                                    </option>
+                                )}
+                            </select>
+                        </div>
+                        <div className="form-group zip-select">
+                            <label>{t('filters.zipCode')}</label>
+                            <input
+                                type="text"
+                                name="zip_code"
+                                value={formData.zip_code}
+                                onChange={handleChange}
+                                placeholder="Örn: 10115"
+                                className="form-control-premium"
+                            />
                         </div>
                     </div>
 
                     <div className="form-row">
                         <div className="form-group">
-                            <label>{t('dashboard.profile.priceRange') || 'Fiyat Aralığı'}</label>
-                            <select name="price" value={formData.price} onChange={handleChange} className="form-control">
-                                <option value="">{t('dashboard.profile.selectPrice') || 'Seçiniz'}</option>
+                            <label>{t('dashboard.profile.priceRange')}</label>
+                            <select name="price" value={formData.price} onChange={handleChange} className="form-control-premium">
+                                <option value="">{t('dashboard.profile.selectPrice')}</option>
                                 <option value="€">{t('filters.price_1')}</option>
                                 <option value="€€">{t('filters.price_2')}</option>
                                 <option value="€€€">{t('filters.price_3')}</option>
@@ -367,13 +458,13 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                             </select>
                         </div>
                         <div className="form-group">
-                            <label>{t('dashboard.profile.capacity') || 'Kapasite'}</label>
+                            <label>{t('dashboard.profile.capacity')}</label>
                             <input
                                 type="number"
                                 name="capacity"
                                 value={formData.capacity}
                                 onChange={handleChange}
-                                className="form-control"
+                                className="form-control-premium"
                                 min="0"
                                 placeholder="Örn: 500"
                             />
@@ -381,15 +472,19 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                     </div>
 
                     {/* Location Settings (Lat/Lng) - Tier Restricted */}
-                    <div className={`form-section ${!features.map_view ? 'locked' : ''}`}>
-                        {!features.map_view && renderLockedOverlay()}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <div className={`form-section ${!features.map_view ? 'locked' : ''} location-box-premium`}>
+                        {!features.map_view && (
+                            <div className="locked-overlay-premium">
+                                <div className="locked-badge">🔒 {t('dashboard.alerts.locked')}</div>
+                            </div>
+                        )}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '12px' }}>
                             <h3>📍 {t('dashboard.profile.locationSettings')}</h3>
                             <button
                                 type="button"
                                 onClick={handleGetLocation}
-                                className="btn btn-secondary"
-                                style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
+                                className="btn-premium-action"
+                                style={{ fontSize: '0.85rem', padding: '10px 20px', boxShadow: 'none' }}
                                 disabled={!features.map_view}
                             >
                                 📍 {t('dashboard.profile.useMyLocation')}
@@ -403,7 +498,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                     name="latitude"
                                     value={formData.latitude || ''}
                                     onChange={handleChange}
-                                    className="form-control"
+                                    className="form-control-premium"
                                     placeholder="41.0082"
                                     disabled={!features.map_view}
                                 />
@@ -415,19 +510,19 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                     name="longitude"
                                     value={formData.longitude || ''}
                                     onChange={handleChange}
-                                    className="form-control"
+                                    className="form-control-premium"
                                     placeholder="28.9784"
                                     disabled={!features.map_view}
                                 />
                             </div>
                         </div>
-                        <small className="text-muted">
+                        <small className="text-muted" style={{ display: 'block', marginTop: '8px' }}>
                             Google Maps: Sağ tık -&gt; "Burası neresi?" -&gt; Koordinatları kopyala (Örn: 41.0082, 28.9784)
                         </small>
 
                         {/* Map Preview */}
                         {formData.latitude && formData.longitude && (
-                            <div style={{ marginTop: '1rem', height: '300px', borderRadius: '8px', overflow: 'hidden' }}>
+                            <div className="map-container-premium" style={{ marginTop: '1.5rem', height: '300px' }}>
                                 <MapView
                                     latitude={parseFloat(formData.latitude)}
                                     longitude={parseFloat(formData.longitude)}
@@ -440,7 +535,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
 
                     <div className="form-group">
                         <label>{t('dashboard.profile.description')} *</label>
-                        <textarea name="description" value={formData.description} onChange={handleChange} required rows="10" className="form-control" />
+                        <textarea name="description" value={formData.description} onChange={handleChange} required rows="10" className="form-control-premium" />
                     </div>
                 </div>
 
@@ -482,7 +577,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                             type="text"
                                             value={formData.details[field.key] || ''}
                                             onChange={(e) => handleDetailChange(field.key, e.target.value)}
-                                            className="form-control"
+                                            className="form-control-premium"
                                         />
                                     )}
 
@@ -491,7 +586,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                             type="number"
                                             value={formData.details[field.key] || ''}
                                             onChange={(e) => handleDetailChange(field.key, e.target.value)}
-                                            className="form-control"
+                                            className="form-control-premium"
                                         />
                                     )}
 
@@ -499,7 +594,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                         <select
                                             value={formData.details[field.key] === true ? 'true' : 'false'}
                                             onChange={(e) => handleDetailChange(field.key, e.target.value === 'true')}
-                                            className="form-control"
+                                            className="form-control-premium"
                                         >
                                             <option value="false">{t('common.no')}</option>
                                             <option value="true">{t('common.yes')}</option>
@@ -510,7 +605,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                         <select
                                             value={formData.details[field.key] || ''}
                                             onChange={(e) => handleDetailChange(field.key, e.target.value)}
-                                            className="form-control"
+                                            className="form-control-premium"
                                         >
                                             <option value="">{t('common.select')}</option>
                                             {field.options?.map(opt => {
@@ -531,23 +626,21 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                         </select>
                                     )}
 
-                                    {field.type === 'multiselect' && (
-                                        <>
-                                            <select
-                                                multiple
-                                                value={formData.details[field.key] || []}
-                                                onChange={(e) => handleDetailMultiSelect(e, field.key)}
-                                                className="form-control"
-                                                style={{ height: '120px' }}
-                                            >
-                                                {field.options?.map(opt => {
-                                                    const cleanOpt = opt.replace(/^schemas\./, '');
-                                                    return <option key={opt} value={opt}>{t(`schemas.${cleanOpt}`) || cleanOpt}</option>;
-                                                })}
-                                            </select>
-                                            <small className="text-muted">{t('dashboard.profile.multiSelectHint')}</small>
-                                        </>
-                                    )}
+                                    <>
+                                        <select
+                                            multiple
+                                            value={formData.details[field.key] || []}
+                                            onChange={(e) => handleDetailMultiSelect(e, field.key)}
+                                            className="form-control-premium"
+                                            style={{ height: '120px' }}
+                                        >
+                                            {field.options?.map(opt => {
+                                                const cleanOpt = opt.replace(/^schemas\./, '');
+                                                return <option key={opt} value={opt}>{t(`schemas.${cleanOpt}`) || cleanOpt}</option>;
+                                            })}
+                                        </select>
+                                        <small className="text-muted" style={{ display: 'block', marginTop: '4px' }}>{t('dashboard.profile.multiSelectHint')}</small>
+                                    </>
                                 </div>
                             ))}
                         </div>
@@ -556,47 +649,55 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
 
                 {/* Website & Social - Tier Restricted */}
                 <div className={`form-section ${!features.website ? 'locked' : ''}`}>
-                    {!features.website && renderLockedOverlay()}
+                    {!features.website && (
+                        <div className="locked-overlay-premium">
+                            <div className="locked-badge">🔒 {t('dashboard.alerts.locked')}</div>
+                        </div>
+                    )}
                     <h3>{t('dashboard.profile.website')} & {t('dashboard.profile.socialMedia')}</h3>
 
                     <div className="form-group">
                         <label>{t('dashboard.profile.website')}</label>
-                        <input type="url" name="website_url" value={formData.website_url} onChange={handleChange} disabled={!features.website} className="form-control" placeholder="https://example.com" />
+                        <input type="url" name="website_url" value={formData.website_url} onChange={handleChange} disabled={!features.website} className="form-control-premium" placeholder="https://example.com" />
                     </div>
 
                     <div className="form-group">
-                        <label>YouTube / Vimeo Video URL</label>
-                        <input type="url" name="video_url" value={formData.video_url} onChange={handleChange} disabled={!features.website} className="form-control" placeholder="https://youtube.com/watch?v=..." />
-                        <small className="text-muted">
-                            {t('dashboard.profile.videoHint') || "Tanıtım videonuzun linkini buraya yapıştırın. Profilinizde görünecektir."}
+                        <label>{t('dashboard.profile.videoUrl') || 'YouTube / Vimeo Video URL'}</label>
+                        <input type="url" name="video_url" value={formData.video_url} onChange={handleChange} disabled={!features.website} className="form-control-premium" placeholder="https://youtube.com/watch?v=..." />
+                        <small className="text-muted" style={{ display: 'block', marginTop: '4px' }}>
+                            {t('dashboard.profile.videoHint')}
                         </small>
                     </div>
 
                     <div className="form-row">
                         <div className="form-group">
                             <label>Instagram</label>
-                            <input type="url" name="social_instagram" value={formData.social_media.instagram} onChange={handleChange} disabled={!features.social} className="form-control" placeholder="https://instagram.com/..." />
+                            <input type="url" name="social_instagram" value={formData.social_media.instagram} onChange={handleChange} disabled={!features.social} className="form-control-premium" placeholder="https://instagram.com/..." />
                         </div>
                         <div className="form-group">
                             <label>Facebook</label>
-                            <input type="url" name="social_facebook" value={formData.social_media.facebook} onChange={handleChange} disabled={!features.social} className="form-control" placeholder="https://facebook.com/..." />
+                            <input type="url" name="social_facebook" value={formData.social_media.facebook} onChange={handleChange} disabled={!features.social} className="form-control-premium" placeholder="https://facebook.com/..." />
                         </div>
                     </div>
                 </div>
 
                 {/* FAQ Section - Tier Restricted */}
                 <div className={`form-section ${!features.faq ? 'locked' : ''}`}>
-                    {!features.faq && renderLockedOverlay()}
+                    {!features.faq && (
+                        <div className="locked-overlay-premium">
+                            <div className="locked-badge">🔒 {t('dashboard.alerts.locked')}</div>
+                        </div>
+                    )}
                     <h3>{t('dashboard.faq.title')}</h3>
                     {(formData.faq || []).map((item, index) => (
-                        <div key={index} className="faq-item" style={{ marginBottom: '1rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
+                        <div key={index} className="faq-item" style={{ marginBottom: '1.5rem', padding: '1.5rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #eef2f6' }}>
                             <div className="form-group">
                                 <label>{t('dashboard.faq.question')} {index + 1}</label>
                                 <input
                                     type="text"
                                     value={item.question}
                                     onChange={(e) => handleFaqChange(index, 'question', e.target.value)}
-                                    className="form-control"
+                                    className="form-control-premium"
                                     placeholder={t('dashboard.faq.question')}
                                 />
                             </div>
@@ -606,7 +707,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                     rows="6"
                                     value={item.answer}
                                     onChange={(e) => handleFaqChange(index, 'answer', e.target.value)}
-                                    className="form-control"
+                                    className="form-control-premium"
                                     placeholder={t('dashboard.faq.answer')}
                                 />
                             </div>
@@ -614,6 +715,7 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                                 type="button"
                                 onClick={() => removeFaq(index)}
                                 className="btn btn-sm btn-danger"
+                                style={{ borderRadius: '8px' }}
                             >
                                 {t('dashboard.faq.remove')}
                             </button>
@@ -623,16 +725,18 @@ const ProfileEditor = ({ vendor, onUpdate }) => {
                         type="button"
                         onClick={addFaq}
                         className="btn btn-secondary"
-                        style={{ width: '100%' }}
+                        style={{ width: '100%', borderRadius: '12px', padding: '12px' }}
                         disabled={!features.faq}
                     >
                         + {t('vendorDashboard.faq.add')}
                     </button>
                 </div>
 
-                <button type="submit" className="btn btn-primary mt-3" disabled={loading}>
-                    {loading ? t('vendorDashboard.alerts.saved') : t('dashboard.profile.save')}
-                </button>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '32px' }}>
+                    <button type="submit" className="btn-premium-action" style={{ minWidth: '200px' }} disabled={loading}>
+                        {loading ? t('vendorDashboard.alerts.saved') : t('dashboard.profile.save')}
+                    </button>
+                </div>
             </form>
         </div>
     );

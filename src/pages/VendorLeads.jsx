@@ -91,7 +91,7 @@ const VendorLeads = () => {
                         `Yetersiz kredi! Bu lead'i açmak için ${data.required} kredi gerekiyor, mevcut bakiyeniz: ${data.current}.\n\nKredi yüklemek ister misiniz?`
                     );
                     if (confirmLoad) {
-                        window.location.href = '/vendor/wallet';
+                        navigate('/vendor/dashboard?tab=wallet');
                     }
                 } else {
                     alert(data.error || 'Lead açılamadı');

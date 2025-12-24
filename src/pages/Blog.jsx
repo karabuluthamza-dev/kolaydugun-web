@@ -1,23 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { usePageTitle } from '../hooks/usePageTitle';
-import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../context/LanguageContext';
+import SEO from '../components/SEO';
 import BlogCard from '../components/BlogCard';
 import './AdminConfig.css'; // Basic styles
 
 const Blog = () => {
-    usePageTitle('Blog - KolayDüğün');
+    const { language, t } = useLanguage();
+    const [categories, setCategories] = useState([]);
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { i18n } = useTranslation();
 
     // Categories
-    const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [postCategories, setPostCategories] = useState({});
 
     // Get current language code (tr, en, de)
-    const currentLang = i18n.language ? i18n.language.split('-')[0] : 'tr';
+    const currentLang = language ? language.split('-')[0] : 'tr';
+
+    // SEO labels
+    const blogTitle = currentLang === 'tr' ? 'Blog & İlham' : currentLang === 'de' ? 'Blog & Inspiration' : 'Blog & Inspiration';
+    const blogDesc = currentLang === 'tr'
+        ? 'Düğün planlamanız için en güncel ipuçları, trendler ve rehberler.'
+        : currentLang === 'de'
+            ? 'Die neuesten Tipps, Trends und Ratgeber für Ihre Hochzeitsplanung.'
+            : 'Latest tips, trends and guides for your wedding planning.';
 
     useEffect(() => {
         fetchCategories();
@@ -107,6 +114,11 @@ const Blog = () => {
 
     return (
         <div className="blog-page-wrapper" style={{ background: '#f9f9f9', minHeight: '100vh', paddingBottom: '80px' }}>
+            <SEO
+                title={blogTitle}
+                description={blogDesc}
+                url="/blog"
+            />
             {/* Hero Section for Blog */}
             <div className="blog-hero" style={{
                 background: '#fff',

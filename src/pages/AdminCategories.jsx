@@ -59,11 +59,31 @@ const AdminCategories = () => {
             if (error) throw error;
 
             await fetchCategories();
-            setEditingCategory(null);
-            alert('Kategori başarıyla güncellendi!');
+            if (!editingCategory) {
+                alert('Kategori başarıyla güncellendi!');
+            } else {
+                setEditingCategory(null);
+            }
         } catch (error) {
             console.error('Error updating category:', error);
             alert('Güncelleme sırasında bir hata oluştu.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleQuickSaveImage = async (category, newUrl) => {
+        try {
+            setLoading(true);
+            const { error } = await supabase
+                .from('categories')
+                .update({ image_url: newUrl })
+                .eq('id', category.id);
+
+            if (error) throw error;
+            fetchCategories();
+        } catch (error) {
+            console.error('Quick save error:', error);
         } finally {
             setLoading(false);
         }
@@ -324,18 +344,42 @@ const AdminCategories = () => {
                                     <div style={{ position: 'absolute', top: '5px', right: '5px', background: 'gold', padding: '2px 6px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>Featured</div>
                                 )}
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <h4 style={{ margin: 0, fontSize: '1.1rem' }}>{cat.icon} {cat.name}</h4>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <button className="btn btn-sm btn-outline-secondary" onClick={() => handleEditSchema(cat)}>📝 Form Şemaları</button>
-                                    <button className="btn btn-sm btn-outline-primary" onClick={() => handleEdit(cat)}>Düzenle</button>
+                            <div style={{ padding: '10px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                    <h4 style={{ margin: 0, fontSize: '1.1rem' }}>{cat.icon} {cat.name}</h4>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <button className="btn btn-sm btn-outline-secondary" onClick={() => handleEditSchema(cat)} title="Form Şemaları">📝</button>
+                                        <button className="btn btn-sm btn-outline-primary" onClick={() => handleEdit(cat)}>Düzenle</button>
+                                    </div>
                                 </div>
+                                <div style={{ marginBottom: '10px' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#666' }}>Görsel URL</label>
+                                    <div style={{ display: 'flex', gap: '5px' }}>
+                                        <input
+                                            type="text"
+                                            className="form-control form-control-sm"
+                                            defaultValue={cat.image_url || ''}
+                                            placeholder="Görsel linki yapıştırın..."
+                                            onBlur={(e) => {
+                                                if (e.target.value !== cat.image_url) {
+                                                    handleQuickSaveImage(cat, e.target.value);
+                                                }
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    handleQuickSaveImage(cat, e.target.value);
+                                                    e.target.blur();
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#666' }}>
+                                    <span>Sıra: {cat.sort_order || 0}</span>
+                                    <span>Slug: {cat.slug}</span>
+                                </div>
+                                <p style={{ fontSize: '0.85rem', color: '#666', margin: '5px 0 0 0', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{cat.description}</p>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#666' }}>
-                                <span>Sıra: {cat.sort_order || 0}</span>
-                                <span>Slug: {cat.slug}</span>
-                            </div>
-                            <p style={{ fontSize: '0.9rem', color: '#666', margin: 0 }}>{cat.description}</p>
                         </div>
                     ))}
                 </div>

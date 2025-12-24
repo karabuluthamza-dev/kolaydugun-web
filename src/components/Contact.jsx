@@ -63,7 +63,7 @@ const Contact = () => {
                             {t('contact.desc')}
                         </p>
                         <div className="contact-info">
-                            <div>📍 Schützenstraße 1, 89269 Vöhringen, Deutschland</div>
+                            <div>📍 {t('contact.address')}</div>
                             <div>✉️ kontakt@kolaydugun.de</div>
                             {settings?.social_media && (
                                 <div style={{ marginTop: '20px' }}>
@@ -99,7 +99,7 @@ const Contact = () => {
                         )}
 
                         <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={status === 'submitting'}>
-                            {status === 'submitting' ? 'Sending...' : t('contact.send')}
+                            {status === 'submitting' ? t('contact.sending', 'Sending...') : t('contact.send')}
                         </button>
                     </form>
                 </div>

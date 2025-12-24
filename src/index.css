@@ -55,6 +55,7 @@ body {
   -webkit-font-smoothing: antialiased;
   padding-top: var(--header-height);
   /* Ensure body starts after fixed header */
+  overflow-x: hidden;
 }
 
 h1,
@@ -387,4 +388,25 @@ textarea {
   .home-section {
     padding: 50px 0;
   }
+}
+
+/* Custom Scrollbar Utility */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+  border: 2px solid #f1f5f9;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

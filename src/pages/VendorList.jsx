@@ -5,33 +5,92 @@ import VendorFilters from '../components/VendorFilters';
 import VendorHero from '../components/VendorHero';
 import VendorCardSkeleton from '../components/VendorCardSkeleton';
 import { useVendors } from '../context/VendorContext';
-import useSEO from '../hooks/useSEO';
 import { useLanguage } from '../context/LanguageContext';
+import SEO from '../components/SEO';
 import useGeolocation from '../hooks/useGeolocation';
 import { calculateDistance, formatDistance, isWithinRadius } from '../utils/geoUtils';
+import { STATES, CITIES_BY_STATE, getCategoryTranslationKey } from '../constants/vendorData';
+import { supabase } from '../supabaseClient';
 import './VendorList.css';
 
 const VendorList = () => {
-    const { t } = useLanguage();
-    useSEO({
-        title: t('vendors.title') || 'Find Vendors',
-        description: 'Find the best wedding vendors in Germany. Venues, catering, photographers and more.'
-    });
-    const { vendors, loading } = useVendors();
+    const { t, language } = useLanguage();
+    const { getFilteredVendors } = useVendors();
     const [searchParams, setSearchParams] = useSearchParams();
     const { location: userLocation, loading: locationLoading, error: locationError, getLocation } = useGeolocation();
+
+    const [vendors, setVendors] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [totalCount, setTotalCount] = useState(0);
     const [topVendors, setTopVendors] = useState([]);
     const [topLoading, setTopLoading] = useState(false);
+    const [categoryMap, setCategoryMap] = useState({});
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 12;
 
     const filters = useMemo(() => ({
         search: searchParams.get('search') || '',
         sort: searchParams.get('sort') || 'recommended',
         category: searchParams.get('category') || '',
+        country: searchParams.get('country') || '',
+        state: searchParams.get('state') || '',
         city: searchParams.get('city') || '',
+        zip_code: searchParams.get('zip_code') || '',
         price: searchParams.get('price') || '',
         capacity: searchParams.get('capacity') || '',
         radius: searchParams.get('radius') || ''
     }), [searchParams]);
+
+    // Dynamic SEO Titles based on Category and City
+    const seoTitle = useMemo(() => {
+        const catKey = filters.category ? getCategoryTranslationKey(filters.category) : '';
+        const catName = catKey ? t(`categories.${catKey}`) : (t('vendors.title') || 'Find Vendors');
+        const cityName = filters.city ? `${filters.city}` : '';
+
+        if (catKey && cityName) return `${catName} ${cityName}`;
+        if (catKey) return `${catName}`;
+        if (cityName) return `${t('vendors.title')} ${cityName}`;
+        return t('vendors.title') || 'Find Vendors';
+    }, [filters.category, filters.city, language, t]);
+
+    const seoDescription = useMemo(() => {
+        const catKey = filters.category ? getCategoryTranslationKey(filters.category) : '';
+        const catName = catKey ? t(`categories.${catKey}`) : 'Hochzeitsdienstleister';
+        const cityName = filters.city ? filters.city : 'Deutschland';
+        return `${cityName} bölgesindeki en iyi ${catName} seçeneklerini keşfedin. ${totalCount} tedarikçi arasından seçim yapın, fiyat teklifi alın ve hayalinizdeki düğünü planlayın.`;
+    }, [filters.category, filters.city, totalCount, language, t]);
+
+    // Generate structural data for SEO
+    const structuredData = useMemo(() => {
+        return {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "numberOfItems": vendors.length,
+            "itemListElement": vendors.slice(0, 10).map((v, i) => ({
+                "@type": "ListItem",
+                "position": i + 1,
+                "url": `https://kolaydugun.de/vendors/${v.slug || v.id}`,
+                "name": v.name
+            }))
+        };
+    }, [vendors]);
+
+    // Main Fetch Effect
+    useEffect(() => {
+        const fetchFilteredData = async () => {
+            setLoading(true);
+            const { vendors: data, total } = await getFilteredVendors({
+                filters,
+                page: currentPage,
+                pageSize: itemsPerPage
+            });
+            setVendors(data || []);
+            setTotalCount(total || 0);
+            setLoading(false);
+        };
+        fetchFilteredData();
+    }, [filters, currentPage]);
 
     const handleFilterChange = (newFilters) => {
         const params = new URLSearchParams();
@@ -41,7 +100,13 @@ const VendorList = () => {
             }
         });
         setSearchParams(params);
+        setCurrentPage(1); // Reset page on filter change
     };
+
+    // Reset page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filters]);
 
     // Fetch Top 5 "Stars of Category"
     useEffect(() => {
@@ -67,169 +132,43 @@ const VendorList = () => {
         fetchTopStars();
     }, [filters.category, filters.city]);
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 6;
-
-    const filteredVendors = useMemo(() => {
-        let result = vendors.map(vendor => {
-            // Calculate distance if user location is available
-            let distance = null;
-            if (userLocation && vendor.latitude && vendor.longitude) {
-                distance = calculateDistance(
-                    userLocation.latitude,
-                    userLocation.longitude,
-                    vendor.latitude,
-                    vendor.longitude
-                );
-            }
-            return { ...vendor, distance };
-        }).filter(vendor => {
-            const searchTerm = (filters.search || '').toLowerCase();
-            const matchSearch = !searchTerm ||
-                (vendor.business_name && vendor.business_name.toLowerCase().includes(searchTerm)) ||
-                (vendor.businessName && vendor.businessName.toLowerCase().includes(searchTerm)) ||
-                (vendor.name && vendor.name.toLowerCase().includes(searchTerm)) ||
-                (vendor.tags && vendor.tags.some(t => t.toLowerCase().includes(searchTerm)));
-
-            const normalize = (str) => str ? str.toLowerCase().replace(/\s+/g, '-').replace(/s$/, '') : '';
-            const catFilter = normalize(filters.category);
-            const vendorCat = normalize(vendor.category);
-
-            const matchCategory = !filters.category ||
-                vendor.category === filters.category ||
-                vendorCat === catFilter ||
-                (vendorCat && catFilter && vendorCat.includes(catFilter)) ||
-                (vendor.additional_categories && vendor.additional_categories.some(ac =>
-                    ac.toLowerCase().replace(/\s+/g, '-').includes(catFilter)
-                ));
-
-            const matchCity = !filters.city || vendor.city === filters.city || vendor.location === filters.city;
-            const matchPrice = !filters.price || vendor.priceRange === filters.price || vendor.price === filters.price;
-            const matchCapacity = !filters.capacity || (vendor.capacity && vendor.capacity >= parseInt(filters.capacity));
-
-            // Dynamic Schema Filtering (e.g. "music_instruments")
-            let matchDynamic = true;
-            if (filters.category) {
-                // We iterate over filter keys that are NOT standard filters
-                const standardKeys = ['search', 'sort', 'category', 'city', 'price', 'capacity', 'radius'];
-                Object.keys(filters).forEach(key => {
-                    if (!standardKeys.includes(key) && filters[key]) {
-                        // Check logic:
-                        // vendor.details is where schema answers are stored.
-                        // If vendor.details[key] is an array (multiselect), check if it includes value
-                        // If vendor.details[key] is a string, check equality
-                        const vendorVal = vendor.details ? vendor.details[key] : null;
-
-                        if (Array.isArray(vendorVal)) {
-                            // Vendor has multiple items (e.g. ["davul", "zurna"])
-                            // Filter value is usually single selection from dropdown (e.g. "davul")
-                            // Check if vendor has that specific item
-                            if (!vendorVal.includes(filters[key])) {
-                                matchDynamic = false;
-                            }
-                        } else {
-                            // Vendor has single value, check equality
-                            if (vendorVal !== filters[key]) {
-                                matchDynamic = false;
-                            }
-                        }
-                    }
-                });
-            }
-
-            // Radius filter
-            const matchRadius = !userLocation || !filters.radius ||
-                (vendor.distance !== null && isWithinRadius(vendor.distance, parseInt(filters.radius)));
-
-            return matchSearch && matchCategory && matchCity && matchPrice && matchCapacity && matchRadius && matchDynamic;
-        });
-
-        // Sort logic
-        if (filters.sort === 'distance' && userLocation) {
-            // Sort by distance (closest first)
-            result.sort((a, b) => {
-                if (a.distance === null) return 1;
-                if (b.distance === null) return -1;
-                return a.distance - b.distance;
-            });
-        } else if (filters.sort === 'price_asc') {
-            const priceMap = { '€': 1, '€€': 2, '€€€': 3, '€€€€': 4 };
-            result.sort((a, b) => (priceMap[a.priceRange] || 0) - (priceMap[b.priceRange] || 0));
-        } else if (filters.sort === 'price_desc') {
-            const priceMap = { '€': 1, '€€': 2, '€€€': 3, '€€€€': 4 };
-            result.sort((a, b) => (priceMap[b.priceRange] || 0) - (priceMap[a.priceRange] || 0));
-        } else if (filters.sort === 'rating') {
-            result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        } else {
-            // Default 'recommended' / Smart Sort
-            result.sort((a, b) => {
-                // 1. Tier Priority: Premium > Basic > Free
-                // Map tiers to weights
-                const getTierWeight = (v) => {
-                    if (v.subscription_tier === 'premium' || v.featured_active) return 3;
-                    if (v.subscription_tier === 'basic') return 2;
-                    return 1;
-                };
-
-                const weightA = getTierWeight(a);
-                const weightB = getTierWeight(b);
-
-                if (weightA !== weightB) {
-                    return weightB - weightA; // Higher tier first
-                }
-
-                // 2. Score Priority: Rating * log(Reviews + 1)
-                // This balances high rating with number of reviews.
-                // A 5.0 with 1 review = 5 * 0.3 = 1.5
-                // A 4.8 with 10 reviews = 4.8 * 1.04 = 4.99
-                // A 4.5 with 100 reviews = 4.5 * 2 = 9
-                const getScore = (v) => {
-                    const rating = v.rating || 0;
-                    const reviews = v.reviews || 0;
-                    // Use log10 to dampen the effect of massive review counts
-                    return rating * Math.log10(reviews + 2); // +2 to ensure log is always positive (>0.3)
-                };
-
-                const scoreA = getScore(a);
-                const scoreB = getScore(b);
-
-                if (Math.abs(scoreA - scoreB) > 0.1) { // Significant difference
-                    return scoreB - scoreA;
-                }
-
-                // 3. Random Shuffle for similar scores (Deterministic per session/page load ideally, but simple random here)
-                // To avoid jitter on re-renders, we should use a stable sort if possible, 
-                // but for "discovery" random is okay. 
-                // However, React re-renders might cause jumping. 
-                // Let's stick to ID for stability if scores are equal, 
-                // OR use a seeded random if we want rotation.
-                // For now, stable sort by ID to prevent jumping.
-                return (a.id || '').toString().localeCompare(b.id || '');
-            });
-        }
-
-        return result;
-    }, [vendors, filters, userLocation]);
-
-    // Reset page when filters change
     useEffect(() => {
-        setCurrentPage(1);
-    }, [filters]);
+        const fetchCategoryMap = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('categories')
+                    .select('name, image_url');
+                if (!error && data) {
+                    const map = {};
+                    data.forEach(cat => {
+                        map[cat.name] = cat.image_url;
+                        map[getCategoryTranslationKey(cat.name)] = cat.image_url;
+                    });
+                    setCategoryMap(map);
+                }
+            } catch (err) {
+                console.error('Error fetching category map:', err);
+            }
+        };
+        fetchCategoryMap();
+    }, []);
 
-    const totalPages = Math.ceil(filteredVendors.length / itemsPerPage);
-    const currentVendors = filteredVendors.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
+    const totalPages = Math.ceil(totalCount / itemsPerPage);
 
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
-        window.scrollTo({ top: 400, behavior: 'smooth' }); // Scroll to top of list, not page
+        window.scrollTo({ top: 400, behavior: 'smooth' });
     };
 
     return (
         <div className="vendor-page">
-            <VendorHero totalVendors={vendors.length} />
+            <SEO
+                title={seoTitle}
+                description={seoDescription}
+                url={`/vendors${filters.category ? `?category=${filters.category}` : ''}${filters.city ? `&city=${filters.city}` : ''}`}
+                structuredData={structuredData}
+            />
+            <VendorHero totalVendors={totalCount} />
 
             <div className="section container">
                 <div className="vendor-list-header">
@@ -268,7 +207,12 @@ const VendorList = () => {
                                 </div>
                                 <div className="vendor-grid">
                                     {topVendors.map(vendor => (
-                                        <VendorCard key={`top-${vendor.id}`} {...vendor} />
+                                        <div key={`top-${vendor.id}`} data-aos="fade-up" data-aos-delay="100">
+                                            <VendorCard
+                                                {...vendor}
+                                                categoryImage={categoryMap[vendor.category] || categoryMap[getCategoryTranslationKey(vendor.category)]}
+                                            />
+                                        </div>
                                     ))}
                                 </div>
                                 <hr style={{ marginTop: '30px', border: 'none', borderTop: '1px solid #fde68a' }} />
@@ -281,20 +225,15 @@ const VendorList = () => {
                                 [...Array(6)].map((_, index) => (
                                     <VendorCardSkeleton key={index} />
                                 ))
-                            ) : currentVendors.length > 0 ? (
-                                currentVendors.map(vendor => {
-                                    // DEBUG: Log claim fields for Test Claimable Vendor
-                                    if (vendor.business_name?.includes('Claimable') || vendor.name?.includes('Claimable')) {
-                                        console.log('[VendorList] Claimable vendor props:', {
-                                            name: vendor.business_name || vendor.name,
-                                            user_id: vendor.user_id,
-                                            is_claimed: vendor.is_claimed,
-                                            is_verified: vendor.is_verified,
-                                            id: vendor.id
-                                        });
-                                    }
-                                    return <VendorCard key={vendor.id} {...vendor} />;
-                                })
+                            ) : vendors.length > 0 ? (
+                                vendors.map((vendor, index) => (
+                                    <div key={vendor.id} data-aos="fade-up" data-aos-delay={index * 50}>
+                                        <VendorCard
+                                            {...vendor}
+                                            categoryImage={categoryMap[vendor.category] || categoryMap[getCategoryTranslationKey(vendor.category)]}
+                                        />
+                                    </div>
+                                ))
                             ) : (
                                 <div className="no-vendors-message">
                                     <p className="no-vendors-text">{t('vendors.noResults') || 'Seçilen filtrelere uygun tedarikçi bulunamadı.'}</p>
@@ -302,33 +241,83 @@ const VendorList = () => {
                             )}
                         </div>
 
-                        {!loading && totalPages > 1 && (
-                            <div className="pagination">
-                                <button
-                                    className="pagination-btn"
-                                    disabled={currentPage === 1}
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                >
-                                    &larr;
-                                </button>
-                                {[...Array(totalPages)].map((_, index) => (
+                        {!loading && totalPages > 1 && (() => {
+                            // Smart pagination: show 1, ..., current-1, current, current+1, ..., last
+                            const pages = [];
+                            const showEllipsisBefore = currentPage > 3;
+                            const showEllipsisAfter = currentPage < totalPages - 2;
+
+                            // Always show first page
+                            pages.push(1);
+
+                            // Ellipsis before current range
+                            if (showEllipsisBefore) {
+                                pages.push('...');
+                            }
+
+                            // Pages around current
+                            for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+                                if (!pages.includes(i)) pages.push(i);
+                            }
+
+                            // Ellipsis after current range
+                            if (showEllipsisAfter) {
+                                pages.push('...');
+                            }
+
+                            // Always show last page
+                            if (totalPages > 1 && !pages.includes(totalPages)) {
+                                pages.push(totalPages);
+                            }
+
+                            return (
+                                <div className="pagination">
                                     <button
-                                        key={index + 1}
-                                        className={`pagination-btn ${currentPage === index + 1 ? 'active' : ''}`}
-                                        onClick={() => handlePageChange(index + 1)}
+                                        className="pagination-btn"
+                                        disabled={currentPage === 1}
+                                        onClick={() => handlePageChange(1)}
+                                        title="İlk Sayfa"
                                     >
-                                        {index + 1}
+                                        ««
                                     </button>
-                                ))}
-                                <button
-                                    className="pagination-btn"
-                                    disabled={currentPage === totalPages}
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                >
-                                    &rarr;
-                                </button>
-                            </div>
-                        )}
+                                    <button
+                                        className="pagination-btn"
+                                        disabled={currentPage === 1}
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                    >
+                                        ←
+                                    </button>
+                                    {pages.map((page, idx) => (
+                                        page === '...' ? (
+                                            <span key={`ellipsis-${idx}`} className="pagination-ellipsis" style={{ padding: '0 8px' }}>...</span>
+                                        ) : (
+                                            <button
+                                                key={page}
+                                                className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                                                onClick={() => handlePageChange(page)}
+                                            >
+                                                {page}
+                                            </button>
+                                        )
+                                    ))}
+                                    <button
+                                        className="pagination-btn"
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                    >
+                                        →
+                                    </button>
+                                    <button
+                                        className="pagination-btn"
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => handlePageChange(totalPages)}
+                                        title="Son Sayfa"
+                                    >
+                                        »»
+                                    </button>
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
             </div>

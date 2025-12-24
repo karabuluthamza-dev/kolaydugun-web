@@ -3,11 +3,15 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useLanguage } from '../context/LanguageContext';
+import VendorAcceleratorBanner from '../components/VendorAcceleratorBanner';
+import { Award, TrendingUp, CheckCircle } from 'lucide-react';
 import './VendorDashboardOverview.css';
 
 const VendorDashboardOverview = () => {
     usePageTitle('Vendor Dashboard');
     const { user } = useAuth();
+    const { t } = useLanguage();
     const [stats, setStats] = useState({
         plan_type: 'free',
         credit_balance: 0,
@@ -71,9 +75,45 @@ const VendorDashboardOverview = () => {
 
     return (
         <div className="section container vendor-dashboard-container">
-            <div className="dashboard-header">
-                <h1>Vendor Dashboard</h1>
-                <p>Hoş geldiniz! İşletmenizi buradan yönetin.</p>
+            <VendorAcceleratorBanner variant="dashboard" />
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem', alignItems: 'stretch' }}>
+                <div className="dashboard-header" style={{ marginBottom: 0 }}>
+                    <h1>Vendor Dashboard</h1>
+                    <p>Hoş geldiniz! İşletmenizi buradan yönetin.</p>
+                </div>
+
+                <div className="card" style={{
+                    border: '1px solid rgba(147, 51, 234, 0.2)',
+                    background: 'linear-gradient(to bottom right, #fff, #fafafa)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    padding: '1.5rem'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1rem' }}>
+                        <Award color="#9333ea" size={20} />
+                        <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{t('dashboard.accelerator.growthCard.title')}</h3>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <TrendingUp size={14} color="#4f46e5" />
+                                <span style={{ fontSize: '0.9rem' }}>{t('dashboard.accelerator.growthCard.freeVitrin')}</span>
+                            </div>
+                            <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 600 }}>%75</span>
+                        </div>
+                        <div style={{ width: '100%', height: '6px', background: '#f1f5f9', borderRadius: '10px' }}>
+                            <div style={{ width: '75%', height: '100%', background: '#10b981', borderRadius: '10px' }}></div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                            <CheckCircle size={14} color="#10b981" />
+                            <span style={{ fontSize: '0.9rem' }}>{t('dashboard.accelerator.growthCard.aiReport')}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div className="stats-grid">
