@@ -27,6 +27,11 @@ export default async function middleware(req) {
             const supabaseUrl = process.env.VITE_SUPABASE_URL;
             const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
+            if (!supabaseUrl || !supabaseKey) {
+                console.warn('⚠️ Middleware: Supabase credentials missing');
+                return next();
+            }
+
             let title = "KolayDugun.de";
             let description = "Find the best wedding vendors in Germany. Turkish & International weddings made easy.";
             let image = "https://kolaydugun.de/og-image.jpg";
