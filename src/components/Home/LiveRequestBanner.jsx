@@ -18,7 +18,9 @@ const LiveRequestBanner = () => {
             }
         }
         // Show banner after a short delay for better UX
-        const timer = setTimeout(() => setIsVisible(true), 1000);
+        const timer = setTimeout(() => {
+            setIsVisible(true);
+        }, 1000);
         return () => clearTimeout(timer);
     }, []);
 
@@ -188,6 +190,30 @@ const LiveRequestBanner = () => {
                         >
                             {content.cta}
                             <ArrowRight style={{ width: 16, height: 16 }} />
+                        </Link>
+
+                        {/* Demo Button */}
+                        <Link
+                            to="/live-demo"
+                            style={{
+                                background: 'rgba(255,255,255,0.2)',
+                                color: 'white',
+                                padding: '10px 20px',
+                                borderRadius: '30px',
+                                fontWeight: 700,
+                                fontSize: '0.9rem',
+                                textDecoration: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                border: '1px solid rgba(255,255,255,0.4)',
+                                transition: 'background 0.2s'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+                        >
+                            <Sparkles style={{ width: 16, height: 16 }} />
+                            Demo
                         </Link>
 
                         {/* Learn More Blog Link */}

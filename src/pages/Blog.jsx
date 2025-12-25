@@ -97,8 +97,10 @@ const Blog = () => {
             // Group by post_id
             const catMap = {};
             catData?.forEach(pc => {
-                if (!catMap[pc.post_id]) catMap[pc.post_id] = [];
-                catMap[pc.post_id].push(pc.blog_categories);
+                if (pc.blog_categories) {
+                    if (!catMap[pc.post_id]) catMap[pc.post_id] = [];
+                    catMap[pc.post_id].push(pc.blog_categories);
+                }
             });
             setPostCategories(catMap);
         }
@@ -202,7 +204,7 @@ const Blog = () => {
                                         flexShrink: 0
                                     }}
                                 >
-                                    {cat.name[currentLang] || cat.name.tr}
+                                    {cat.name?.[currentLang] || cat.name?.tr || 'Category'}
                                 </button>
                             ))}
                         </div>

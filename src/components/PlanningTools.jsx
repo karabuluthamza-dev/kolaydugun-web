@@ -23,6 +23,11 @@ const PlanningTools = () => {
             link: '/tools/budget'
         },
         {
+            key: 'liveDJ',
+            icon: '🎧',
+            link: '/canli-istek-sistemi'
+        },
+        {
             key: 'weather',
             icon: '🌤️',
             link: '/tools/weather'
@@ -41,8 +46,13 @@ const PlanningTools = () => {
 
             <div className="planning-tools-grid">
                 {tools.map(tool => (
-                    <div key={tool.key} className="planning-tool-card">
-                        <span className="planning-tool-badge">{t('planningTools.free')}</span>
+                    <div
+                        key={tool.key}
+                        className={`planning-tool-card ${tool.key === 'liveDJ' ? 'featured-tool' : ''}`}
+                    >
+                        <span className="planning-tool-badge">
+                            {tool.key === 'liveDJ' ? t('planningTools.trial') : t('planningTools.free')}
+                        </span>
                         <div className="planning-tool-icon-wrapper">
                             <span className="planning-tool-icon">{tool.icon}</span>
                         </div>

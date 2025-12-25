@@ -643,6 +643,16 @@ const AdminDashboard = () => {
                         <h3>{t('adminPanel.dashboard.quickActions.messages', 'Mesajlar')}</h3>
                         <p>{t('adminPanel.dashboard.quickActions.contactFormMessages', 'İletişim formu mesajları')}</p>
                     </button>
+
+                    <button
+                        className="action-card"
+                        onClick={() => navigate('/admin/live-requests')}
+                        style={{ borderLeft: '4px solid #f43f5e', background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)' }}
+                    >
+                        <div className="action-icon">🔥</div>
+                        <h3>Canlı İstek Monitörü</h3>
+                        <p>Tüm canlı etkinlikleri ve bahşişleri izle</p>
+                    </button>
                 </div>
             </div>
 

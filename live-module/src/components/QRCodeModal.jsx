@@ -3,8 +3,10 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, Copy, CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const QRCodeModal = ({ isOpen, onClose, url, eventName }) => {
+    const { t } = useTranslation();
     const [copied, setCopied] = useState(false);
 
     const handleCopy = () => {
@@ -43,7 +45,7 @@ const QRCodeModal = ({ isOpen, onClose, url, eventName }) => {
 
             ctx.fillStyle = '#64748b';
             ctx.font = 'bold 16px sans-serif';
-            ctx.fillText('ISTEK SAYFASI ICIN TARATIN', canvas.width / 2, qrCanvas.height + padding + 80);
+            ctx.fillText(t('qrModal.scanText'), canvas.width / 2, qrCanvas.height + padding + 80);
 
             // Force octet-stream to help download managers recognize it as a file to be saved
             const pngData = canvas.toDataURL('image/png').replace("image/png", "application/octet-stream");
@@ -85,7 +87,7 @@ const QRCodeModal = ({ isOpen, onClose, url, eventName }) => {
 
                         <div className="relative z-10">
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-xl font-black text-white tracking-tight">QR Giriş Kodu</h3>
+                                <h3 className="text-xl font-black text-white tracking-tight">{t('qrModal.title')}</h3>
                                 <button
                                     onClick={onClose}
                                     className="p-2 hover:bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors"
@@ -103,8 +105,14 @@ const QRCodeModal = ({ isOpen, onClose, url, eventName }) => {
                                 />
                                 <div className="mt-4 text-center">
                                     <p className="text-slate-900 font-bold text-sm">{eventName}</p>
-                                    <p className="text-slate-500 text-[10px] uppercase font-black tracking-widest mt-0.5">İstek Sayfası</p>
+                                    <p className="text-slate-500 text-[10px] uppercase font-black tracking-widest mt-0.5">{t('qrModal.scanText')}</p>
                                 </div>
+                            </div>
+
+                            <div className="mb-6 px-4">
+                                <p className="text-center text-slate-400 text-xs leading-relaxed font-medium">
+                                    {t('qrModal.instruction')}
+                                </p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
@@ -113,19 +121,19 @@ const QRCodeModal = ({ isOpen, onClose, url, eventName }) => {
                                     className="flex items-center justify-center gap-2 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-bold text-sm transition-all active:scale-95"
                                 >
                                     {copied ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                                    {copied ? 'KOPYALANDI' : 'LİNK KOPYALA'}
+                                    {copied ? t('qrModal.copied') : t('qrModal.copyButton')}
                                 </button>
                                 <button
                                     onClick={handleDownload}
                                     className="flex items-center justify-center gap-2 py-4 bg-prime hover:bg-rose-600 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-prime/20 active:scale-95"
                                 >
                                     <Download className="w-4 h-4" />
-                                    İNDİR (PNG V3)
+                                    {t('qrModal.downloadButton')}
                                 </button>
                             </div>
 
                             <p className="text-center text-slate-500 text-[10px] mt-6 font-medium uppercase tracking-widest">
-                                Misafirler kamerayı taratıp giriş yapabilir
+                                {t('qrModal.footerText')}
                             </p>
                         </div>
                     </motion.div>

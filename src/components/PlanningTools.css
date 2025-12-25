@@ -120,6 +120,53 @@
     text-decoration: underline;
 }
 
+/* Featured Tool Styles (Live DJ) */
+.planning-tool-card.featured-tool {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%) !important;
+    color: white !important;
+    border: none;
+    transform: scale(1.02);
+    box-shadow: 0 15px 35px rgba(168, 85, 247, 0.25);
+}
+
+.planning-tool-card.featured-tool:hover {
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 20px 45px rgba(168, 85, 247, 0.4);
+}
+
+.featured-tool .planning-tool-name {
+    color: white !important;
+    font-size: 1.5rem;
+}
+
+.featured-tool .planning-tool-desc {
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.featured-tool .planning-tool-link {
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.featured-tool .planning-tool-link:hover {
+    background: rgba(255, 255, 255, 0.3);
+    text-decoration: none;
+}
+
+.featured-tool .planning-tool-icon-wrapper {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.featured-tool .planning-tool-badge {
+    background-color: #fbbf24;
+    /* Yellow for attention on purple bg */
+    color: #1f2937;
+}
+
 @media (max-width: 768px) {
     .planning-tools-title {
         font-size: 2rem;

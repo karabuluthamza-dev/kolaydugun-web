@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Plus, Play, Trash2, LayoutDashboard, QrCode, LogOut, Loader2, AlertCircle, BarChart3, Settings, HelpCircle, ChevronDown, ChevronUp, Monitor } from 'lucide-react';
+import { Plus, Play, Trash2, LayoutDashboard, QrCode, LogOut, Loader2, AlertCircle, BarChart3, Settings, HelpCircle, ChevronDown, ChevronUp, Monitor, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import QRCodeModal from '../components/QRCodeModal';
+import WeddingWrapped from '../components/WeddingWrapped';
 
 const DJDashboard = () => {
     const { t } = useTranslation();
@@ -28,6 +29,9 @@ const DJDashboard = () => {
 
     // QR Modal State
     const [qrModal, setQrModal] = useState({ isOpen: false, url: '', name: '' });
+
+    // Wrapped State
+    const [wrappedEvent, setWrappedEvent] = useState(null);
 
     useEffect(() => {
         fetchEvents();
@@ -116,17 +120,41 @@ const DJDashboard = () => {
         e.preventDefault();
         setUpdating(true);
         try {
+            // Try updating with paypal_link column first
             const { error: err } = await supabase
                 .from('live_events')
-                .update({ settings: settingsModal.event.settings })
+                .update({
+                    settings: settingsModal.event.settings,
+                    paypal_link: settingsModal.event.paypal_link
+                })
                 .eq('id', settingsModal.event.id);
 
-            if (err) throw err;
+            // If column doesn't exist, fallback to settings JSONB
+            if (err && (err.message?.includes('paypal_link') || err.code === 'PGRST204')) {
+                console.warn('paypal_link column missing, falling back to settings JSONB');
+                const { error: fallbackErr } = await supabase
+                    .from('live_events')
+                    .update({
+                        settings: {
+                            ...settingsModal.event.settings,
+                            paypal_link: settingsModal.event.paypal_link
+                        }
+                    })
+                    .eq('id', settingsModal.event.id);
+
+                if (fallbackErr) {
+                    console.error('Fallback update error:', fallbackErr);
+                    throw fallbackErr;
+                }
+            } else if (err) {
+                throw err;
+            }
 
             setEvents(events.map(ev => ev.id === settingsModal.event.id ? settingsModal.event : ev));
             setSettingsModal({ isOpen: false, event: null });
         } catch (err) {
-            alert('Hata: ' + err.message);
+            console.error('Live settings update error:', err);
+            alert('Hata: ' + (err.message || JSON.stringify(err)));
         } finally {
             setUpdating(false);
         }
@@ -268,6 +296,13 @@ const DJDashboard = () => {
                                         title="TV / Ekran Görünümü (Crowd View)"
                                     >
                                         <Monitor className="w-5 h-5" />
+                                    </button>
+                                    <button
+                                        onClick={() => setWrappedEvent(event)}
+                                        className="p-3 bg-slate-800 hover:bg-yellow-500/10 hover:text-yellow-500 text-yellow-500/60 rounded-xl transition-all"
+                                        title="Wedding Wrapped (Etkinlik Özeti)"
+                                    >
+                                        <Sparkles className="w-5 h-5" />
                                     </button>
                                     <button
                                         onClick={(e) => handleDeleteEvent(e, event.id)}
@@ -424,6 +459,39 @@ const DJDashboard = () => {
                                     </div>
                                 </div>
 
+                                <div className="pt-4 border-t border-slate-800/50">
+                                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
+                                        PayPal.me Bağlantısı (VIP İstekler İçin)
+                                    </label>
+                                    <div className="flex items-center bg-slate-800 rounded-2xl px-5 py-4 group focus-within:ring-2 focus:ring-prime transition-all">
+                                        <span className="text-slate-500 text-sm mr-2 opacity-50">paypal.me/</span>
+                                        <input
+                                            type="text"
+                                            placeholder="kullaniciadini"
+                                            value={(settingsModal.event.paypal_link || settingsModal.event.settings?.paypal_link || '').replace('https://paypal.me/', '')}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const fullLink = val ? `https://paypal.me/${val.replace('https://paypal.me/', '')}` : '';
+                                                setSettingsModal({
+                                                    ...settingsModal,
+                                                    event: {
+                                                        ...settingsModal.event,
+                                                        paypal_link: fullLink,
+                                                        settings: {
+                                                            ...settingsModal.event.settings,
+                                                            paypal_link: fullLink
+                                                        }
+                                                    }
+                                                });
+                                            }}
+                                            className="flex-1 bg-transparent border-none p-0 text-white focus:ring-0 text-sm font-mono"
+                                        />
+                                    </div>
+                                    <p className="text-[10px] text-slate-600 mt-2 italic">
+                                        * Misafirler VIP istek göndermek istediğinde bu linke yönlendirilir. Ödemeler doğrudan hesabınıza yatar.
+                                    </p>
+                                </div>
+
                                 <div>
                                     <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
                                         {t('dashboard.settings.theme')}
@@ -450,6 +518,31 @@ const DJDashboard = () => {
                                         ))}
                                     </div>
                                 </div>
+                                <div className="space-y-4">
+                                    <label className="text-sm font-bold text-slate-400">HIZLI BAHŞİŞ MİKTARLARI (EURO)</label>
+                                    <div className="grid grid-cols-4 gap-3">
+                                        {[2, 5, 10, 20].map((amount, idx) => (
+                                            <input
+                                                key={idx}
+                                                type="number"
+                                                placeholder={amount}
+                                                value={settingsModal.event.settings?.quick_tips?.[idx] || ''}
+                                                onChange={(e) => {
+                                                    const newTips = [...(settingsModal.event.settings?.quick_tips || [2, 5, 10, 20])];
+                                                    newTips[idx] = parseInt(e.target.value) || 0;
+                                                    setSettingsModal({
+                                                        ...settingsModal,
+                                                        event: {
+                                                            ...settingsModal.event,
+                                                            settings: { ...settingsModal.event.settings, quick_tips: newTips }
+                                                        }
+                                                    });
+                                                }}
+                                                className="w-full bg-slate-800 border-2 border-transparent focus:border-prime rounded-2xl p-3 text-center font-bold text-white transition-all"
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
 
                                 <div className="flex gap-3 pt-4 border-t border-slate-800/50">
                                     <button
@@ -469,12 +562,12 @@ const DJDashboard = () => {
                                 </div>
                             </form>
                         </motion.div>
-                    </div>
+                    </div >
                 )}
-            </AnimatePresence>
+            </AnimatePresence >
 
             {/* FAQ Modal */}
-            <AnimatePresence>
+            < AnimatePresence >
                 {showFAQ && (
                     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
                         <motion.div
@@ -499,7 +592,7 @@ const DJDashboard = () => {
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-8 space-y-4">
-                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((num) => (
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((num) => (
                                     <div
                                         key={num}
                                         className={`border rounded-2xl transition-all overflow-hidden ${openAccordion === num ? 'border-prime bg-prime/5' : 'border-slate-800 bg-slate-800/20 hover:border-slate-700'
@@ -544,7 +637,7 @@ const DJDashboard = () => {
                         </motion.div>
                     </div>
                 )}
-            </AnimatePresence>
+            </AnimatePresence >
 
             <QRCodeModal
                 isOpen={qrModal.isOpen}
@@ -552,6 +645,13 @@ const DJDashboard = () => {
                 url={qrModal.url}
                 eventName={qrModal.name}
             />
+            {/* Wedding Wrapped Overlay */}
+            {wrappedEvent && (
+                <WeddingWrapped
+                    event={wrappedEvent}
+                    onClose={() => setWrappedEvent(null)}
+                />
+            )}
         </div>
     );
 };

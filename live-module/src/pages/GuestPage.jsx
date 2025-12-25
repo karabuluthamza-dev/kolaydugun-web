@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Music, Send, CheckCircle2, AlertCircle, Loader2, ThumbsUp, Youtube, Search } from 'lucide-react';
+import { Music, Music2, Send, CheckCircle2, AlertCircle, Loader2, ThumbsUp, Youtube, Search, X, Camera, Heart, Flame } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { containsProfanity, filterProfanity } from '../utils/profanity';
 
@@ -22,6 +22,14 @@ const GuestPage = () => {
     const [mood, setMood] = useState('🎉'); // Default mood
     const [allRequests, setAllRequests] = useState([]);
     const [upvoteLoading, setUpvoteLoading] = useState(null);
+    const [isVipRequest, setIsVipRequest] = useState(false);
+    const [activeBattle, setActiveBattle] = useState(null);
+    const [userVote, setUserVote] = useState(null);
+    const [image, setImage] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [mediaType, setMediaType] = useState('upload'); // 'upload' or 'link'
+    const [showPaypalModal, setShowPaypalModal] = useState(false);
+    const [tipAmount, setTipAmount] = useState(null);
 
     // Search State
     const [searchResults, setSearchResults] = useState([]);
@@ -44,9 +52,14 @@ const GuestPage = () => {
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
-                table: 'live_requests'
-            }, () => {
-                fetchOtherRequests();
+                table: 'live_battles'
+            }, (payload) => {
+                if (payload.new && payload.new.is_active) {
+                    setActiveBattle(payload.new);
+                    setUserVote(null); // Reset vote for new battle
+                } else {
+                    setActiveBattle(null);
+                }
             })
             .subscribe();
 
@@ -81,8 +94,32 @@ const GuestPage = () => {
     useEffect(() => {
         if (event?.id) {
             fetchOtherRequests();
+            fetchActiveBattle();
         }
     }, [event]);
+
+    const fetchActiveBattle = async () => {
+        const { data } = await supabase
+            .from('live_battles')
+            .select('*')
+            .eq('event_id', event.id)
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        setActiveBattle(data);
+        if (data) {
+            const deviceId = localStorage.getItem('live_device_id');
+            const { data: vote } = await supabase
+                .from('live_battle_votes')
+                .select('option_vote')
+                .eq('battle_id', data.id)
+                .eq('device_id', deviceId)
+                .maybeSingle();
+            if (vote) setUserVote(vote.option_vote);
+        }
+    };
 
     const fetchOtherRequests = async () => {
         if (!event?.id) return;
@@ -94,6 +131,93 @@ const GuestPage = () => {
             .order('upvote_count', { ascending: false })
             .limit(10);
         setAllRequests(data || []);
+    };
+
+    const handleVote = async (option) => {
+        if (userVote) return;
+        const deviceId = localStorage.getItem('live_device_id');
+        const { error } = await supabase
+            .from('live_battle_votes')
+            .insert([{
+                battle_id: activeBattle.id,
+                device_id: deviceId,
+                option_vote: option
+            }]);
+
+        if (!error) setUserVote(option);
+    };
+
+    const compressImage = (file) => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1200;
+                    const MAX_HEIGHT = 1200;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        resolve(blob);
+                    }, 'image/jpeg', 0.7); // 0.7 kalite ile sıkıştır
+                };
+            };
+        });
+    };
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploading(true);
+        try {
+            // Görseli sıkıştır
+            const compressedBlob = await compressImage(file);
+
+            const fileExt = 'jpg';
+            const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+            const filePath = `${event.id}/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('live-dedications')
+                .upload(filePath, compressedBlob, {
+                    contentType: 'image/jpeg'
+                });
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('live-dedications')
+                .getPublicUrl(filePath);
+
+            setImage(publicUrl);
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('Görüntü yüklenirken hata oluştu!');
+        } finally {
+            setUploading(false);
+        }
     };
 
     const fetchEvent = async () => {
@@ -146,23 +270,66 @@ const GuestPage = () => {
             }
 
             // 2. Insert the request
+            const requestData = {
+                event_id: event.id,
+                song_title: filterProfanity(song.trim()),
+                note: filterProfanity(note.trim()),
+                requester_name: filterProfanity(name.trim()) || 'Misafir',
+                mood: mood,
+                status: 'pending',
+                song_link: selectedSongLink,
+                metadata: {
+                    ...selectedSongMetadata,
+                    is_vip: isVipRequest,
+                    image_url: image,
+                    tip_amount: isVipRequest ? tipAmount : null
+                },
+                is_vip: isVipRequest,
+                total_paid: isVipRequest ? tipAmount : null,
+                image_url: image
+            };
+
             const { error: err } = await supabase
                 .from('live_requests')
-                .insert([{
-                    event_id: event.id,
-                    song_title: filterProfanity(song.trim()),
-                    note: filterProfanity(note.trim()),
-                    requester_name: filterProfanity(name.trim()) || 'Misafir',
-                    mood: mood,
-                    status: 'pending',
-                    song_link: selectedSongLink,
-                    metadata: selectedSongMetadata
-                }]);
+                .insert([requestData]);
 
-            if (err) throw err;
+            // Fallback for missing columns
+            if (err && err.message.includes('column')) {
+                console.warn('Extended columns missing in live_requests, falling back to minimal insert...');
+                const minimalData = {
+                    event_id: event.id,
+                    song_title: requestData.song_title,
+                    note: requestData.note,
+                    requester_name: requestData.requester_name,
+                    status: 'pending',
+                    is_vip: requestData.is_vip,
+                    total_paid: requestData.total_paid
+                };
+                // Try to find which columns are supported or just send minimal
+                const { error: fallbackErr } = await supabase
+                    .from('live_requests')
+                    .insert([minimalData]);
+
+                if (fallbackErr) throw fallbackErr;
+            } else if (err) {
+                throw err;
+            }
 
             setSubmitted(true);
             localStorage.setItem(`last_req_${slug}`, Date.now().toString());
+
+            if (isVipRequest) {
+                const paypalLink = event.paypal_link || event.settings?.paypal_link;
+                if (paypalLink) {
+                    let finalLink = paypalLink;
+                    if (tipAmount && tipAmount !== 'custom') {
+                        // Append amount to PayPal.me link if it follows the standard pattern
+                        // Remove trailing slash if exists and append amount
+                        finalLink = paypalLink.replace(/\/$/, '') + '/' + tipAmount;
+                    }
+                    window.open(finalLink, '_blank');
+                }
+            }
         } catch (err) {
             alert('Hata: ' + err.message);
         } finally {
@@ -378,13 +545,135 @@ const GuestPage = () => {
                             />
                         </div>
 
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between ml-1">
+                                <label className={`text-[11px] font-bold ${styles.muted} uppercase tracking-wider`}>MEDYA DEDİKASYONU</label>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setMediaType('upload')}
+                                        className={`text-[9px] font-black px-2 py-1 rounded-lg transition-all ${mediaType === 'upload' ? 'bg-prime text-white' : 'bg-white/5 text-slate-500'}`}
+                                    >
+                                        DOSYA
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setMediaType('link')}
+                                        className={`text-[9px] font-black px-2 py-1 rounded-lg transition-all ${mediaType === 'link' ? 'bg-prime text-white' : 'bg-white/5 text-slate-500'}`}
+                                    >
+                                        Link
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-4">
+                                {mediaType === 'upload' ? (
+                                    <label className={`flex-1 flex flex-col items-center justify-center gap-3 p-8 border-2 border-dashed rounded-3xl cursor-pointer transition-all hover:bg-white/5 ${image ? 'border-green-500/50 bg-green-500/5' : 'border-white/10 hover:border-prime/50'}`}>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={handleImageUpload}
+                                            disabled={uploading}
+                                        />
+                                        {uploading ? (
+                                            <Loader2 className="w-8 h-8 animate-spin text-prime" />
+                                        ) : image && mediaType === 'upload' ? (
+                                            <div className="relative group">
+                                                <img src={image} className="w-20 h-20 object-cover rounded-xl shadow-lg" alt="" />
+                                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-xl transition-all">
+                                                    <X className="w-6 h-6 text-white" onClick={(e) => { e.preventDefault(); setImage(null); }} />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center">
+                                                    <Camera className="w-6 h-6 text-slate-400" />
+                                                </div>
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">RESİM SEÇ VEYA ÇEK</span>
+                                            </>
+                                        )}
+                                    </label>
+                                ) : (
+                                    <div className="flex-1 space-y-2">
+                                        <input
+                                            placeholder="Görsel URL (Pinterest, Instagram vb.)"
+                                            value={mediaType === 'link' ? image || '' : ''}
+                                            onChange={(e) => setImage(e.target.value)}
+                                            className={`w-full border rounded-2xl px-5 py-4 focus:ring-2 transition-all outline-none ${styles.input} focus:ring-slate-700`}
+                                        />
+                                        <p className="text-[9px] text-slate-500 italic ml-1">* Depolama alanı kullanmaz, sistemimizi korur.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {event.paypal_link && (
+                            <div className={`p-5 rounded-2xl border-2 transition-all cursor-pointer ${isVipRequest ? 'border-prime bg-prime/5 shadow-[0_0_20px_rgba(225,29,72,0.1)]' : 'border-white/5 bg-white/5 opacity-60 hover:opacity-100'}`}
+                                onClick={() => setIsVipRequest(!isVipRequest)}
+                            >
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isVipRequest ? 'bg-prime text-white' : 'bg-slate-800 text-slate-500'}`}>
+                                            <ThumbsUp className={`w-5 h-5 ${isVipRequest ? 'fill-current' : ''}`} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-sm">VIP İSTEK (ÖNCELİKLİ)</h4>
+                                            <p className="text-[10px] opacity-70">Sıranın en başına geç ve DJ'i destekle!</p>
+                                        </div>
+                                    </div>
+                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isVipRequest ? 'border-prime bg-prime' : 'border-slate-700'}`}>
+                                        {isVipRequest && <CheckCircle2 className="w-4 h-4 text-white" />}
+                                    </div>
+                                </div>
+                                {isVipRequest && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        className="pt-3 border-t border-white/5 overflow-hidden"
+                                    >
+                                        <p className="text-[11px] leading-relaxed text-slate-400 mb-3">
+                                            {t('guest.vipNote')}
+                                        </p>
+                                        <div className="grid grid-cols-4 gap-2 mb-2">
+                                            {(event.settings?.quick_tips || [2, 5, 10, 20]).map((amount) => (
+                                                <button
+                                                    key={amount}
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); setTipAmount(amount); }}
+                                                    className={`py-2 rounded-xl text-xs font-bold transition-all border-2 ${tipAmount === amount ? 'bg-prime border-prime text-white' : 'bg-white/5 border-transparent text-slate-400 hover:border-white/10'}`}
+                                                >
+                                                    {amount}€
+                                                </button>
+                                            ))}
+                                            <button
+                                                type="button"
+                                                onClick={(e) => { e.stopPropagation(); setTipAmount('custom'); }}
+                                                className={`py-2 rounded-xl text-[10px] font-bold transition-all border-2 ${tipAmount === 'custom' ? 'bg-prime border-prime text-white' : 'bg-white/5 border-transparent text-slate-400 hover:border-white/10'}`}
+                                            >
+                                                {t('guest.customAmount')}
+                                            </button>
+                                        </div>
+                                        {tipAmount === 'custom' && (
+                                            <input
+                                                type="number"
+                                                placeholder="Örn: 15"
+                                                onClick={(e) => e.stopPropagation()}
+                                                onChange={(e) => setTipAmount(e.target.value)}
+                                                className={`w-full mt-2 bg-slate-800/50 border border-white/10 rounded-xl p-2 text-sm text-white text-center font-bold focus:border-prime outline-none transition-all`}
+                                            />
+                                        )}
+                                    </motion.div>
+                                )}
+                            </div>
+                        )}
+
                         <button
                             type="submit"
                             disabled={sending}
                             className={`w-full font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 transform active:scale-[0.98] transition-all border-none disabled:opacity-50 ${styles.button}`}
                         >
-                            {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                            {t('guest.send')}
+                            {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : isVipRequest ? 'VIP İSTEĞİ ÖDE VE GÖNDER' : t('guest.send')}
                         </button>
                     </motion.form>
                 ) : (
@@ -409,6 +698,48 @@ const GuestPage = () => {
                         >
                             {t('guest.sendNewRequest')}
                         </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Battle Mode Section */}
+            <AnimatePresence>
+                {activeBattle && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        className={`mt-8 p-6 rounded-[2.5rem] border-2 border-orange-500/30 bg-orange-500/5 relative overflow-hidden shadow-2xl shadow-orange-500/10`}
+                    >
+                        <div className="absolute top-0 right-0 p-4">
+                            <Flame className="w-6 h-6 text-orange-500 animate-pulse" />
+                        </div>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500/60 mb-2">CANLI OYLAMA</h3>
+                        <h4 className="text-xl font-black mb-6 pr-8 uppercase tracking-tight">{activeBattle.title}</h4>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                onClick={() => handleVote('A')}
+                                disabled={!!userVote}
+                                className={`flex flex-col items-center gap-3 p-6 rounded-3xl border-2 transition-all duration-500 relative overflow-hidden ${userVote === 'A' ? 'bg-orange-500 border-orange-500 text-black' : userVote ? 'bg-white/5 border-transparent opacity-40' : 'bg-white/5 border-white/5 hover:border-orange-500/50'}`}
+                            >
+                                <span className="text-[10px] font-black uppercase tracking-widest relative z-10">{activeBattle.option_a_name}</span>
+                                {userVote === 'A' && <CheckCircle2 className="w-5 h-5 relative z-10" />}
+                            </button>
+                            <button
+                                onClick={() => handleVote('B')}
+                                disabled={!!userVote}
+                                className={`flex flex-col items-center gap-3 p-6 rounded-3xl border-2 transition-all duration-500 relative overflow-hidden ${userVote === 'B' ? 'bg-blue-500 border-blue-500 text-black' : userVote ? 'bg-white/5 border-transparent opacity-40' : 'bg-white/5 border-white/5 hover:border-blue-500/50'}`}
+                            >
+                                <span className="text-[10px] font-black uppercase tracking-widest relative z-10">{activeBattle.option_b_name}</span>
+                                {userVote === 'B' && <CheckCircle2 className="w-5 h-5 relative z-10" />}
+                            </button>
+                        </div>
+                        {userVote && (
+                            <p className="text-center text-[9px] font-black text-orange-500/60 uppercase tracking-[0.2em] mt-6 bg-orange-500/10 py-3 rounded-2xl">
+                                OYUNUZ KAYDEDİLDİ! EKRANI TAKİP EDİN 🔥
+                            </p>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>

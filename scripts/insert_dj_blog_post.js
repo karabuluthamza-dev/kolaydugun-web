@@ -1,133 +1,135 @@
-// Blog Yazısı Ekleme Scripti
+// Blog Yazısı Ekleme Scripti - ENHANCED VERSION WITH NEW FEATURES
 // Bu scripti tarayıcı konsolunda çalıştırın veya node ile çalıştırın
 
 const blogPost = {
-    slug: 'canli-sarki-istek-sistemi',
+    slug: 'live-dj-wow-features-guide',
     status: 'published',
     is_featured: true,
-    featured_image_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=1200',
+    featured_image_url: 'https://images.unsplash.com/photo-1514525253361-bee8d4a9ec2b?auto=format&fit=crop&q=80&w=1200',
     title: {
-        tr: 'Düğününüzde DJ ile İletişimi Modernleştirin: Canlı Şarkı İstek Sistemi',
-        de: 'Musikwünsche auf Ihrer Hochzeit modernisieren: Live Song Request System',
-        en: 'Modernize DJ Communication at Your Wedding: Live Song Request System'
+        tr: 'Live DJ Sisteminde Devrim: Misafirlerinizi Büyüleyecek 5 Yeni Özellik',
+        de: 'Revolution im Live-DJ-System: 5 neue Funktionen, die Ihre Gäste begeistern werden',
+        en: 'Revolution in Live DJ System: 5 New Features to Wow Your Guests'
     },
     excerpt: {
-        tr: 'Kağıt kalem devri sona erdi! Misafirleriniz artık QR kod ile şarkı isteği gönderebilir.',
-        de: 'Die Zeit von Papier und Stift ist vorbei! Gäste können jetzt per QR-Code Musikwünsche senden.',
-        en: 'The paper and pen era is over! Guests can now send song requests via QR code.'
+        tr: 'Düğünlerin ve partilerin havasını değiştirecek Battle Mode, VIP İstekler ve Fotoğraf Desteği yayında! DJ performansınızı bir üst seviyeye taşıyın.',
+        de: 'Battle Mode, VIP-Wünsche und Foto-Support sind live! Heben Sie Ihre DJ-Performance auf das nächste Level.',
+        en: 'Battle Mode, VIP Requests, and Photo Support are live! Take your DJ performance to the next level.'
     },
     content: {
-        tr: `<h1>Düğününüzde DJ ile İletişimi Modernleştirin</h1>
+        tr: `<h1>Modern DJ Performansında Yeni Bir Dönem Başlıyor</h1>
 
-<p>Düğünlerde en sık yaşanan sorunlardan biri, misafirlerin DJ'e şarkı isteği iletmesidir. Kağıt parçaları, sahneye gidip DJ'in kulağına fısıldama veya garsonlar aracılığıyla mesaj gönderme... Bu yöntemler hem profesyonellikten uzak hem de çoğu zaman mesajlar kaybolur.</p>
+<p>Düğün ve etkinliklerde DJ performansını sadece müzik çalmaktan çıkarıp interaktif bir show'a dönüştürmeye hazır mısınız? KolayDugun Live DJ sistemine eklediğimiz <strong>"Wow"</strong> özellikleri ile hem misafirlerinizi eğlencenin merkezine koyuyoruz hem de DJ'ler için yeni kazanç kapıları açıyoruz.</p>
 
-<p><strong>Peki ya misafirleriniz telefonlarından, saniyeler içinde şarkı isteği gönderebilseydi?</strong></p>
+<p>İşte A'dan Z'ye tüm yenilikler:</p>
 
-<h2>Canlı Şarkı İstek Sistemi Nedir?</h2>
+<hr />
 
-<p>KolayDugun'un yeni <strong>Canlı Şarkı İstek Sistemi</strong>, DJ'ler için geliştirilen dijital bir çözümdür. Sistem şu şekilde çalışır:</p>
-
-<ol>
-<li><strong>QR Kod Tarama</strong>: Her masaya yerleştirilen QR kod, misafirleri özel istek sayfasına yönlendirir</li>
-<li><strong>Şarkı Seçimi</strong>: Misafirler şarkı adı veya sanatçı yazarak istek gönderir</li>
-<li><strong>Anlık Görüntüleme</strong>: DJ, sahnedeki ekranında tüm istekleri gerçek zamanlı görür</li>
-<li><strong>İstek Yönetimi</strong>: DJ, çaldığı şarkıları işaretler, spam istekleri filtreler</li>
-</ol>
-
-<h2>DJ'ler İçin Avantajlar</h2>
-
+<h2>1. Medya Dedikasyonları: Şarkı İsteğine Fotoğraf Ekleyin!</h2>
+<p>Artık misafirler sadece şarkı istemiyor, o şarkıyla olan anılarını da paylaşıyor! Misafir sayfasındaki yeni "Medya Dedikasyonu" alanı sayesinde misafirleriniz:</p>
 <ul>
-<li>✅ <strong>Profesyonel Görünüm</strong>: Sahneye gelen misafirlerle uğraşmak yerine odaklanmış performans</li>
-<li>✅ <strong>Spam Koruması</strong>: Küfürlü veya uygunsuz istekler otomatik filtrelenir</li>
-<li>✅ <strong>Veri Analizi</strong>: Hangi şarkılar en çok isteniyor, hangi saat diliminde pist doldu</li>
-<li>✅ <strong>Müşteri Memnuniyeti</strong>: Çiftler, misafirlerinin eğlenceye dahil olduğunu görür</li>
+    <li>Galerilerinden bir fotoğraf yükleyebilir</li>
+    <li>Anlık olarak o anın fotoğrafını çekip gönderebilir</li>
+    <li>Veya Pinterest/Instagram gibi platformlardan bir görsel linki paylaşabilir.</li>
+</ul>
+<p><strong>Optimize Sistem:</strong> Merak etmeyin, yüklenen fotoğraflar cihaz içinde otomatik sıkıştırılır. Böylece sistemimiz binlerce fotoğrafı saniyeler içinde DJ paneline iletir.</p>
+
+<hr />
+
+<h2>2. Battle Mode (Canlı Kapışma): Pistin Hakimi Kim?</h2>
+<p>Gecenin nabzına göre bir oylama başlatmaya ne dersiniz? DJ panelinden tek tıkla başlatabileceğiniz "Battle Mode" ile:</p>
+<ul>
+    <li><strong>90'lar Pop vs 2000'ler Rock</strong> gibi kategorileri yarıştırın.</li>
+    <li>Misafirler telefonlarından anlık oy versin.</li>
+    <li><strong>TV Ekranı (Public Display)</strong> anlık olarak ikiye bölünür ve devasa grafiklerle oylama sonuçlarını canlı yayınlar!</li>
+</ul>
+<p>Bu özellik, pistteki enerjiyi anında iki katına çıkarmanın en garanti yoludur.</p>
+
+<hr />
+
+<h2>3. VIP İstekler: "Sıranın Başına Geç" Fonksiyonu</h2>
+<p>DJ'ler için profesyonel bir ek gelir modeli! Eğer misafiriniz çok meraklıysa veya acelesi varsa, "VIP İSTEK" seçeneğini aktif edebilir. Bu sistem sayesinde:</p>
+<ul>
+    <li>Misafir, isteğini VIP olarak işaretler.</li>
+    <li>Sistem misafiri DJ'in PayPal.me linkine yönlendirir.</li>
+    <li>Ödeme tamamlandığında DJ paneline "ALTIN SARISI" çerçeveli bir bildirim düşer.</li>
+    <li>TV ekranında bu istek **"VIP İSTEK"** etiketiyle en tepede parlar!</li>
 </ul>
 
-<h2>Düğün Çiftleri İçin Avantajlar</h2>
+<hr />
 
+<h2>4. Wedding Wrapped: Gecenin Unutulmaz Raporu</h2>
+<p>Etkinlik bittiğinde çiftinize verebileceğiniz en güzel hediye! Spotify Wrapped tarzında hazırlanan bu rapor şunları içerir:</p>
 <ul>
-<li>🎉 <strong>Misafir Katılımı</strong>: Yaşlı-genç herkes kolayca katılabilir</li>
-<li>🎉 <strong>Modern Deneyim</strong>: "Bu düğünde bile QR kod var!" diyecekler</li>
-<li>🎉 <strong>Kişisel Dokunuş</strong>: Özel mesajlarla şarkı isteği</li>
-</ul>
-
-<h2>Nasıl Kullanılır?</h2>
-
-<p><strong>DJ'ler için:</strong></p>
-<ol>
-<li><a href="https://live.kolaydugun.de">live.kolaydugun.de</a> adresinden kayıt olun</li>
-<li>Etkinlik oluşturun ve QR kodunuzu alın</li>
-<li>Düğün günü QR kodları masalara dağıtın</li>
-<li>Sahnede istekleri yönetin!</li>
+    <li>Gecenin en çok istenen Top 3 şarkısı.</li>
+    <li>Misafirlerin genel modu (En çok hangi emoji kullanıldı?).</li>
+    <li>Toplam kaç beğeni toplandı?</li>
 </ol>
+<p>DJ Dashboard'daki "Yıldız" ikonuna tıklayarak bu animasyonlu hikayeyi çiftinizle paylaşabilirsiniz.</p>
 
-<h2>Ücretsiz Deneme</h2>
+<hr />
 
-<p>Yeni yıl kampanyası kapsamında, <strong>ilk 3 etkinlik tamamen ücretsiz</strong>! Sistemi deneyip beğenmezseniz hiçbir ücret ödemezsiniz.</p>
+<h2>5. Yeni Nesil TV Yayını (Public Display)</h2>
+<p>Tüm bu akış, sahnedeki dev ekranlarda (veya projeksiyonda) tamamen yenilenmiş bir tasarım ile görünüyor. Şık animasyonlar, neon ışıklandırmalar ve dinamik geçişler ile DJ kabini düğünün en stil sahibi noktası haline geliyor.</p>
 
-<p><a href="/live-request" class="btn btn-primary">🎵 Hemen Keşfedin →</a></p>`,
+<hr />
 
-        de: `<h1>Musikwünsche auf Ihrer Hochzeit modernisieren</h1>
+<h3>Hemen Deneyin!</h3>
+<p>Bu özellikleri denemek için bir DJ hesabınızın olması yeterli. İlk 3 etkinlik tamamen ücretsizdir!</p>
 
-<p>Eines der häufigsten Probleme bei Hochzeiten ist die Übermittlung von Musikwünschen an den DJ. Zettel, zum DJ auf die Bühne gehen oder Nachrichten über Kellner senden... Diese Methoden sind unprofessionell und Nachrichten gehen oft verloren.</p>
+<p><a href="/live/dashboard" class="btn btn-primary" style="background:#e11d48; color:white; padding:15px 30px; border-radius:50px; text-decoration:none; font-weight:bold; display:inline-block; margin-top:20px;">🎶 Demo Etkinlik Oluştur →</a></p>`,
 
-<p><strong>Was wäre, wenn Ihre Gäste in Sekundenschnelle Musikwünsche vom Handy senden könnten?</strong></p>
+        de: `<h1>Ein neues Zeitalter der modernen DJ-Performance beginnt</h1>
 
-<h2>Was ist das Live Song Request System?</h2>
+<p>Sind Sie bereit, Ihre DJ-Performance bei Hochzeiten und Events in eine interaktive Show zu verwandeln? Mit den neuen <strong>"Wow"</strong>-Funktionen des KolayDugun Live-DJ-Systems stellen wir Ihre Gäste in den Mittelpunkt und eröffnen DJs neue Einnahmequellen.</p>
 
-<p>Das neue <strong>Live Song Request System</strong> von KolayDugun ist eine digitale Lösung für DJs:</p>
+<hr />
 
-<ol>
-<li><strong>QR-Code scannen</strong>: Jeder Tisch hat einen QR-Code, der zur Wunschseite führt</li>
-<li><strong>Song auswählen</strong>: Gäste geben Songtitel oder Künstler ein</li>
-<li><strong>Echtzeit-Anzeige</strong>: Der DJ sieht alle Wünsche live auf seinem Bildschirm</li>
-<li><strong>Verwaltung</strong>: DJ markiert gespielte Songs, filtert Spam</li>
-</ol>
+<h2>1. Medien-Widmungen: Fotos zu Musikwünschen hinzufügen!</h2>
+<p>Gäste können jetzt nicht nur Songs wünschen, sondern auch Fotos hochladen oder Links teilen.</p>
 
-<h2>Jetzt kostenlos testen</h2>
+<h2>2. Battle Mode: Wer beherrscht die Tanzfläche?</h2>
+<p>Starten Sie Live-Votings wie **90er Pop vs. 2000er Rock**. Die Ergebnisse werden in Echtzeit auf dem großen Bildschirm angezeigt!</p>
 
-<p><strong>Die ersten 3 Events sind komplett kostenlos!</strong></p>
+<h2>3. VIP-Wünsche: Die "Skip-the-Line"-Funktion</h2>
+<p>Gäste können per PayPal bezahlen, um ihre Wünsche ganz nach oben zu setzen. VIP-Wünsche glänzen in Gold auf allen Bildschirmen!</p>
 
-<p><a href="/live-request" class="btn btn-primary">🎵 Jetzt entdecken →</a></p>`,
+<h2>4. Wedding Wrapped: Der ultimative Event-Bericht</h2>
+<p>Ein animierter Rückblick im Spotify-Wrapped-Stil mit den Top-Songs und Statistiken der Nacht.</p>
 
-        en: `<h1>Modernize DJ Communication at Your Wedding</h1>
+<p><a href="/live/dashboard" class="btn btn-primary">🎶 Jetzt kostenlos testen →</a></p>`,
 
-<p>One of the most common problems at weddings is guests trying to request songs from the DJ. Paper notes, walking up to the stage, or sending messages through waiters... These methods are unprofessional and messages often get lost.</p>
+        en: `<h1>A New Era of Modern DJ Performance Begins</h1>
 
-<p><strong>What if your guests could send song requests from their phones in seconds?</strong></p>
+<p>Ready to transform your DJ performance into an interactive show? With the new <strong>"Wow"</strong> features of the KolayDugun Live DJ system, we put your guests at the center of the fun and open new revenue streams for DJs.</p>
 
-<h2>What is the Live Song Request System?</h2>
+<hr />
 
-<p>KolayDugun's new <strong>Live Song Request System</strong> is a digital solution for DJs:</p>
+<h2>1. Media Dedications: Add Photos to Song Requests!</h2>
+<p>Guests can now upload photos or share links alongside their song requests.</p>
 
-<ol>
-<li><strong>Scan QR Code</strong>: Each table has a QR code that leads to the request page</li>
-<li><strong>Select Song</strong>: Guests enter song title or artist</li>
-<li><strong>Real-time Display</strong>: DJ sees all requests live on their screen</li>
-<li><strong>Management</strong>: DJ marks played songs, filters spam</li>
-</ol>
+<h2>2. Battle Mode: Who Rules the Dance Floor?</h2>
+<p>Start live votings like **90s Pop vs. 2000s Rock**. Results are shown in real-time on the big screen!</p>
 
-<h2>Free Trial</h2>
+<h2>3. VIP Requests: The "Skip-the-Line" Function</h2>
+<p>Guests can pay via PayPal to boost their requests. VIP requests shine in gold on all screens!</p>
 
-<p><strong>First 3 events are completely free!</strong></p>
+<h2>4. Wedding Wrapped: The Ultimate Event Report</h2>
+<p>An animated review in Spotify Wrapped style, featuring the night's top songs and stats.</p>
 
-<p><a href="/live-request" class="btn btn-primary">🎵 Discover Now →</a></p>`
+<p><a href="/live/dashboard" class="btn btn-primary">🎶 Try for Free Now →</a></p>`
     },
     meta_title: {
-        tr: 'Düğünde DJ Şarkı İsteği - Dijital Çözüm | KolayDugun',
-        de: 'Hochzeits-DJ Musikwünsche - Digitale Lösung | KolayDugun',
-        en: 'Wedding DJ Song Requests - Digital Solution | KolayDugun'
+        tr: 'DJ Performansını Uçuran 5 Yeni Özellik | KolayDugun Live',
+        de: '5 neue DJ-Features, die begeistern | KolayDugun Live',
+        en: '5 New DJ Features to Wow Your Crowd | KolayDugun Live'
     },
     meta_description: {
-        tr: 'Düğününüzde misafirler QR kod ile şarkı isteği göndersin! Canlı şarkı istek sistemi ile DJ performansını profesyonelleştirin.',
-        de: 'Gäste senden Musikwünsche per QR-Code! Live Song Request System für professionelle DJ-Performances.',
-        en: 'Let guests send song requests via QR code! Live song request system for professional DJ performances.'
+        tr: 'Battle Mode, VIP İstekler ve Fotoğraf Desteği ile tanışın. DJ performansınızı modernize edin ve misafir katılımını artırın.',
+        de: 'Entdecken Sie Battle Mode, VIP-Wünsche und Foto-Support. Modernisieren Sie Ihre DJ-Performance.',
+        en: 'Discover Battle Mode, VIP Requests, and Photo Support. Modernize your DJ performance today.'
     }
 };
 
-// Supabase'e eklemek için bu objeyi kullanın
-console.log('Blog post data ready:', blogPost);
-
-// Tarayıcı konsolunda çalıştırmak için:
+console.log('Premium Blog post data ready:', blogPost);
 // const { data, error } = await supabase.from('posts').insert([blogPost]).select();
-// console.log('Result:', { data, error });

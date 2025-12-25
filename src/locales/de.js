@@ -255,7 +255,11 @@ export const de = {
         "delete": "Löschen"
     },
     "planningTools": {
-        "weatherDesc": "Wettervorhersage für Ihren Hochzeitstag prüfen"
+        "weatherDesc": "Wettervorhersage für Ihren Hochzeitstag prüfen",
+        "liveDJ": {
+            "title": "Live DJ Wunsch",
+            "desc": "Erhalten Sie Live-Musikwünsche von Ihren Gästen während der Hochzeit."
+        }
     },
     "weather": {
         "title": "Hochzeitswetter",

@@ -57,7 +57,7 @@ const BlogCard = ({ post, lang, categories = [] }) => {
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.5px'
                             }}>
-                                {cat.name[lang] || cat.name.tr}
+                                {cat.name?.[lang] || cat.name?.tr || 'Category'}
                             </span>
                         ))}
                     </div>

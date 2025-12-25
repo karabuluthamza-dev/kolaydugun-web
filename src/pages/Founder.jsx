@@ -21,7 +21,37 @@ const Founder = () => {
             const { data: mData } = await supabase.from('founder_media').select('*').eq('is_active', true).order('order_index', { ascending: true });
 
             if (sData) setSettings(sData);
-            if (pData) setProjects(pData);
+
+            // Add new projects that aren't in DB yet
+            const additionalProjects = [
+                {
+                    id: 'live-request-system',
+                    title_tr: 'Canlı İstek Sistemi',
+                    title_de: 'Live-Anfrage-System',
+                    title_en: 'Live Request System',
+                    description_tr: 'DJ ve müzisyenler için QR kod tabanlı şarkı istek sistemi. Misafirler telefonlarından anlık istek gönderebilir, VIP önceliklendirme ve bahşiş özelliği.',
+                    description_de: 'QR-Code-basiertes Song-Anfrage-System für DJs und Musiker. Gäste können Anfragen über ihr Telefon senden, mit VIP-Priorisierung und Trinkgeld-Funktion.',
+                    description_en: 'QR code-based song request system for DJs and musicians. Guests can send requests from their phones, with VIP prioritization and tipping feature.',
+                    status: 'current',
+                    order_index: 3
+                },
+                {
+                    id: 'vendor-shops',
+                    title_tr: 'Tedarikçi Mağazaları',
+                    title_de: 'Anbieter-Shops',
+                    title_en: 'Vendor Shops',
+                    description_tr: 'Düğün tedarikçilerinin kendi ürünlerini ve hizmetlerini doğrudan satabileceği entegre pazaryeri. Çiftler tek noktadan alışveriş yapabilir.',
+                    description_de: 'Integrierter Marktplatz, auf dem Hochzeitsanbieter ihre eigenen Produkte und Dienstleistungen direkt verkaufen können.',
+                    description_en: 'Integrated marketplace where wedding vendors can sell their own products and services directly.',
+                    status: 'current',
+                    order_index: 4
+                }
+            ];
+
+            // Merge DB projects with additional projects
+            const allProjects = [...(pData || []), ...additionalProjects].sort((a, b) => a.order_index - b.order_index);
+            setProjects(allProjects);
+
             if (mData) setMedia(mData);
             setLoading(false);
         };

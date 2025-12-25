@@ -263,7 +263,11 @@ export const en = {
         "forecast": "Forecast"
     },
     "planningTools": {
-        "weatherDesc": "Check weather forecast for your wedding day"
+        "weatherDesc": "Check weather forecast for your wedding day",
+        "liveDJ": {
+            "title": "Live DJ Request",
+            "desc": "Get live song requests from your guests during your wedding."
+        }
     },
     "calendar": {
         "available": "Available",

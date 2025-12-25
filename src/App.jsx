@@ -30,6 +30,7 @@ import Founder from './pages/Founder';
 import VendorLanding from './pages/VendorLanding';
 import SeoLandingPage from './pages/SeoLandingPage';
 import LiveRequestLanding from './pages/LiveRequestLanding';
+import LiveDemo from './pages/LiveDemo';
 import ToolsDashboard from './pages/ToolsDashboard';
 import CommunityLayout from './pages/community/CommunityLayout';
 import CommunityHome from './pages/community/CommunityHome';
@@ -77,6 +78,7 @@ const AdminComments = lazy(() => import('./pages/AdminComments'));
 const AdminFAQ = lazy(() => import('./pages/AdminFAQ'));
 const AdminFounder = lazy(() => import('./pages/AdminFounder'));
 const AdminHelp = lazy(() => import('./pages/AdminHelp'));
+const AdminLiveRequestPanel = lazy(() => import('./pages/Admin/AdminLiveRequestPanel'));
 
 // Admin Forum
 const AdminForumSettings = lazy(() => import('./pages/AdminForumSettings'));
@@ -208,6 +210,7 @@ function App() {
               <Route path="/canli-istek-sistemi" element={<LiveRequestLanding />} />
               <Route path="/de/live-wunsch-system" element={<LiveRequestLanding />} />
               <Route path="/en/live-request-system" element={<LiveRequestLanding />} />
+              <Route path="/live-demo" element={<LiveDemo />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/faq" element={<FAQPage />} />
@@ -324,6 +327,7 @@ function App() {
                 <Route path="imports" element={<AdminImports />} />
                 <Route path="/admin/founder" element={<AdminFounder />} />
                 <Route path="help" element={<AdminHelp />} />
+                <Route path="live-requests" element={<AdminLiveRequestPanel />} />
 
               </Route>
 

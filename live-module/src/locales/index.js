@@ -79,7 +79,13 @@ export const locales = {
                 q11: 'Kredi ile 24 saatlik erişim nasıl çalışır?',
                 a11: 'Premium paketiniz yoksa, sadece ihtiyacınız olan günlerde 20 kredi harcayarak Canlı İstek Paneli\'ni 24 saatliğine aktif edebilirsiniz. Kredileriniz bakiyenizden düşülür.',
                 q12: 'Premium paketin avantajları nelerdir?',
-                a12: 'Premium paket üyeleri Canlı İstek Paneli\'ne herhangi bir kredi harcamadan sınırsız erişim sağlarlar. Ayrıca listede üst sıralarda görünme ve onaylı rozeti gibi avantajlara sahip olurlar.'
+                a12: 'Premium paket üyeleri Canlı İstek Paneli\'ne herhangi bir kredi harcamadan sınırsız erişim sağlarlar. Ayrıca listede üst sıralarda görünme ve onaylı rozeti gibi avantajlara sahip olurlar.',
+                q13: 'Uygulama indirmem gerekiyor mu?',
+                a13: 'Hayır, ne sizin ne de misafirlerinizin herhangi bir uygulama indirmesine gerek yok. Sistem tamamen tarayıcı üzerinden (browser) çalışır.',
+                q14: 'Verilerim güvende mi?',
+                a14: 'Kesinlikle. Misafirlerin verileri sadece istek sırasında DJ ile paylaşılır ve kalıcı olarak saklanmaz. Gizliliğiniz bizim için önemlidir.',
+                q15: 'Sadece düğünlerde mi kullanılır?',
+                a15: 'Hayır; doğum günleri, kurumsal partiler, kulüpler ve her türlü müzikli etkinlik için mükemmel bir interaktif çözümdür.'
             }
         },
         liveFeed: {
@@ -138,11 +144,21 @@ export const locales = {
             sendNewRequest: "YENİ BİR İSTEK GÖNDER",
             searchPlaceholder: "Şarkı veya sanatçı arayın...",
             searching: "Aranıyor...",
-            noResults: "Sonuç bulunamadı."
+            noResults: "Sonuç bulunamadı.",
+            tipAmount: "BAHŞİŞ / VIP MİKTARI",
+            customAmount: "Özel",
+            vipNote: "VIP istekleri DJ panelinde en üstte ve öncelikli görünür.",
+            paypalRedirect: "Ödeme için PayPal'a yönlendiriliyorsunuz..."
         },
         qrModal: {
-            title: "Misafir Girişi",
+            title: "QR Giriş Kodu",
             subtitle: "Misafirlerinizin şarkı isteyebilmesi için bu kodu okutması yeterli.",
+            copyButton: "LİNK KOPYALA",
+            copied: "KOPYALANDI",
+            downloadButton: "İNDİR (PNG)",
+            footerText: "MİSAFİRLER KAMERAYI TARATIP GİRİŞ YAPABİLİR",
+            instruction: "Bu kodu masalara koyarak misafirlerin DJ'e müzik isteklerini iletmesini sağlayabilirsiniz.",
+            scanText: "İSTEK SAYFASI İÇİN TARATIN",
             copySuccess: "Link başarıyla kopyalandı!"
         },
         publicDisplay: {
@@ -236,7 +252,13 @@ export const locales = {
                 q11: 'Wie funktioniert der 24-Stunden-Zugang mit Credits?',
                 a11: 'Wenn Sie kein Premium-Paket haben, können Sie das Panel für 24 Stunden aktivieren, indem Sie 20 Credits ausgeben. Ideal für einzelne Hochzeiten.',
                 q12: 'Was sind die Vorteile des Premium-Pakets?',
-                a12: 'Premium-Mitglieder haben unbegrenzten Zugriff auf das Live-Wunsch-Panel ohne Credit-Einsatz. Zudem erhalten sie Top-Platzierungen und ein verifiziertes Badge.'
+                a12: 'Premium-Mitglieder haben unbegrenzten Zugriff auf das Live-Wunsch-Panel ohne Credit-Einsatz. Zudem erhalten sie Top-Platzierungen und ein verifiziertes Badge.',
+                q13: 'Muss ich eine App herunterladen?',
+                a13: 'Nein, weder Sie noch Ihre Gäste müssen eine App installieren. Das System läuft vollständig im Browser.',
+                q14: 'Sind meine Daten sicher?',
+                a14: 'Absolut. Gästedaten werden nur während der Anfrage mit dem DJ geteilt und nicht dauerhaft gespeichert. Ihre Privatsphäre ist uns wichtig.',
+                q15: 'Wird es nur bei Hochzeiten verwendet?',
+                a15: 'Nein; es ist eine perfekte interaktive Lösung für Geburtstage, Firmenfeiern, Clubs und jede Art von Musikveranstaltung.'
             }
         },
         liveFeed: {
@@ -295,11 +317,21 @@ export const locales = {
             sendNewRequest: "EINE NEUE ANFRAGE SENDEN",
             searchPlaceholder: "Nach Song oder Künstler suchen...",
             searching: "Suche...",
-            noResults: "Keine Ergebnisse gefunden."
+            noResults: "Keine Ergebnisse gefunden.",
+            tipAmount: "TRINKGELD / VIP-BETRAG",
+            customAmount: "Individuell",
+            vipNote: "VIP-Anfragen erscheinen ganz oben und haben Vorrang im DJ-Panel.",
+            paypalRedirect: "Weiterleitung zu PayPal für die Zahlung..."
         },
         qrModal: {
-            title: "Gäste-Login",
+            title: "QR-Login-Code",
             subtitle: "Ihre Gäste müssen nur diesen Code scannen, um Lieder anzufragen.",
+            copyButton: "LINK KOPIEREN",
+            copied: "KOPIERT",
+            downloadButton: "DOWNLOAD (PNG)",
+            footerText: "GÄSTE KÖNNEN ZUM EINTRETEN SCANNEN",
+            instruction: "Platzieren Sie diesen Code auf den Tischen, damit Gäste ihre Musikwünsche an den DJ senden können.",
+            scanText: "FÜR WUNSCHSEITE SCANNEN",
             copySuccess: "Link erfolgreich kopiert!"
         },
         publicDisplay: {
@@ -393,7 +425,13 @@ export const locales = {
                 q11: 'How does 24-hour access with credits work?',
                 a11: 'If you don\'t have a Premium plan, you can activate the panel for 24 hours by spending 20 credits. Ideal for specific wedding days.',
                 q12: 'What are the advantages of the Premium plan?',
-                a12: 'Premium members have unlimited access to the Live Request Panel without spending credits. They also get top placement and a verified badge.'
+                a12: 'Premium members have unlimited access to the Live Request Panel without spending credits. They also get top placement and a verified badge.',
+                q13: 'Do I need to download an app?',
+                a13: 'No, neither you nor your guests need to download any app. The system works entirely through the browser.',
+                q14: 'Is my data safe?',
+                a14: 'Absolutely. Guest data is only shared with the DJ during the request and is not stored permanently. Your privacy is important to us.',
+                q15: 'Is it only for weddings?',
+                a15: 'No; it is a perfect interactive solution for birthdays, corporate parties, clubs, and any kind of musical event.'
             }
         },
         liveFeed: {
@@ -452,11 +490,21 @@ export const locales = {
             sendNewRequest: "SEND A NEW REQUEST",
             searchPlaceholder: "Search for song or artist...",
             searching: "Searching...",
-            noResults: "No results found."
+            noResults: "No results found.",
+            tipAmount: "TIP / VIP AMOUNT",
+            customAmount: "Custom",
+            vipNote: "VIP requests appear at the top and are prioritized in the DJ panel.",
+            paypalRedirect: "Redirecting to PayPal for payment..."
         },
         qrModal: {
-            title: "Guest Login",
+            title: "QR Entry Code",
             subtitle: "Your guests just need to scan this code to request songs.",
+            copyButton: "COPY LINK",
+            copied: "COPIED",
+            downloadButton: "DOWNLOAD (PNG)",
+            footerText: "GUESTS CAN SCAN TO ENTER",
+            instruction: "Place this code on tables to allow guests to send their music requests to the DJ.",
+            scanText: "SCAN FOR REQUEST PAGE",
             copySuccess: "Link copied successfully!"
         },
         publicDisplay: {

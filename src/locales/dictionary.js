@@ -149,139 +149,45 @@ export const dictionary = {
             "spam": {
                 "title": { "tr": "Akıllı Filtre", "de": "Intelligenter Filter", "en": "Smart Filter" },
                 "desc": { "tr": "Küfürlü ve mükerrer istekler otomatik engellenir.", "de": "Anstößige und doppelte Anfragen werden automatisch blockiert.", "en": "Offensive and duplicate requests are automatically blocked." }
+            },
+            "battle": {
+                "title": { "tr": "Battle Mode", "de": "Battle-Modus", "en": "Battle Mode" },
+                "desc": { "tr": "Misafirleriniz arasında canlı oylamalar başlatın.", "de": "Starten Sie Live-Abstimmungen unter Ihren Gästen.", "en": "Start live polls among your guests." }
+            },
+            "vip": {
+                "title": { "tr": "VIP İstekler", "de": "VIP-Wünsche", "en": "VIP Requests" },
+                "desc": { "tr": "PayPal entegrasyonu ile öncelikli istekler alın.", "de": "Erhalten Sie vorrangige Wünsche mit PayPal-Integration.", "en": "Get priority requests with PayPal integration." }
             }
         },
-        "cta": {
+        cta: {
             "tr": "Hemen Ücretsiz Deneyin",
             "de": "Jetzt kostenlos testen",
             "en": "Try for Free Now"
+        },
+        "demo": {
+            "title": { "tr": "Canlı Demo", "de": "Live-Demo", "en": "Live Demo" },
+            "welcome": { "tr": "KolayDüğün Canlı İstek Sistemini Deneyin", "de": "Testen Sie das KolayDugun Live-Request-System", "en": "Try KolayDugun Live Request System" },
+            "guestView": { "tr": "Misafir Görünümü", "de": "Gastansicht", "en": "Guest View" },
+            "djView": { "tr": "DJ / Panel Görünümü", "de": "DJ / Panel-Ansicht", "en": "DJ / Panel View" },
+            "toggle": { "tr": "Görünümü Değiştir", "de": "Ansicht wechseln", "en": "Switch View" },
+            "songPlaceholder": { "tr": "Bir şarkı arayın...", "de": "Suchen Sie nach einem Lied...", "en": "Search for a song..." },
+            "yourName": { "tr": "Adınız (İsteğe bağlı)", "de": "Ihr Name (Optional)", "en": "Your Name (Optional)" },
+            "sendRequest": { "tr": "İstek Gönder", "de": "Wunsch senden", "en": "Send Request" },
+            "requestSent": { "tr": "İsteğiniz Gönderildi!", "de": "Wunsch gesendet!", "en": "Request Sent!" },
+            "limitedNotice": {
+                "tr": "Bu bir demo sürümüdür ve özellikleri kısıtlıdır. Gerçek sistemde PayPal entegrasyonu, tam analitik ve özel QR kod üretimi gibi tüm özellikler mevcuttur.",
+                "de": "Dies ist eine Demoversion mit eingeschränkten Funktionen. Das echte System bietet alle Funktionen wie PayPal-Integration, vollständige Analysen und individuelle QR-Codes.",
+                "en": "This is a demo version with limited features. The real system includes all features like PayPal integration, full analytics, and custom QR codes."
+            },
+            "requestSent": { "tr": "İsteğiniz DJ'e iletildi!", "de": "Ihre Anfrage wurde an den DJ gesendet!", "en": "Your request has been sent to the DJ!" },
+            "battleTitle": { "tr": "Sıradaki Parçayı Seçin!", "de": "Wählen Sie den nächsten Song!", "en": "Choose the Next Track!" },
+            "vote": { "tr": "OY VER", "de": "ABSTIMMEN", "en": "VOTE" },
+            "requests": { "tr": "Gelen İstekler", "de": "Eingehende Anfragen", "en": "Incoming Requests" },
+            "accept": { "tr": "Çal", "de": "Abspielen", "en": "Play" },
+            "vip": { "tr": "VIP İSTEK", "de": "VIP-WUNSCH", "en": "VIP REQUEST" }
         }
     },
 
-    "planningTools": {
-        "title": {
-            "en": "Planning Tools",
-            "de": "Planungstools",
-            "tr": "Planlama Araçları"
-        },
-        "agenda": {
-            "title": {
-                "en": "My Agenda",
-                "de": "Meine Agenda",
-                "tr": "Ajandam"
-            },
-            "desc": {
-                "en": "Monthly to-do list based on your wedding date.",
-                "de": "Monatliche To-Do-Liste basierend auf Ihrem Hochzeitsdatum.",
-                "tr": "Düğün tarihinize göre aylık yapılacaklar listesi."
-            }
-        },
-        "budget": {
-            "title": {
-                "en": "Budget",
-                "de": "Budget",
-                "tr": "Bütçe"
-            },
-            "desc": {
-                "en": "Plan your total budget, manage expenses and track payments.",
-                "de": "Planen Sie Ihr Gesamtbudget, verwalten Sie Ausgaben und verfolgen Sie Zahlungen.",
-                "tr": "Toplam bütçenizi belirleyin, harcama kalemlerini yönetin ve ödemelerinizi takip edin."
-            }
-        },
-        "website": {
-            "title": {
-                "en": "Wedding Website",
-                "de": "Hochzeitswebsite",
-                "tr": "Web Sitem"
-            },
-            "desc": {
-                "en": "Create a special website for your wedding, share your story and collect RSVPs.",
-                "de": "Erstellen Sie eine spezielle Website für Ihre Hochzeit, teilen Sie Ihre Geschichte und sammeln Sie RSVPs.",
-                "tr": "Düğününüz için özel bir web sitesi oluşturun, hikayenizi paylaşın ve LCV toplayın."
-            }
-        },
-        "seating": {
-            "title": {
-                "en": "Seating Plan",
-                "de": "Sitzplan",
-                "tr": "Oturma Planı"
-            },
-            "desc": {
-                "en": "Assign your guests to tables and easily create your seating arrangement.",
-                "de": "Weisen Sie Ihre Gäste den Tischen zu und erstellen Sie einfach Ihre Sitzordnung.",
-                "tr": "Misafirlerinizi masalara yerleştirin, oturma düzeninizi kolayca oluşturun."
-            }
-        },
-        "weather": {
-            "title": {
-                "en": "Weather Forecast",
-                "de": "Wettervorhersage",
-                "tr": "Hava Durumu"
-            },
-            "desc": {
-                "en": "Get temperature suggestions based on your wedding date and city.",
-                "de": "Erhalten Sie Temperaturvorschläge basierend auf Ihrem Hochzeitsdatum und Ihrer Stadt.",
-                "tr": "Düğün tarihi ve şehrinize göre hava tahmini alın, ortalama sıcaklık ve gün batımı saatini öğrenin."
-            }
-        },
-        "progress": {
-            "en": "Progress",
-            "de": "Fortschritt",
-            "tr": "İlerleme"
-        },
-        "editWebsite": {
-            "en": "Edit Website",
-            "de": "Website bearbeiten",
-            "tr": "Web Sitemi Düzenle"
-        }
-    },
-    "seoLanding": {
-        "guide": {
-            "tr": "Rehberi",
-            "de": "Ratgeber",
-            "en": "Guide"
-        },
-        "introText1": {
-            "tr": "bölgesinde düğün yapmayı planlıyorsanız, en kritik adımlardan biri doğru",
-            "de": "planen Sie Ihre Hochzeit in der Region, ist einer der kritischsten Schritte die Wahl des richtigen",
-            "en": "region, one of the most critical steps is choosing the right"
-        },
-        "introText2": {
-            "tr": "seçimini yapmaktır. Kolay Düğün olarak, size en yakın ve en kaliteli",
-            "de": "Anbieters. Als Kolay Düğün haben wir die besten und nächstgelegenen",
-            "en": "professional. As Kolay Düğün, we have gathered the best and closest"
-        },
-        "introText3": {
-            "tr": "profesyoneli tek bir çatı altında topladık. Fiyat teklifi alabilir, galerileri inceleyebilir ve diğer çiftlerin deneyimlerinden faydalanabilirsiniz.",
-            "de": "Profis unter einem Dach vereint. Sie können Angebote einholen, Galerien durchsehen und von den Erfahrungen anderer Paare profitieren.",
-            "en": "professionals under one roof. You can get price quotes, browse galleries, and benefit from the experiences of other couples."
-        },
-        "listHeader": {
-            "tr": "Listesi",
-            "de": "Liste",
-            "en": "List"
-        },
-        "resultsFound": {
-            "tr": "Sonuç bulundu",
-            "de": "Ergebnisse gefunden",
-            "en": "Results found"
-        },
-        "noResults": {
-            "tr": "Üzgünüz, {{city}} bölgesinde bu kategoride henüz bir tedarikçi bulunamadı.",
-            "de": "Entschuldigung, in dieser Kategorie wurden für die Region {{city}} noch keine Anbieter gefunden.",
-            "en": "Sorry, no vendors were found in this category for the {{city}} region."
-        },
-        "seeAll": {
-            "tr": "Tüm Tedarikçileri Gör",
-            "de": "Alle Anbieter ansehen",
-            "en": "View All Vendors"
-        },
-        "allVendors": {
-            "tr": "Tüm Tedarikçiler",
-            "de": "Alle Anbieter",
-            "en": "All Vendors"
-        }
-    },
     "footer": {
         "planning": {
             "tr": "PLANLAMA",
@@ -5002,6 +4908,11 @@ export const dictionary = {
             "de": "Kostenlos",
             "tr": "Ücretsiz"
         },
+        "trial": {
+            "en": "Trial / 20 Req.",
+            "de": "Test / 20 Anfr.",
+            "tr": "Deneme / 20 İstek"
+        },
         "timeline": {
             "title": {
                 "en": "My Agenda",
@@ -5012,6 +4923,18 @@ export const dictionary = {
                 "en": "Monthly to-do list based on your wedding date. Personalize tasks, add notes, and track your progress.",
                 "de": "Monatliche To-Do-Liste basierend auf Ihrem Hochzeitsdatum. Personalisieren Sie Aufgaben, fügen Sie Notizen hinzu und verfolgen Sie Ihren Fortschritt.",
                 "tr": "Düğün tarihinize göre aylık yapılacaklar listesi. Görevleri kişiselleştirin, not ekleyin ve ilerlemenizi takip edin."
+            }
+        },
+        "liveDJ": {
+            "title": {
+                "en": "Live DJ System",
+                "de": "Live DJ System",
+                "tr": "Live DJ Sistemi"
+            },
+            "desc": {
+                "en": "Let your guests request songs & send photos via QR code.",
+                "de": "Lassen Sie Ihre Gäste Songs wünschen & Fotos per QR-Code senden.",
+                "tr": "Misafirleriniz QR kod ile şarkı istesin ve fotoğraf göndersin."
             }
         },
         "progress": {

@@ -6,6 +6,7 @@ import { ChevronLeft, BarChart3, TrendingUp, Music, Users, Clock, ArrowRight } f
 import { motion } from 'framer-motion';
 
 const StatisticsPage = () => {
+    const { t } = useTranslation();
     const { eventId } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);

@@ -259,7 +259,11 @@ export const tr = {
         "delete": "Sil"
     },
     "planningTools": {
-        "weatherDesc": "Düğün gününüz için hava durumu tahminini kontrol edin"
+        "weatherDesc": "Düğün gününüz için hava durumu tahminini kontrol edin",
+        "liveDJ": {
+            "title": "Canlı DJ İstek",
+            "desc": "Düğününüzde misafirlerinizden canlı şarkı istekleri alın."
+        }
     },
     "weather": {
         "title": "Düğün Havası",

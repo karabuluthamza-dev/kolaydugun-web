@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { Music, QrCode, Zap, ShieldCheck, BarChart3, ArrowRight } from 'lucide-react';
+import { Music, QrCode, Zap, ShieldCheck, BarChart3, ArrowRight, Flame } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const LiveRequestLanding = () => {
@@ -14,6 +14,16 @@ const LiveRequestLanding = () => {
             desc: t('liveRequest.features.realtime.desc')
         },
         {
+            icon: <Flame className="w-8 h-8 text-orange-500" />,
+            title: t('liveRequest.features.battle.title'),
+            desc: t('liveRequest.features.battle.desc')
+        },
+        {
+            icon: <Zap className="w-8 h-8 text-purple-400" />,
+            title: t('liveRequest.features.vip.title'),
+            desc: t('liveRequest.features.vip.desc')
+        },
+        {
             icon: <BarChart3 className="w-8 h-8 text-blue-400" />,
             title: t('liveRequest.features.stats.title'),
             desc: t('liveRequest.features.stats.desc')
@@ -22,8 +32,14 @@ const LiveRequestLanding = () => {
             icon: <ShieldCheck className="w-8 h-8 text-green-400" />,
             title: t('liveRequest.features.spam.title'),
             desc: t('liveRequest.features.spam.desc')
+        },
+        {
+            icon: <QrCode className="w-8 h-8 text-prime" />,
+            title: "Özel QR Kodlar",
+            desc: "Her etkinlik ve masa için saniyeler içinde benzersiz QR kodlar oluşturun."
         }
     ];
+
 
     return (
         <div className="bg-white min-h-screen">
@@ -39,11 +55,12 @@ const LiveRequestLanding = () => {
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full text-prime font-bold text-sm mb-8 border border-white/10"
+                            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full text-white font-bold text-sm mb-8 border border-white/10"
                         >
-                            <Music className="w-4 h-4" />
+                            <Music className="w-4 h-4 text-prime" />
                             <span>Müzisyenler & Orkestralar İçin</span>
                         </motion.div>
+
 
                         <motion.h1
                             initial={{ opacity: 0, y: 20 }}
@@ -67,17 +84,32 @@ const LiveRequestLanding = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="flex flex-col sm:flex-row gap-4 justify-center"
+                            className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center items-center"
                         >
                             <a
                                 href="https://live.kolaydugun.de/dashboard"
-                                className="bg-prime hover:bg-rose-600 text-white px-10 py-5 rounded-2xl font-black tracking-widest transition-all shadow-xl shadow-prime/20 flex items-center justify-center gap-3 text-lg"
+                                className="bg-prime hover:bg-rose-600 text-white px-8 py-4 rounded-2xl font-black tracking-widest transition-all shadow-xl shadow-prime/20 flex items-center justify-center gap-3 text-base"
                             >
-                                {t('liveRequest.cta')} <ArrowRight className="w-6 h-6" />
+                                {t('liveRequest.cta')} <ArrowRight className="w-5 h-5" />
                             </a>
                             <Link
+                                to="/live-demo"
+                                className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-8 py-4 rounded-2xl font-black tracking-widest transition-all flex items-center justify-center gap-3 text-base backdrop-blur-sm"
+                            >
+                                <Zap className="w-5 h-5 text-yellow-400" />
+                                {t('liveRequest.demo.title')}
+                            </Link>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="mt-6"
+                        >
+                            <Link
                                 to="/register?type=vendor"
-                                className="bg-white/5 hover:bg-white/10 text-white border border-white/10 px-10 py-5 rounded-2xl font-black tracking-widest transition-all text-lg"
+                                className="inline-block bg-white/5 hover:bg-white/10 text-white border border-white/10 px-8 py-4 rounded-2xl font-bold tracking-wider transition-all text-sm"
                             >
                                 Hemen Üye Ol
                             </Link>
@@ -85,6 +117,7 @@ const LiveRequestLanding = () => {
                     </div>
                 </div>
             </div>
+
 
             {/* Features Grid */}
             <div className="py-24 bg-slate-50">
@@ -141,9 +174,9 @@ const LiveRequestLanding = () => {
                         <div className="lg:w-1/2 relative">
                             <div className="bg-prime/10 rounded-[3rem] p-4 rotate-3">
                                 <img
-                                    src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=1000"
+                                    src="/images/live/dj-demo-real.png"
                                     alt="DJ Live Request Demo"
-                                    className="rounded-[2.5rem] shadow-2xl -rotate-3"
+                                    className="rounded-[2.5rem] shadow-2xl -rotate-3 border-8 border-slate-900"
                                 />
                             </div>
                         </div>
