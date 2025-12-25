@@ -7,7 +7,14 @@ import { community } from '../locales/community';
 const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
-    const { translations, loading } = useTranslations();
+    // Wrap useTranslations in a try-catch scenario by providing a fallback
+    let translationsData = { translations: {}, loading: false };
+    try {
+        translationsData = useTranslations();
+    } catch (e) {
+        console.error('[LanguageProvider] useTranslations failed, using fallback:', e);
+    }
+    const { translations, loading } = translationsData;
     const [language, setLanguage] = useState(i18n.language || 'de');
 
     // Update i18n resources when translations change

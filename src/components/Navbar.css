@@ -8,7 +8,7 @@
     /* Removed backdrop-filter to improve video playback performance */
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    z-index: 9999;
+    z-index: 99999;
     padding: 0.8rem 0;
     transition: all var(--transition-normal);
 }
@@ -47,8 +47,7 @@
 
 .navbar-links {
     display: flex;
-    gap: 1rem;
-    /* Reduced from 1.25rem */
+    gap: 1.5rem;
     align-items: center;
 }
 
@@ -86,16 +85,16 @@
 
 .navbar-actions {
     display: flex;
-    gap: 0.6rem;
-    /* Reduced from 0.75rem */
+    gap: 1rem;
     align-items: center;
 }
 
 .navbar-user {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    /* Reduced from 0.5rem */
+    gap: 1.25rem;
+    position: relative;
+    z-index: 100000;
 }
 
 .user-name {

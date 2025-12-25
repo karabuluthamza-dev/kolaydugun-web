@@ -41,6 +41,11 @@ const AdminVendors = () => {
     const [showcaseCustomDate, setShowcaseCustomDate] = useState('');
     const [showcaseOrder, setShowcaseOrder] = useState(0);
     const [confirmDeleteId, setConfirmDeleteId] = useState(null); // Inline delete confirmation state
+    const [managingSubscription, setManagingSubscription] = useState(null); // Vendor being managed
+    const [subModalPlan, setSubModalPlan] = useState('');
+    const [subModalEndDate, setSubModalEndDate] = useState('');
+    const [subModalCredits, setSubModalCredits] = useState(0);
+    const [isSavingSub, setIsSavingSub] = useState(false);
 
     // AI Insight State
     const [aiInsightVendor, setAiInsightVendor] = useState(null);
@@ -420,6 +425,85 @@ const AdminVendors = () => {
         await toggleFeatured(showcaseVendor.id, true, expiresAt, showcaseOrder);
         setShowShowcaseModal(false);
         setShowcaseVendor(null);
+    };
+
+    const openSubscriptionModal = (vendor) => {
+        setManagingSubscription(vendor);
+        setSubModalPlan(vendor.subscription_tier || 'free');
+        setSubModalEndDate(vendor.subscription_end_date ? vendor.subscription_end_date.split('T')[0] : '');
+        setSubModalCredits(0);
+        setShowShowcaseModal(false); // Close others
+        setEditingVendor(null);
+    };
+
+    const handleSubscriptionSubmit = async () => {
+        if (!managingSubscription) return;
+
+        // Premium seçiliyse tarih zorunlu olsun
+        if (subModalPlan === 'premium' && !subModalEndDate) {
+            alert('❌ ' + t('adminPanel.vendors.feedback.dateRequired', 'Premium paket için lütfen bir bitiş tarihi seçiniz.'));
+            return;
+        }
+
+        setIsSavingSub(true);
+        try {
+            const vendorId = managingSubscription.id;
+            const updates = {
+                subscription_tier: subModalPlan,
+                subscription_end_date: subModalEndDate ? new Date(subModalEndDate).toISOString() : null,
+                credit_balance: (managingSubscription.credit_balance || 0) + parseInt(subModalCredits || 0),
+                updated_at: new Date().toISOString()
+            };
+
+            // 1. Update vendors table
+            const { error: vError } = await supabase
+                .from('vendors')
+                .update(updates)
+                .eq('id', vendorId);
+
+            if (vError) throw vError;
+
+            // 2. Sync with vendor_subscriptions table
+            const { data: planData } = await supabase
+                .from('subscription_plans')
+                .select('id')
+                .eq('name', subModalPlan)
+                .maybeSingle();
+
+            if (planData) {
+                await supabase
+                    .from('vendor_subscriptions')
+                    .upsert({
+                        vendor_id: vendorId,
+                        plan_id: planData.id,
+                        status: 'active',
+                        current_period_start: new Date().toISOString(),
+                        current_period_end: updates.subscription_end_date,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'vendor_id' });
+            }
+
+            // 3. Record transaction if credits added
+            if (parseInt(subModalCredits) !== 0) {
+                await supabase.from('transactions').insert({
+                    user_id: vendorId,
+                    type: 'admin_adjustment',
+                    status: 'approved',
+                    credits_added: parseInt(subModalCredits),
+                    description: `Admin tarafından manuel kredi düzenlemesi.`,
+                    amount: 0
+                });
+            }
+
+            alert('✅ ' + t('adminPanel.vendors.feedback.successUpdate', 'Abonelik bilgileri güncellendi.'));
+            setManagingSubscription(null);
+            fetchVendors();
+        } catch (err) {
+            console.error('Sub update error:', err);
+            alert('❌ ' + err.message);
+        } finally {
+            setIsSavingSub(false);
+        }
     };
 
     const toggleFeatured = async (vendorId, newValue, expiresAt = null, sortOrder = 0) => {
@@ -1187,6 +1271,15 @@ const AdminVendors = () => {
                                                         👑
                                                     </button>
                                                 )}
+
+                                                <button
+                                                    className="btn-sm btn-secondary"
+                                                    onClick={() => openSubscriptionModal(vendor)}
+                                                    title={t('adminPanel.vendors.actions.manageSubscription', 'Abonelik Yönetimi')}
+                                                    style={{ backgroundColor: '#f59e0b', color: 'white', borderColor: '#f59e0b' }}
+                                                >
+                                                    💎
+                                                </button>
                                                 <button
                                                     className="btn-sm btn-info"
                                                     onClick={() => setAiInsightVendor(vendor)}
@@ -1316,55 +1409,74 @@ const AdminVendors = () => {
                 )
             }
 
-            {/* Showcase Modal */}
+            {/* Subscription Management Modal */}
             {
-                showShowcaseModal && (
+                managingSubscription && (
                     <div className="modal-overlay">
-                        <div className="modal-content" style={{ maxWidth: '400px' }}>
-                            <h3>{t('adminPanel.vendors.modals.showcaseTitle', 'Vitrine Ekle')}: {showcaseVendor?.business_name}</h3>
+                        <div className="modal-content" style={{ maxWidth: '450px' }}>
+                            <h3 style={{ marginBottom: '20px' }}>💎 {t('adminPanel.vendors.actions.manageSubscription', 'Abonelik Yönetimi')}</h3>
+                            <p style={{ marginBottom: '15px', color: '#666' }}><strong>{managingSubscription.business_name}</strong> {t('adminPanel.vendors.modals.subDesc', 'için üyelik detaylarını düzenleyin.')}</p>
 
-                            <div className="form-group">
-                                <label>{t('adminPanel.vendors.modals.duration', 'Süre')}</label>
+                            <div className="form-group" style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>{t('adminPanel.vendors.table.membership', 'Üyelik Paketi')}</label>
                                 <select
-                                    value={showcaseDuration}
-                                    onChange={(e) => setShowcaseDuration(e.target.value)}
+                                    value={subModalPlan}
+                                    onChange={(e) => setSubModalPlan(e.target.value)}
                                     className="form-control"
+                                    style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd' }}
                                 >
-                                    <option value="1_week">{t('adminPanel.vendors.modals.durations.week', '1 Hafta')}</option>
-                                    <option value="1_month">{t('adminPanel.vendors.modals.durations.month', '1 Ay')}</option>
-                                    <option value="3_months">{t('adminPanel.vendors.modals.durations.threeMonths', '3 Ay')}</option>
-                                    <option value="unlimited">{t('adminPanel.vendors.modals.durations.unlimited', 'Süresiz')}</option>
-                                    <option value="custom">{t('adminPanel.vendors.modals.durations.custom', 'Özel Tarih')}</option>
+                                    <option value="free">Free</option>
+                                    <option value="premium">Premium</option>
                                 </select>
                             </div>
 
-                            {showcaseDuration === 'custom' && (
-                                <div className="form-group">
-                                    <label>{t('adminPanel.vendors.modals.expiryDate', 'Bitiş Tarihi')}</label>
-                                    <input
-                                        type="date"
-                                        value={showcaseCustomDate}
-                                        onChange={(e) => setShowcaseCustomDate(e.target.value)}
-                                        className="form-control"
-                                    />
-                                </div>
-                            )}
-
-                            <div className="form-group">
-                                <label>{t('adminPanel.vendors.modals.order', 'Sıralama Önceliği (1 = En Üst)')}</label>
+                            <div className="form-group" style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>{t('adminPanel.vendors.table.expires', 'Bitiş Tarihi')}</label>
                                 <input
-                                    type="number"
-                                    value={showcaseOrder}
-                                    onChange={(e) => setShowcaseOrder(parseInt(e.target.value))}
+                                    type="date"
+                                    value={subModalEndDate}
+                                    onChange={(e) => setSubModalEndDate(e.target.value)}
                                     className="form-control"
-                                    min="0"
+                                    required={subModalPlan === 'premium'}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd' }}
                                 />
-                                <small className="text-muted">{t('adminPanel.vendors.modals.orderHint', 'Düşük numara daha üstte görünür.')}</small>
+                                {subModalPlan === 'premium' ? (
+                                    <small style={{ color: '#ef4444' }}>*{t('adminPanel.vendors.modals.expiryRequired', 'Premium için tarih seçilmesi zorunludur.')}</small>
+                                ) : (
+                                    <small style={{ color: '#888' }}>{t('adminPanel.vendors.modals.expiryOptional', 'Ücretsiz üyelik için isteğe bağlıdır.')}</small>
+                                )}
                             </div>
 
-                            <div className="modal-actions">
-                                <button className="btn btn-secondary" onClick={() => setShowShowcaseModal(false)}>{t('common.cancel', 'İptal')}</button>
-                                <button className="btn btn-primary" onClick={handleShowcaseSubmit}>{t('adminPanel.vendors.modals.saveAndAdd', 'Kaydet ve Ekle')}</button>
+                            <div className="form-group" style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>➕ {t('adminPanel.vendors.modals.addCredits', 'Kredi Ekle/Çıkar')}</label>
+                                <input
+                                    type="number"
+                                    value={subModalCredits}
+                                    onChange={(e) => setSubModalCredits(parseInt(e.target.value))}
+                                    className="form-control"
+                                    placeholder="Örn: 50 veya -20"
+                                    style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd' }}
+                                />
+                                <small style={{ color: '#888' }}>{t('adminPanel.vendors.modals.currentCredits', 'Mevcut Bakiye')}: <strong>{managingSubscription.credit_balance || 0}</strong></small>
+                            </div>
+
+                            <div className="modal-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={() => setManagingSubscription(null)}
+                                    disabled={isSavingSub}
+                                    style={{ padding: '10px 20px', borderRadius: '6px' }}
+                                >
+                                    {t('common.cancel', 'İptal')}
+                                </button>
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={handleSubscriptionSubmit}
+                                    disabled={isSavingSub}
+                                    style={{ padding: '10px 20px', borderRadius: '6px', background: '#f59e0b', borderColor: '#f59e0b' }}
+                                >
+                                    {isSavingSub ? '...' : t('common.save', 'Kaydet')}
+                                </button>
                             </div>
                         </div>
                     </div>

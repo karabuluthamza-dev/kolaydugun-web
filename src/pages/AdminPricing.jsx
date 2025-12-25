@@ -208,6 +208,7 @@ const AdminPricing = () => {
                                             top_placement: '🚀 Üst Sıralarda Gösterim',
                                             social_links: '🔗 Sosyal Medya Linkleri',
                                             map_view: '🗺️ Harita Görünümü',
+                                            live_requests: '🎤 Canlı İstek Paneli',
                                             monthly_free_credits: '💎 Aylık Hediye Kredi'
                                         };
 

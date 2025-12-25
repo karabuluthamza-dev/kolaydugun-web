@@ -29,6 +29,18 @@ class ErrorBoundary extends React.Component {
     if (import.meta.env.DEV) {
       console.error("Uncaught error:", error, errorInfo);
     }
+
+    // Auto-retry once for ChunkLoadErrors
+    const isChunkLoadError = error.name === 'ChunkLoadError' || error.message?.includes('Loading chunk') || error.message?.includes('Loading CSS chunk');
+    const hasRetried = sessionStorage.getItem('chunk_error_retried') === 'true';
+
+    if (isChunkLoadError && !hasRetried) {
+      console.warn('ChunkLoadError detected, retrying...');
+      sessionStorage.setItem('chunk_error_retried', 'true');
+      window.location.reload();
+      return;
+    }
+
     this.setState({ errorInfo });
   }
 

@@ -52,7 +52,8 @@ const AdminCategories = () => {
                     icon: editingCategory.icon,
                     is_featured: editingCategory.is_featured,
                     sort_order: editingCategory.sort_order,
-                    slug: editingCategory.slug
+                    slug: editingCategory.slug,
+                    is_live_supported: editingCategory.is_live_supported
                 })
                 .eq('id', editingCategory.id);
 
@@ -297,6 +298,17 @@ const AdminCategories = () => {
                                     style={{ width: '20px', height: '20px', marginRight: '10px' }}
                                 />
                                 Anasayfada Göster (Featured)
+                            </label>
+                        </div>
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', marginTop: '25px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={editingCategory.is_live_supported || false}
+                                    onChange={e => setEditingCategory({ ...editingCategory, is_live_supported: e.target.checked })}
+                                    style={{ width: '20px', height: '20px', marginRight: '10px' }}
+                                />
+                                Canlı İstek Desteği (Live Requests)
                             </label>
                         </div>
                     </div>

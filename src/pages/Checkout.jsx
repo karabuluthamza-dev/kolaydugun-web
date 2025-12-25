@@ -35,6 +35,51 @@ const Checkout = () => {
             const order = await actions.order.capture();
             console.log("Order captured:", order);
 
+            // 1. Get Premium Plan ID
+            const { data: planData } = await supabase
+                .from('subscription_plans')
+                .select('id')
+                .eq('name', 'premium')
+                .single();
+
+            const planId = planData?.id;
+
+            // 2. Update Vendor Subscription in vendors table
+            const { error: updateError } = await supabase
+                .from('vendors')
+                .update({
+                    subscription_tier: 'premium',
+                    subscription_end_date: new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString(),
+                    credit_balance: (user.credit_balance || 0) + (isAnnual ? 150 : 12)
+                })
+                .eq('id', user.id);
+
+            if (updateError) throw updateError;
+
+            // 3. Upsert into vendor_subscriptions table
+            const { error: subError } = await supabase
+                .from('vendor_subscriptions')
+                .upsert({
+                    vendor_id: user.id,
+                    plan_id: planId,
+                    status: 'active',
+                    current_period_start: new Date().toISOString(),
+                    current_period_end: new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString()
+                }, { onConflict: 'vendor_id' });
+
+            if (subError) throw subError;
+
+            // 4. Record Transaction
+            await supabase.from('transactions').insert({
+                user_id: user.id,
+                type: 'subscription_purchase',
+                status: 'approved',
+                amount: parseFloat(price),
+                credits_added: isAnnual ? 150 : 12,
+                description: `${planName} abonelik satın alındı. Order: ${order.id}`,
+                payment_id: order.id
+            });
+
             navigate('/vendor/dashboard', { state: { message: t('checkout.success') } });
         } catch (err) {
             console.error("Payment Error:", err);

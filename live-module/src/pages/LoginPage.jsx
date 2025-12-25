@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Music, Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const LoginPage = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const [email, setEmail] = useState('');
@@ -36,7 +38,7 @@ const LoginPage = () => {
 
             if (!vendor) {
                 await supabase.auth.signOut();
-                throw new Error('Yalnızca tedarikçi hesapları DJ paneline erişebilir.');
+                throw new Error(t('login.vendorOnly'));
             }
 
             navigate(from, { replace: true });
@@ -58,8 +60,8 @@ const LoginPage = () => {
                     <div className="inline-flex items-center justify-center w-20 h-20 bg-prime/10 rounded-full mb-6">
                         <Music className="w-10 h-10 text-prime" />
                     </div>
-                    <h1 className="text-3xl font-black tracking-tight text-white mb-2">Müzisyen Girişi</h1>
-                    <p className="text-slate-500 font-medium text-sm">KolayDüğün hesabınızla giriş yapın</p>
+                    <h1 className="text-3xl font-black tracking-tight text-white mb-2">{t('login.title')}</h1>
+                    <p className="text-slate-500 font-medium text-sm">{t('login.subtitle')}</p>
                 </div>
 
                 {error && (
@@ -75,7 +77,7 @@ const LoginPage = () => {
 
                 <form onSubmit={handleLogin} className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">E-Posta</label>
+                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('login.email')}</label>
                         <div className="relative">
                             <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-600" />
                             <input
@@ -84,13 +86,13 @@ const LoginPage = () => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-14 pr-5 py-4 text-white focus:ring-2 focus:ring-prime focus:border-transparent transition-all outline-none"
-                                placeholder="E-posta adresiniz"
+                                placeholder={t('login.emailPlaceholder')}
                             />
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Şifre</label>
+                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('login.password')}</label>
                         <div className="relative">
                             <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-600" />
                             <input
@@ -109,7 +111,7 @@ const LoginPage = () => {
                         disabled={loading}
                         className="w-full bg-prime hover:bg-rose-600 text-white font-bold py-5 rounded-2xl shadow-lg shadow-prime/20 flex items-center justify-center gap-3 transform active:scale-[0.98] transition-all disabled:opacity-50"
                     >
-                        {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'GİRİŞ YAP'}
+                        {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : t('login.loginButton')}
                     </button>
 
                     <div className="pt-4 text-center">
@@ -119,14 +121,14 @@ const LoginPage = () => {
                             rel="noopener noreferrer"
                             className="text-xs font-bold text-slate-600 hover:text-slate-400 uppercase tracking-widest transition-colors"
                         >
-                            Şifremi Unuttum?
+                            {t('login.forgotPassword')}
                         </a>
                     </div>
                 </form>
             </motion.div>
 
             <footer className="fixed bottom-8 text-center text-[10px] text-slate-700 font-bold uppercase tracking-[0.4em]">
-                &copy; KolayDüğün Live Module
+                &copy; {t('common.title', 'KolayDüğün Live Module')}
             </footer>
         </div>
     );

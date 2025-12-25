@@ -239,6 +239,136 @@
     }
 }
 
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.circular-score.analyzing {
+    animation: spin 3s linear infinite;
+    border-top-color: #fb7185 !important;
+    box-shadow: 0 0 20px rgba(251, 113, 133, 0.3);
+}
+
+/* Premium AI Insight Card */
+.insight-card-premium {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%) !important;
+    border-radius: 24px !important;
+    padding: 32px !important;
+    color: white !important;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(49, 46, 129, 0.3) !important;
+}
+
+.insight-card-premium h3 {
+    color: white !important;
+    font-weight: 700 !important;
+}
+
+.insight-card-premium p {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.insight-card-premium .rec-pill {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+}
+
+.insight-card-premium .score-container .circular-score {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Shop Promo Card */
+.shop-promo-card {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+    padding: 24px !important;
+    border-radius: 20px !important;
+    margin-bottom: 24px !important;
+    box-shadow: 0 12px 30px rgba(79, 70, 229, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.shop-promo-card h4 {
+    color: white !important;
+    margin: 0 0 8px !important;
+    font-size: 1.1rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.3px !important;
+}
+
+.shop-promo-card p {
+    color: rgba(255, 255, 255, 0.85) !important;
+    margin: 0 0 15px !important;
+    font-size: 0.85rem !important;
+    line-height: 1.5 !important;
+}
+
+.shop-promo-icon-box {
+    background: rgba(255, 255, 255, 0.2);
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.shop-promo-btn {
+    width: 100%;
+    background: white !important;
+    color: #4f46e5 !important;
+    padding: 12px 20px !important;
+    border-radius: 12px !important;
+    border: none !important;
+    font-weight: 800 !important;
+    font-size: 0.9rem !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.2s ease !important;
+}
+
+.shop-promo-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15) !important;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
 .favorite-card {
     transition: all 0.2s ease;
     cursor: pointer;

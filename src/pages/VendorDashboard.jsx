@@ -44,6 +44,8 @@ const VendorDashboard = () => {
 
     const [vendor, setVendor] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [categorySupport, setCategorySupport] = useState(false);
+    const [hasLiveAccess, setHasLiveAccess] = useState(false);
 
     useEffect(() => {
         if (isDemo) {
@@ -51,12 +53,14 @@ const VendorDashboard = () => {
             setVendor({
                 id: 'demo-v-99',
                 business_name: 'DJ34Istanbul – Wedding & Event DJ',
-                category: 'Wedding DJ',
+                category: 'DJs',
                 city: 'Ulm',
                 subscription_tier: 'premium',
                 credit_balance: 500,
                 is_claimed: true
             });
+            setCategorySupport(true);
+            setHasLiveAccess(true);
             setRecentInsight({
                 performance_score: 95,
                 summary: language === 'tr'
@@ -135,12 +139,16 @@ const VendorDashboard = () => {
         }
     }, [vendor?.id, fetchRecentInsight, isDemo]);
 
+    const [liveTrialUsed, setLiveTrialUsed] = useState(false);
+    const [liveAccessUntil, setLiveAccessUntil] = useState(null);
+    const [isProcessingLive, setIsProcessingLive] = useState(false);
+
     const fetchVendorProfile = async () => {
         try {
             const { data, error } = await supabase
                 .from('vendors')
                 .select('*')
-                .eq('user_id', user.id);
+                .eq('id', user.id);
 
             if (error) throw error;
 
@@ -160,11 +168,98 @@ const VendorDashboard = () => {
                 if (mainVendor) selectedVendor = mainVendor;
             }
 
-            setVendor(selectedVendor);
+            if (selectedVendor) {
+                setVendor(selectedVendor);
+                setLiveTrialUsed(selectedVendor.live_trial_used || false);
+                setLiveAccessUntil(selectedVendor.live_access_until);
+
+                // Fetch Category Support & Plan Features separately since there's no FK join
+                const [catRes, planRes] = await Promise.all([
+                    supabase.from('categories').select('is_live_supported').eq('name', selectedVendor.category).maybeSingle(),
+                    supabase.from('subscription_plans').select('features').eq('name', selectedVendor.subscription_tier || 'free').maybeSingle()
+                ]);
+
+                setCategorySupport(catRes.data?.is_live_supported || false);
+
+                // Live Access Logic: Check if they have Premium OR if they have temporary access
+                const now = new Date();
+                const tempAccess = selectedVendor.live_access_until && new Date(selectedVendor.live_access_until) > now;
+                const premiumAccess = planRes.data?.features?.live_requests === true;
+
+                setHasLiveAccess(premiumAccess || tempAccess);
+            }
         } catch (error) {
             console.error('Error fetching vendor profile:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleStartTrial = async () => {
+        if (!vendor || liveTrialUsed) return;
+        setIsProcessingLive(true);
+        try {
+            const accessUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+            const { error } = await supabase
+                .from('vendors')
+                .update({
+                    live_trial_used: true,
+                    live_access_until: accessUntil
+                })
+                .eq('id', vendor.id);
+
+            if (error) throw error;
+            alert('✅ ' + t('dashboard.liveAccessPass.trialStarted'));
+            fetchVendorProfile();
+        } catch (err) {
+            console.error('Trial error:', err);
+            alert('❌ ' + err.message);
+        } finally {
+            setIsProcessingLive(false);
+        }
+    };
+
+    const handleUnlockWithCredits = async () => {
+        if (!vendor || isProcessingLive) return;
+        const PRICE = 20;
+
+        if ((vendor.credit_balance || 0) < PRICE) {
+            alert('❌ ' + t('dashboard.liveAccessPass.insufficientCredits'));
+            return;
+        }
+
+        setIsProcessingLive(true);
+        try {
+            const accessUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+            // 1. Deduct credits and set access
+            const { error: vError } = await supabase
+                .from('vendors')
+                .update({
+                    credit_balance: (vendor.credit_balance || 0) - PRICE,
+                    live_access_until: accessUntil
+                })
+                .eq('id', vendor.id);
+
+            if (vError) throw vError;
+
+            // 2. Add transaction
+            await supabase.from('transactions').insert({
+                user_id: vendor.id,
+                type: 'debet',
+                status: 'approved',
+                credits_removed: PRICE,
+                description: 'Canlı İstek Paneli - 24 Saatlik Erişim',
+                amount: 0
+            });
+
+            alert('✅ ' + t('dashboard.liveAccessPass.creditUnlocked'));
+            fetchVendorProfile();
+        } catch (err) {
+            console.error('Unlock error:', err);
+            alert('❌ ' + err.message);
+        } finally {
+            setIsProcessingLive(false);
         }
     };
 
@@ -266,15 +361,7 @@ const VendorDashboard = () => {
                                 </div>
                             )}
 
-                            <div className="insight-card-premium" style={{
-                                background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
-                                borderRadius: '24px',
-                                padding: '32px',
-                                color: 'white',
-                                position: 'relative',
-                                overflow: 'hidden',
-                                boxShadow: '0 20px 40px rgba(49, 46, 129, 0.3)'
-                            }}>
+                            <div className="insight-card-premium">
                                 {/* Decorative elements */}
                                 <div style={{
                                     position: 'absolute',
@@ -289,33 +376,22 @@ const VendorDashboard = () => {
 
                                 <div className="flex flex-col md:flex-row gap-8 items-center relative z-10">
                                     <div className="score-container flex-shrink-0">
-                                        <div className="circular-score" style={{
-                                            width: '120px',
-                                            height: '120px',
-                                            borderRadius: '50%',
-                                            border: '8px solid rgba(255,255,255,0.1)',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            background: 'rgba(255,255,255,0.05)',
-                                            borderTopColor: '#f43f5e'
-                                        }}>
-                                            <span style={{ fontSize: '2rem', fontWeight: '800' }}>{recentInsight?.performance_score || 0}</span>
-                                            <span style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'uppercase' }}>{t('dashboard.gamification.aiAnalysis.scoreLabel')}</span>
+                                        <div className={`circular-score ${recentInsight ? '' : 'analyzing'}`}>
+                                            <span style={{ fontSize: '2rem', fontWeight: '800' }}>{recentInsight?.performance_score || '...'}</span>
+                                            <span style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'uppercase' }}>{recentInsight ? t('dashboard.gamification.aiAnalysis.scoreLabel') : 'AI'}</span>
                                         </div>
                                     </div>
 
                                     <div className="content-container flex-grow">
                                         <div className="flex items-center gap-2 mb-2">
                                             <span style={{ fontSize: '1.2rem' }}>🧠</span>
-                                            <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '700' }}>{t('dashboard.gamification.aiAnalysis.title')}</h3>
+                                            <h3 style={{ margin: 0 }}>{t('dashboard.gamification.aiAnalysis.title')}</h3>
                                             <span className="pulse-dot"></span>
                                         </div>
 
                                         {recentInsight ? (
                                             <>
-                                                <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'rgba(255,255,255,0.9)', marginBottom: '20px' }}>
+                                                <p className="summary-text mb-5">
                                                     {(() => {
                                                         const summary = recentInsight.summary;
                                                         if (!summary) return '';
@@ -368,16 +444,7 @@ const VendorDashboard = () => {
                                                         const localizedRec = key ? t(`dashboard.gamification.aiAnalysis.recommendations.${key}`) : rec;
 
                                                         return (
-                                                            <div key={i} className="rec-pill" style={{
-                                                                background: 'rgba(255,255,255,0.08)',
-                                                                padding: '8px 16px',
-                                                                borderRadius: '100px',
-                                                                fontSize: '0.8rem',
-                                                                border: '1px solid rgba(255,255,255,0.1)',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: '8px'
-                                                            }}>
+                                                            <div key={i} className="rec-pill">
                                                                 <span style={{ color: '#fb7185' }}>✦</span> {localizedRec}
                                                             </div>
                                                         );
@@ -386,7 +453,8 @@ const VendorDashboard = () => {
                                             </>
                                         ) : (
                                             <div className="loading-state py-4">
-                                                <p style={{ opacity: 0.7, fontStyle: 'italic' }}>{t('dashboard.gamification.aiAnalysis.analyzing')}</p>
+                                                <p style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '8px' }}>🚀 {t('dashboard.gamification.aiAnalysis.preparing') || 'Analiz Hazırlanıyor...'}</p>
+                                                <p style={{ opacity: 0.7, fontStyle: 'italic', fontSize: '0.9rem' }}>{t('dashboard.gamification.aiAnalysis.analyzing')}</p>
                                             </div>
                                         )}
                                     </div>
@@ -397,35 +465,23 @@ const VendorDashboard = () => {
                         <div className="stats-grid">
                             <div className="stat-card">
                                 <h3>{t('dashboard.status')}</h3>
-                                <span className="status-active">{t('dashboard.active')}</span>
+                                <span className="status-active" style={{
+                                    background: '#10b981',
+                                    color: 'white',
+                                    padding: '4px 12px',
+                                    borderRadius: '20px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '600'
+                                }}>{t('dashboard.active')}</span>
                             </div>
                             <div className="stat-card">
                                 <h3>{t('dashboard.package')}</h3>
-                                <p className="text-sm opacity-70">{t(`dashboard.tiers.${vendor?.subscription_tier || 'free'}.name`)}</p>
+                                <p className="text-sm font-bold" style={{ color: '#6366f1', marginTop: '5px' }}>
+                                    {t(`dashboard.tiers.${vendor?.subscription_tier || 'free'}.name`)}
+                                </p>
                             </div>
                         </div>
 
-                        <style>{`
-                            .pulse-dot {
-                                width: 8px;
-                                height: 8px;
-                                background: #10b981;
-                                border-radius: 50%;
-                                display: inline-block;
-                                box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
-                                animation: pulse 2s infinite;
-                            }
-                            @keyframes pulse {
-                                0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-                                70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-                                100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-                            }
-                            .rec-pill:hover {
-                                background: rgba(255,255,255,0.15) !important;
-                                transform: translateY(-2px);
-                                transition: all 0.2s;
-                            }
-                        `}</style>
                     </div>
                 );
             case 'profile':
@@ -438,6 +494,90 @@ const VendorDashboard = () => {
                 return <VendorMessages vendor={vendor} />;
             case 'shop':
                 return <VendorShop />;
+            case 'live-request':
+                return (
+                    <div className="live-request-tab-content">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2>{t('dashboard.livePanel')}</h2>
+                        </div>
+
+                        {hasLiveAccess ? (
+                            <div className="live-access-success" style={{ textAlign: 'center', padding: '60px 20px', background: 'white', borderRadius: '15px', border: '1px solid #eee' }}>
+                                <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🔴</div>
+                                <h3 style={{ marginBottom: '15px' }}>{t('dashboard.liveAccessPass.creditUnlocked')}</h3>
+                                <p style={{ marginBottom: '30px', color: '#666' }}>{t('dashboard.liveAccessPass.trialStarted')}</p>
+                                <button
+                                    className="btn btn-primary btn-lg"
+                                    onClick={() => {
+                                        const liveUrl = import.meta.env.VITE_LIVE_MODULE_URL || 'http://localhost:5175';
+                                        window.open(`${liveUrl}/dashboard`, '_blank');
+                                    }}
+                                    style={{ padding: '15px 40px', fontSize: '1.2rem', background: '#f43f5e', border: 'none' }}
+                                >
+                                    {t('dashboard.promo.viewPanel')}
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="live-request-upsell" style={{ textAlign: 'center', padding: '40px 20px', background: 'white', borderRadius: '15px', border: '1px solid #eee' }}>
+                                <div style={{ fontSize: '3rem', marginBottom: '20px' }}>💎</div>
+                                <h3 style={{ marginBottom: '10px', fontSize: '1.5rem', color: '#1a1a1a' }}>{t('dashboard.liveAccessPass.title')}</h3>
+                                <p style={{ marginBottom: '30px', color: '#666' }}>{t('dashboard.liveAccessPass.desc')}</p>
+
+                                <div className="live-pass-options" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', maxWidth: '1000px', margin: '0 auto' }}>
+
+                                    {/* Option 1: Trial */}
+                                    {!liveTrialUsed && (
+                                        <div className="pass-card" style={{ padding: '25px', border: '2px solid #3b82f6', borderRadius: '12px', background: '#eff6ff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                                            <div>
+                                                <h4 style={{ marginBottom: '10px', color: '#1e40af' }}>{t('dashboard.liveAccessPass.trialBtn')}</h4>
+                                                <p style={{ fontSize: '0.85rem', color: '#60a5fa', marginBottom: '20px' }}>{t('dashboard.liveAccessPass.trialHint')}</p>
+                                            </div>
+                                            <button
+                                                className="btn btn-primary"
+                                                onClick={handleStartTrial}
+                                                disabled={isProcessingLive}
+                                                style={{ width: '100%', background: '#3b82f6', border: 'none' }}
+                                            >
+                                                {isProcessingLive ? '...' : t('dashboard.livePanel')}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Option 2: Credits */}
+                                    <div className="pass-card" style={{ padding: '25px', border: '2px solid #f59e0b', borderRadius: '12px', background: '#fffbeb', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                                        <div>
+                                            <h4 style={{ marginBottom: '10px', color: '#92400e' }}>{t('dashboard.liveAccessPass.creditBtn')}</h4>
+                                            <p style={{ fontSize: '0.85rem', color: '#d97706', marginBottom: '20px' }}>{t('dashboard.liveAccessPass.creditAction')}: <strong>{vendor?.credit_balance || 0}</strong></p>
+                                        </div>
+                                        <button
+                                            className="btn btn-primary"
+                                            onClick={handleUnlockWithCredits}
+                                            disabled={isProcessingLive}
+                                            style={{ width: '100%', background: '#f59e0b', borderColor: '#f59e0b' }}
+                                        >
+                                            {isProcessingLive ? '...' : t('dashboard.livePanel')}
+                                        </button>
+                                    </div>
+
+                                    {/* Option 3: Premium */}
+                                    <div className="pass-card" style={{ padding: '25px', border: '2px solid #8b5cf6', borderRadius: '12px', background: '#f5f3ff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                                        <div>
+                                            <h4 style={{ marginBottom: '10px', color: '#5b21b6' }}>{t('dashboard.liveAccessPass.premiumBtn')}</h4>
+                                            <p style={{ fontSize: '0.85rem', color: '#a78bfa', marginBottom: '20px' }}>💍 {t('pricing.monthly')}</p>
+                                        </div>
+                                        <button
+                                            className="btn btn-primary"
+                                            onClick={() => navigate('/pricing')}
+                                            style={{ width: '100%', background: '#8b5cf6', borderColor: '#8b5cf6' }}
+                                        >
+                                            {t('dashboard.liveAccessPass.premiumAction')}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
             case 'wallet':
                 return <VendorWallet />;
             default:
@@ -457,73 +597,34 @@ const VendorDashboard = () => {
     return (
         <div className="section container dashboard-layout">
             <aside className="dashboard-sidebar" ref={scrollRef}>
-                {/* Shop Marketplace Promo Card - Compact */}
-                <div className="shop-promo-card" style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    padding: '16px',
-                    borderRadius: '12px',
-                    marginBottom: '16px',
-                    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
-                }}>
-                    <h4 style={{
-                        color: 'white',
-                        margin: '0 0 8px',
-                        fontSize: '1rem',
-                        fontWeight: 'bold'
-                    }}>
-                        {promo.title}
-                    </h4>
-                    <p style={{
-                        color: 'rgba(255,255,255,0.85)',
-                        margin: '0 0 10px',
-                        fontSize: '0.8rem',
-                        lineHeight: '1.4'
-                    }}>
-                        {promo.desc}
-                    </p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+                {/* Shop Marketplace Promo Card - Modernized */}
+                <div className="shop-promo-card">
+                    <div className="shop-promo-icon-box">🛒</div>
+                    <h4>{promo.title}</h4>
+                    <p>{promo.desc}</p>
+                    <div className="flex flex-col gap-2 mb-4">
                         <a
                             href="/shop/magaza/wedding-essentials-demo-mj7uva80"
                             target="_blank"
-                            style={{
-                                color: 'rgba(255,255,255,0.95)',
-                                fontSize: '0.8rem',
-                                textDecoration: 'underline'
-                            }}
+                            className="text-white/90 text-sm underline hover:text-white"
                         >
                             {promo.viewDemo}
                         </a>
                         <a
                             href="/shop-panel/demo"
                             target="_blank"
-                            style={{
-                                color: 'rgba(255,255,255,0.95)',
-                                fontSize: '0.8rem',
-                                textDecoration: 'underline'
-                            }}
+                            className="text-white/90 text-sm underline hover:text-white"
                         >
                             {promo.viewPanel}
                         </a>
                     </div>
                     <button
                         onClick={() => navigate('/shop/basvuru')}
-                        style={{
-                            width: '100%',
-                            background: 'white',
-                            color: '#667eea',
-                            padding: '10px 16px',
-                            borderRadius: '8px',
-                            border: 'none',
-                            fontWeight: 'bold',
-                            fontSize: '0.85rem',
-                            cursor: 'pointer',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                        }}
+                        className="shop-promo-btn"
                     >
                         {promo.apply}
                     </button>
                 </div>
-
                 <div className="sidebar-header" style={{ position: 'relative' }}>
                     <h3>{t('dashboard.panel')}</h3>
                     {isDemo && (
@@ -593,6 +694,43 @@ const VendorDashboard = () => {
                     >
                         🛍️ {t('shop.vendorShop.title', 'Mağazam')}
                     </button>
+                    {categorySupport && (
+                        <button
+                            className={`live-request-btn ${activeTab === 'live-request' ? 'active' : ''} ${!hasLiveAccess ? 'locked' : ''}`}
+                            onClick={() => {
+                                if (hasLiveAccess) {
+                                    const liveUrl = import.meta.env.VITE_LIVE_MODULE_URL || 'http://localhost:5175';
+                                    window.open(`${liveUrl}/dashboard`, '_blank');
+                                } else {
+                                    handleTabChange('live-request');
+                                }
+                            }}
+                            style={{
+                                background: hasLiveAccess
+                                    ? 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)'
+                                    : (activeTab === 'live-request' ? '#f43f5e' : 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)'),
+                                color: 'white',
+                                fontWeight: 'bold',
+                                marginTop: '10px',
+                                boxShadow: hasLiveAccess ? '0 4px 12px rgba(244, 63, 94, 0.3)' : 'none',
+                                opacity: hasLiveAccess || activeTab === 'live-request' ? 1 : 0.8,
+                                position: 'relative'
+                            }}
+                        >
+                            {hasLiveAccess ? '🔴' : '🔒'} {t('dashboard.livePanel', 'Canlı İstek Paneli')}
+                            {!hasLiveAccess && (
+                                <span style={{
+                                    fontSize: '10px',
+                                    display: 'block',
+                                    marginTop: '-2px',
+                                    opacity: 0.9,
+                                    fontWeight: 'normal'
+                                }}>
+                                    {t('dashboard.premiumRequired', 'Premium Gerekli')}
+                                </span>
+                            )}
+                        </button>
+                    )}
                     <button
                         className="help-nav-btn"
                         onClick={() => window.open('/faq?category=vendors', '_blank')}
@@ -608,28 +746,30 @@ const VendorDashboard = () => {
                         🆘 {t('dashboard.liveSupport')}
                     </button>
                 </nav>
-            </aside>
+            </aside >
             <main className="dashboard-content">
                 {renderContent()}
             </main>
-            {isDemo && (
-                <div className="demo-cta-banner">
-                    <div className="demo-cta-content">
-                        <div className="demo-cta-icon">🚀</div>
-                        <div className="demo-cta-text">
-                            <h4>{t('dashboard.demo.badge')}</h4>
-                            <p>{t('dashboard.demo.ctaText')}</p>
+            {
+                isDemo && (
+                    <div className="demo-cta-banner">
+                        <div className="demo-cta-content">
+                            <div className="demo-cta-icon">🚀</div>
+                            <div className="demo-cta-text">
+                                <h4>{t('dashboard.demo.badge')}</h4>
+                                <p>{t('dashboard.demo.ctaText')}</p>
+                            </div>
                         </div>
+                        <button
+                            className="demo-cta-button"
+                            onClick={() => navigate('/register')}
+                        >
+                            {t('dashboard.demo.ctaButton')}
+                        </button>
                     </div>
-                    <button
-                        className="demo-cta-button"
-                        onClick={() => navigate('/register')}
-                    >
-                        {t('dashboard.demo.ctaButton')}
-                    </button>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 

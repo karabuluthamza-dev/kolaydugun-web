@@ -8,15 +8,27 @@ export const useUnreadMessages = (userId, userRole) => {
         if (!userId) return;
 
         const fetchUnreadCount = async () => {
+            if (!userId) return;
+
+            // Simple UUID validation to prevent 400 error on invalid IDs
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            if (!uuidRegex.test(userId)) {
+                console.warn('[useUnreadMessages] Invalid userId format, skipping fetch:', userId);
+                return;
+            }
+
             try {
-                const { count, error } = await supabase
+                const { data, count, error } = await supabase
                     .from('messages')
-                    .select('*', { count: 'exact', head: true })
+                    .select('id', { count: 'exact', head: true })
                     .eq('receiver_id', userId)
                     .is('read_at', null);
 
                 if (error) {
-                    console.error('Error fetching unread count:', error);
+                    // Only log real errors, ignore 400 if user is signed out or invalid
+                    if (error.code !== 'PGRST116') {
+                        console.error('Error fetching unread count:', error);
+                    }
                     return;
                 }
 

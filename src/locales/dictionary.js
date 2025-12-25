@@ -1,5 +1,27 @@
 export const dictionary = {
     "common": {
+        "error": {
+            "title": {
+                "en": "Something went wrong",
+                "de": "Etwas ist schief gelaufen",
+                "tr": "Bir şeyler ters gitti"
+            },
+            "message": {
+                "en": "An unexpected error occurred while loading the page.",
+                "de": "Beim Laden der Seite ist ein unerwarteter Fehler aufgetreten.",
+                "tr": "Sayfa yüklenirken beklenmedik bir hata oluştu."
+            },
+            "refresh": {
+                "en": "Refresh Page",
+                "de": "Seite neu laden",
+                "tr": "Sayfayı Yenile"
+            },
+            "home": {
+                "en": "Go to Home",
+                "de": "Zur Startseite",
+                "tr": "Ana Sayfaya Dön"
+            }
+        },
         "nav": {
             "home": { "tr": "Ana Sayfa", "de": "Startseite", "en": "Home" }
         },
@@ -201,6 +223,11 @@ export const dictionary = {
                 "de": "Erhalten Sie Temperaturvorschläge basierend auf Ihrem Hochzeitsdatum und Ihrer Stadt.",
                 "tr": "Düğün tarihi ve şehrinize göre hava tahmini alın, ortalama sıcaklık ve gün batımı saatini öğrenin."
             }
+        },
+        "progress": {
+            "en": "Progress",
+            "de": "Fortschritt",
+            "tr": "İlerleme"
         },
         "editWebsite": {
             "en": "Edit Website",
@@ -909,7 +936,50 @@ export const dictionary = {
                 "en": "Try Out Our Dashboard Demo!",
                 "de": "Probieren Sie unsere Dashboard-Demo aus!",
                 "tr": "Kontrol Paneli Demomuzu Deneyin!"
+            },
+            "ctaText": {
+                "en": "Ready to take your business to the next level? Join thousands of wedding professionals.",
+                "de": "Bereit, Ihr Geschäft auf die nächste Stufe zu heben? Schließen Sie sich tausenden Hochzeitsdienstleistern an.",
+                "tr": "İşinizi bir üst seviyeye taşımaya hazır mısınız? Binlerce düğün profesyoneline katılın."
+            },
+            "ctaButton": {
+                "en": "Create Your Account",
+                "de": "Konto erstellen",
+                "tr": "Hesabınızı Oluşturun"
             }
+        },
+        "livePanel": {
+            "en": "Live Request Panel",
+            "de": "Live-Wunsch-Panel",
+            "tr": "Canlı İstek Paneli"
+        },
+        "liveSupportRequestPremium": {
+            "en": "You need to upgrade to Premium plan to use the Live Request Panel. Would you like to see the plans now?",
+            "de": "Sie müssen auf den Premium-Plan upgraden, um das Live-Wunsch-Panel zu nutzen. Möchten Sie die Pläne jetzt sehen?",
+            "tr": "Canlı İstek Paneli'ni kullanmak için Premium pakete geçmeniz gerekmektedir. Şimdi planları görmek ister misiniz?"
+        },
+        "premiumRequired": {
+            "en": "Premium Required",
+            "de": "Premium Erforderlich",
+            "tr": "Premium Gerekli"
+        },
+        "liveAccessPass": {
+            "title": { "tr": "Canlı İstek Paneli Erişimi", "de": "Live-Wunsch-Panel Zugang", "en": "Live Request Panel Access" },
+            "desc": { "tr": "Bu özelliği kullanmak için bir seçenek belirleyin:", "de": "Wählen Sie eine Option, um diese Funktion zu nutzen:", "en": "Choose an option to use this feature:" },
+            "trialBtn": { "tr": "24 Saatlik Ücretsiz Deneme", "de": "24h Kostenlose Testversion", "en": "24h Free Trial" },
+            "trialHint": { "tr": "(Sadece bir kez kullanılabilir)", "de": "(Nur einmal verwendbar)", "en": "(One-time use only)" },
+            "creditBtn": { "tr": "24 Saatlik Kilit Aç", "de": "24h Freischalten", "en": "Unlock for 24h" },
+            "premiumBtn": { "tr": "Premium'a Yükselt", "de": "Auf Premium upgraden", "en": "Upgrade to Premium" },
+            "creditAction": { "tr": "20 Kredi Harca", "de": "20 Credits ausgeben", "en": "Spend 20 Credits" },
+            "premiumAction": { "tr": "Planları Gör", "de": "Pläne ansehen", "en": "View Plans" },
+            "trialStarted": { "tr": "Deneme süreniz başladı! 24 saat boyunca tüm özellikleri kullanabilirsiniz.", "de": "Testzeitraum hat begonnen! Sie können alle Funktionen 24h lang nutzen.", "en": "Trial started! You can use all features for 24h." },
+            "creditUnlocked": { "tr": "Kilit açıldı! 24 saatlik erişim tanımlandı.", "de": "Freigeschaltet! 24h Zugang gewährt.", "en": "Unlocked! 24h access granted." },
+            "insufficientCredits": { "tr": "Yetersiz kredi. Lütfen kredi yükleyin.", "de": "Nicht genügend Credits. Bitte laden Sie Credits auf.", "en": "Insufficient credits. Please top up." }
+        },
+        "pricing": {
+            "monthly": { "tr": "Aylık", "de": "Monatlich", "en": "Monthly" },
+            "annual": { "tr": "Yıllık", "de": "Jährlich", "en": "Annual" },
+            "save": { "tr": "TASARRUF ET", "de": "SPAREN", "en": "SAVE" }
         },
         "accelerator": {
             "heroTitle": {
@@ -1069,6 +1139,11 @@ export const dictionary = {
             "en": "Vendor Panel",
             "de": "Anbieter-Panel",
             "tr": "Tedarikçi Paneli"
+        },
+        "livePanel": {
+            "en": "Live Request Panel",
+            "de": "Live-Wunsch-Panel",
+            "tr": "Canlı İstek Paneli"
         },
         "profileLabel": {
             "en": "Profile",
@@ -4936,8 +5011,8 @@ export const dictionary = {
         },
         "progress": {
             "en": "Progress",
-            "de": "Webseite Einrichten",
-            "tr": "Web Sitemi Düzenle"
+            "de": "Fortschritt",
+            "tr": "İlerleme"
         },
         "settingsTab": {
             "en": "Settings",
@@ -13766,6 +13841,69 @@ export const dictionary = {
             "price_range_label": { "tr": "Fiyat Aralığı", "de": "Preisklasse", "en": "Price Range" },
             "music_genres_label": { "tr": "Müzik Türleri", "de": "Musikrichtungen", "en": "Music Genres" },
             "photo_services_label": { "tr": "Hizmetler", "de": "Dienstleistungen", "en": "Services" }
+        },
+        "adminPanel": {
+            "vendors": {
+                "title": { "tr": "Tedarikçi Yönetimi", "de": "Anbieter-Verwaltung", "en": "Vendor Management" },
+                "subtitle": { "tr": "Tüm tedarikçileri görüntüleyin ve yönetin", "de": "Alle Anbieter anzeigen und verwalten", "en": "View and manage all vendors" },
+                "metrics": {
+                    "total": { "tr": "Toplam Tedarikçi", "de": "Gesamt Anbieter", "en": "Total Vendors" },
+                    "verified": { "tr": "Onaylı", "de": "Verifiziert", "en": "Verified" },
+                    "claimed": { "tr": "Sahipli", "de": "Beansprucht", "en": "Claimed" },
+                    "monthlyLeads": { "tr": "Bu Ay Lead", "de": "Anfragen diesen Monat", "en": "Leads this Month" }
+                },
+                "actions": {
+                    "addNew": { "tr": "Yeni Tedarikçi", "de": "Neuer Anbieter", "en": "New Vendor" },
+                    "import": { "tr": "Excel İçe Aktar", "de": "Excel Importieren", "en": "Excel Import" },
+                    "edit": { "tr": "Düzenle", "de": "Bearbeiten", "en": "Edit" },
+                    "delete": { "tr": "Sil", "de": "Löschen", "en": "Delete" },
+                    "viewProfile": { "tr": "Profili Görüntüle", "de": "Profil anzeigen", "en": "View Profile" },
+                    "makePremium": { "tr": "Premium Yap", "de": "Premium machen", "en": "Make Premium" },
+                    "makeFree": { "tr": "Free Yap", "de": "Free machen", "en": "Make Free" },
+                    "aiAnalysis": { "tr": "AI Analiz", "de": "KI-Analyse", "en": "AI Analysis" },
+                    "manageSubscription": { "tr": "Abonelik Yönetimi", "de": "Abonnement-Verwaltung", "en": "Subscription management" }
+                },
+                "filters": {
+                    "all": { "tr": "Tümü", "de": "Alle", "en": "All" },
+                    "premium": { "tr": "Premium", "de": "Premium", "en": "Premium" },
+                    "free": { "tr": "Free", "de": "Free", "en": "Free" },
+                    "organic": { "tr": "Üyeler", "de": "Mitglieder", "en": "Members" },
+                    "imported": { "tr": "Adaylar", "de": "Kandidaten", "en": "Candidates" },
+                    "hasImage": { "tr": "Fotoğraflı", "de": "Mit Foto", "en": "With Photo" },
+                    "noImage": { "tr": "Fotoğrafsız", "de": "Ohne Foto", "en": "Without Photo" },
+                    "searchPlaceholder": { "tr": "Tedarikçi ara (işletme adı)...", "de": "Anbieter suchen...", "en": "Search vendors..." }
+                },
+                "table": {
+                    "thumbnail": { "tr": "Önizleme", "de": "Vorschau", "en": "Preview" },
+                    "businessName": { "tr": "İşletme Adı", "de": "Geschäftsname", "en": "Business Name" },
+                    "category": { "tr": "Kategori", "de": "Kategorie", "en": "Category" },
+                    "city": { "tr": "Şehir", "de": "Stadt", "en": "City" },
+                    "membership": { "tr": "Üyelik Paketi", "de": "Abonnement", "en": "Membership" },
+                    "aiReport": { "tr": "AI Rapor", "de": "KI-Bericht", "en": "AI Report" },
+                    "source": { "tr": "Kaynak", "de": "Quelle", "en": "Source" },
+                    "showcase": { "tr": "Vitrin", "de": "Vitrine", "en": "Showcase" },
+                    "visual": { "tr": "Görsel", "de": "Visual", "en": "Visual" },
+                    "status": { "tr": "Durum", "de": "Status", "en": "Status" },
+                    "actions": { "tr": "İşlemler", "de": "Aktionen", "en": "Actions" },
+                    "expires": { "tr": "Bitiş Tarihi", "de": "Ablaufdatum", "en": "Expiry Date" }
+                },
+                "modals": {
+                    "subDesc": { "tr": "için üyelik detaylarını düzenleyin.", "de": "Abonnement-Details bearbeiten für.", "en": "edit subscription details for." },
+                    "expiryDesc": { "tr": "Boş bırakılırsa süre sınırsız olur.", "de": "Leer lassen für unbegrenzt.", "en": "Leave empty for unlimited." },
+                    "expiryRequired": { "tr": "Premium için tarih seçilmesi zorunludur.", "de": "Datum für Premium erforderlich.", "en": "Date is required for Premium." },
+                    "expiryOptional": { "tr": "Ücretsiz üyelik için isteğe bağlıdır.", "de": "Optional für kostenlose Mitgliedschaft.", "en": "Optional for free membership." },
+                    "addCredits": { "tr": "Kredi Ekle/Çıkar", "de": "Credits hinzufügen/entfernen", "en": "Add/Remove Credits" },
+                    "currentCredits": { "tr": "Mevcut Bakiye", "de": "Aktuelles Guthaben", "en": "Current Balance" },
+                    "showcaseTitle": { "tr": "Vitrine Ekle", "de": "In Vitrine", "en": "Add to Showcase" },
+                    "expiryDate": { "tr": "Bitiş Tarihi", "de": "Ablaufdatum", "en": "Expiry Date" }
+                },
+                "feedback": {
+                    "successUpdate": { "tr": "Abonelik bilgileri güncellendi.", "de": "Abonnement-Infos aktualisiert.", "en": "Subscription info updated." },
+                    "dateRequired": { "tr": "Premium paket için lütfen bir bitiş tarihi seçiniz.", "de": "Bitte wählen Sie ein Ablaufdatum für das Premium-Paket.", "en": "Please select an expiry date for the Premium package." },
+                    "noVendors": { "tr": "Tedarikçi bulunamadı", "de": "Keine Anbieter gefunden", "en": "No vendors found" },
+                    "noVendorsDesc": { "tr": "Bu filtreye veya aramaya uygun tedarikçi yok.", "de": "Keine Anbieter für diesen Filter.", "en": "No vendors for this filter." }
+                }
+            }
         }
     }
 };

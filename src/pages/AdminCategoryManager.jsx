@@ -83,7 +83,8 @@ const AdminCategoryManager = () => {
                 icon: icon,
                 is_featured: isFeatured,
                 sort_order: sortOrder,
-                slug: slug
+                slug: slug,
+                is_live_supported: selectedCategory.is_live_supported
             })
             .eq('id', selectedCategory.id);
 
@@ -182,12 +183,12 @@ const AdminCategoryManager = () => {
                                             <input
                                                 className="form-check-input"
                                                 type="checkbox"
-                                                checked={isFeatured}
-                                                onChange={(e) => setIsFeatured(e.target.checked)}
-                                                id="featuredCheck"
+                                                checked={selectedCategory.is_live_supported}
+                                                onChange={(e) => setSelectedCategory({ ...selectedCategory, is_live_supported: e.target.checked })}
+                                                id="liveCheck"
                                             />
-                                            <label className="form-check-label" htmlFor="featuredCheck">
-                                                Anasayfada Göster (Featured)
+                                            <label className="form-check-label" htmlFor="liveCheck">
+                                                Canlı İstek Desteği (Live Supported)
                                             </label>
                                         </div>
                                     </div>

@@ -40,14 +40,20 @@ const secureStorage = {
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-        storage: secureStorage,
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: false
-    }
-});
+// Safety check for missing environment variables
+let supabase = null;
 
+if (supabaseUrl && supabaseAnonKey) {
+    supabase = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+            storage: secureStorage,
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: false
+        }
+    });
+} else {
+    console.error('[SUPABASE] Missing environment variables! VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY not set.');
+}
 
-
+export { supabase };

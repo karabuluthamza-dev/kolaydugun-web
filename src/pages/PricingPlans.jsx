@@ -34,7 +34,8 @@ const PricingPlans = () => {
                 social_links: 'Sosyal Medya Linkleri',
                 map_view: 'Harita Görünümü',
                 monthly_free_credits: 'Aylık Hediye Kredi',
-                messaging: 'Müşterilerle Mesajlaşma'
+                messaging: 'Müşterilerle Mesajlaşma',
+                live_requests: 'Canlı İstek Paneli'
             },
             credit_info: '(Her ay 4 müşteri iletişimi)',
             faq: {
@@ -69,7 +70,8 @@ const PricingPlans = () => {
                 social_links: 'Social Media Links',
                 map_view: 'Map View',
                 monthly_free_credits: 'Monthly Free Credits',
-                messaging: 'Messaging with Customers'
+                messaging: 'Messaging with Customers',
+                live_requests: 'Live Request Panel'
             },
             credit_info: '(4 customer contacts/mo)',
             faq: {
@@ -104,7 +106,8 @@ const PricingPlans = () => {
                 social_links: 'Social Media Links',
                 map_view: 'Kartenansicht',
                 monthly_free_credits: 'Monatliche Gratis-Credits',
-                messaging: 'Nachrichten an Kunden'
+                messaging: 'Nachrichten an Kunden',
+                live_requests: 'Live-Wunsch-Panel'
             },
             credit_info: '(4 Kundenkontakte/Monat)',
             faq: {
@@ -312,6 +315,7 @@ const PricingPlans = () => {
                         const displayFeatures = {
                             ...plan.features,
                             messaging: isPremium, // Only available for premium
+                            live_requests: isPremium, // Only available for premium
                             monthly_free_credits: isPremium ? (billingCycle === 'annual' ? 150 : 12) : 0
                         };
 
@@ -319,6 +323,7 @@ const PricingPlans = () => {
                         const featureOrder = [
                             'monthly_free_credits',
                             'messaging',
+                            'live_requests',
                             'map_view',
                             'social_links',
                             'top_placement',

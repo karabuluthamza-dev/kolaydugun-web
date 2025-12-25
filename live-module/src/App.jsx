@@ -5,6 +5,8 @@ import LiveFeed from './pages/LiveFeed';
 import GuestPage from './pages/GuestPage';
 import LoginPage from './pages/LoginPage';
 import StatisticsPage from './pages/StatisticsPage';
+import PublicDisplay from './pages/PublicDisplay';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 function App() {
     return (
@@ -17,6 +19,7 @@ function App() {
                     <Route path="/dashboard" element={<DJDashboard />} />
                     <Route path="/live/:eventId" element={<LiveFeed />} />
                     <Route path="/stats/:eventId" element={<StatisticsPage />} />
+                    <Route path="/display/:eventId" element={<PublicDisplay />} />
 
                     {/* Guest Route */}
                     <Route path="/e/:slug" element={<GuestPage />} />
@@ -25,6 +28,7 @@ function App() {
                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
             </div>
+            <LanguageSwitcher />
         </Router>
     );
 }

@@ -112,25 +112,25 @@ const BudgetPlanner = () => {
             </div>
 
             {/* Özet Kartlar */}
-            <div className="summary-grid" role="region" aria-label={t('budget.summaryTotal')}>
-                <div className="summary-card summary-card-total">
-                    <div className="summary-label">{t('budget.summaryTotal') || 'Toplam Bütçe'}</div>
-                    <div className="summary-value">€{budget || 0}</div>
+            <div className="summary-grid" role="region" aria-label={t('budget.summaryTotal')} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '1.5rem', borderRadius: '12px', color: '#fff', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}>
+                    <div style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '0.5rem', color: 'rgba(255,255,255,0.9)' }}>Toplam Bütçe</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: '#fff' }}>€{budget || 0}</div>
                 </div>
 
-                <div className="summary-card summary-card-estimated">
-                    <div className="summary-label">{t('budget.summaryEstimated') || 'Planlanan'}</div>
-                    <div className="summary-value">€{totalEstimated}</div>
+                <div style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', padding: '1.5rem', borderRadius: '12px', color: '#fff', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}>
+                    <div style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '0.5rem', color: 'rgba(255,255,255,0.9)' }}>Planlanan</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: '#fff' }}>€{totalEstimated}</div>
                 </div>
 
-                <div className="summary-card summary-card-actual">
-                    <div className="summary-label">{t('budget.summaryActual') || 'Harcanan'}</div>
-                    <div className="summary-value">€{totalActual}</div>
+                <div style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', padding: '1.5rem', borderRadius: '12px', color: '#fff', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}>
+                    <div style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '0.5rem', color: 'rgba(255,255,255,0.9)' }}>Harcanan</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: '#fff' }}>€{totalActual}</div>
                 </div>
 
-                <div className={`summary-card ${remaining >= 0 ? 'summary-card-remaining-positive' : 'summary-card-remaining-negative'}`}>
-                    <div className="summary-label">{t('budget.summaryRemaining') || 'Kalan'}</div>
-                    <div className="summary-value">€{remaining}</div>
+                <div style={{ background: remaining >= 0 ? 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' : 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', padding: '1.5rem', borderRadius: '12px', color: '#fff', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}>
+                    <div style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '0.5rem', color: 'rgba(255,255,255,0.9)' }}>Kalan</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: '#fff' }}>€{remaining}</div>
                 </div>
             </div>
 

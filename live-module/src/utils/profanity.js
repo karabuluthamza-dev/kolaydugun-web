@@ -1,20 +1,30 @@
 const badWords = [
-    'küfür1', 'küfür2', 'lan', 'aptal', 'salak', // Add more as needed
-    'idiot', 'stupid', 'fuck', 'shit'
+    // TR
+    'amk', 'amina', 'amına', 'ibne', 'orospu', 'piç', 'pic', 'siktir', 'yarrak', 'göt', 'got', 'meme', 'taşşak', 'tassak', 'pezevenk', 'kahpe', 'kancık', 'yavşak', 'yavsak', 'dalyarak', 'amçık', 'amcik', 'sik', 'daşşak',
+    // EN
+    'fuck', 'shit', 'bitch', 'asshole', 'cunt', 'dick', 'pussy', 'slut', 'whore', 'bastard', 'motherfucker',
+    // DE
+    'arschloch', 'hure', 'wichser', 'fotze', 'schlampe', 'miststück', 'scheiße'
 ];
+
+// Kelimeleri regex desenine dönüştüren yardımcı fonksiyon
+// f+u+c+k+ şeklinde harf tekrarlarını ve f.u.c.k gibi aradaki sembolleri yakalar
+const patterns = badWords.map(word => {
+    return word
+        .split('')
+        .map(char => `${char}+`)
+        .join('[\\s\\W_]*');
+});
+
+const profanityRegex = new RegExp(`(${patterns.join('|')})`, 'gi');
 
 export const containsProfanity = (text) => {
     if (!text) return false;
-    const lowerText = text.toLowerCase();
-    return badWords.some(word => lowerText.includes(word));
+    return profanityRegex.test(text);
 };
 
 export const filterProfanity = (text) => {
     if (!text) return text;
-    let filtered = text;
-    badWords.forEach(word => {
-        const regex = new RegExp(word, 'gi');
-        filtered = filtered.replace(regex, '***');
-    });
-    return filtered;
+    // Eşleşen küfürleri yıldız karakteriyle değiştirir
+    return text.replace(profanityRegex, (match) => '*'.repeat(match.length));
 };

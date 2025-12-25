@@ -10,21 +10,29 @@ export const useTranslations = () => {
             if (!obj || typeof obj !== 'object') return;
 
             for (const key in obj) {
-                const value = obj[key];
-                if (value === null || value === undefined) continue;
+                try {
+                    const value = obj[key];
+                    if (value === null || value === undefined) continue;
 
-                if (typeof value === 'object' && !value.en) {
-                    traverse(value, [...path, key]);
-                } else if (typeof value === 'object' && value.en) {
-                    const flatKey = [...path, key].join('.');
-                    flat[flatKey] = value;
-                } else if (typeof value === 'string') {
-                    const flatKey = [...path, key].join('.');
-                    flat[flatKey] = { en: value, de: value, tr: value };
+                    if (typeof value === 'object' && !value.en) {
+                        traverse(value, [...path, key]);
+                    } else if (typeof value === 'object' && value.en) {
+                        const flatKey = [...path, key].join('.');
+                        flat[flatKey] = value;
+                    } else if (typeof value === 'string') {
+                        const flatKey = [...path, key].join('.');
+                        flat[flatKey] = { en: value, de: value, tr: value };
+                    }
+                } catch (e) {
+                    console.warn('[useTranslations] Error processing key:', key, e);
                 }
             }
         };
-        traverse(dict);
+        try {
+            traverse(dict);
+        } catch (e) {
+            console.error('[useTranslations] Error flattening dictionary:', e);
+        }
         return flat;
     }, []);
 
@@ -34,6 +42,11 @@ export const useTranslations = () => {
 
     const fetchTranslations = useCallback(async () => {
         try {
+            // Safety check - supabase might not be initialized
+            if (!supabase) {
+                console.warn('[useTranslations] Supabase not initialized, using local dictionary only');
+                return;
+            }
             // Background update
             const { data, error } = await supabase
                 .from('translations')
