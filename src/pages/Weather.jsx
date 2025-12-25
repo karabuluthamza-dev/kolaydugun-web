@@ -217,8 +217,8 @@ const Weather = () => {
                                 aria-invalid={error && !city ? "true" : "false"}
                             >
                                 <option value="">{t('register.selectCity') || 'Şehir seçin...'}</option>
-                                {(CITIES_BY_STATE[state] || []).map(cityName => (
-                                    <option key={cityName} value={cityName}>{cityName}</option>
+                                {(CITIES_BY_STATE[state] || []).map(city => (
+                                    <option key={city.id} value={city.id}>{city[language] || city.en || city.id}</option>
                                 ))}
                                 {!state && <option disabled>Önce eyalet seçin</option>}
                             </select>

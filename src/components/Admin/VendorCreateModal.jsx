@@ -231,7 +231,7 @@ const VendorCreateModal = ({ onClose, onSuccess }) => {
                         <select name="city" value={formData.city} onChange={handleChange} required>
                             <option value="">-</option>
                             {(CITIES_BY_STATE[formData.state] || []).map(city => (
-                                <option key={city} value={city}>{city}</option>
+                                <option key={city.id} value={city.id}>{city[language] || city.en || city.id}</option>
                             ))}
                             {!formData.state && <option disabled>Önce eyalet seçin</option>}
                         </select>

@@ -211,7 +211,7 @@ const AdminNotifications = () => {
                                 >
                                     <option value="">Tüm Şehirler</option>
                                     {(CITIES_BY_STATE[formData.target_state] || []).map(city => (
-                                        <option key={city} value={city}>{city}</option>
+                                        <option key={city.id} value={city.id}>{city[language] || city.en || city.id}</option>
                                     ))}
                                 </select>
                             </div>

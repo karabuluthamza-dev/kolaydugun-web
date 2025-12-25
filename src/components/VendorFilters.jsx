@@ -233,7 +233,7 @@ const VendorFilters = ({ filters, onFilterChange, userLocation, onLocationReques
                             {filters.state && (
                                 <optgroup label={dictionary.locations.states[filters.state]?.[language] || filters.state}>
                                     {(CITIES_BY_STATE[filters.state] || []).map(city => (
-                                        <option key={city} value={city}>{city}</option>
+                                        <option key={city.id} value={city.id}>{city[language] || city.en || city.id}</option>
                                     ))}
                                 </optgroup>
                             )}

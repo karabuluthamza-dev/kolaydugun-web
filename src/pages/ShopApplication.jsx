@@ -386,9 +386,7 @@ const ShopApplication = () => {
                                                 >
                                                     <option value="">{txt.cityPlaceholder}</option>
                                                     {(CITIES_BY_STATE[formData.state] || []).map(city => (
-                                                        <option key={city} value={city}>
-                                                            {city}
-                                                        </option>
+                                                        <option key={city.id} value={city.id}>{city[language] || city.en || city.id}</option>
                                                     ))}
                                                 </select>
                                             </div>
