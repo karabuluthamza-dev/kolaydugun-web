@@ -18,6 +18,7 @@ import HomeBlogShowcase from '../components/HomeBlogShowcase';
 import FloatingCTA from '../components/FloatingCTA';
 import HomeShopPromo from '../components/HomeShopPromo';
 import MobileAppShowcase from '../components/Home/MobileAppShowcase';
+import LiveRequestBanner from '../components/Home/LiveRequestBanner';
 
 const Home = () => {
     const { t, language } = useLanguage();
@@ -83,6 +84,7 @@ const Home = () => {
                 trustBadges={trustBadges}
                 heroSettings={videoSettings}
             />
+            <LiveRequestBanner />
             <PlanningTools />
             <FeaturedCategories />
             <FeaturedVendors />
