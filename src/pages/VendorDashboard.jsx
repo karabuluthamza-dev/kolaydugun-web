@@ -508,9 +508,14 @@ const VendorDashboard = () => {
                                 <p style={{ marginBottom: '30px', color: '#666' }}>{t('dashboard.liveAccessPass.trialStarted')}</p>
                                 <button
                                     className="btn btn-primary btn-lg"
-                                    onClick={() => {
+                                    onClick={async () => {
+                                        const { data: { session } } = await supabase.auth.getSession();
                                         const liveUrl = import.meta.env.VITE_LIVE_MODULE_URL || (import.meta.env.PROD ? 'https://live.kolaydugun.de' : 'http://localhost:5175');
-                                        window.open(`${liveUrl}/dashboard`, '_blank');
+                                        if (session) {
+                                            window.open(`${liveUrl}/login#access_token=${session.access_token}&refresh_token=${session.refresh_token}`, '_blank');
+                                        } else {
+                                            window.open(`${liveUrl}/dashboard`, '_blank');
+                                        }
                                     }}
                                     style={{ padding: '15px 40px', fontSize: '1.2rem', background: '#f43f5e', border: 'none' }}
                                 >
@@ -697,10 +702,15 @@ const VendorDashboard = () => {
                     {categorySupport && (
                         <button
                             className={`live-request-btn ${activeTab === 'live-request' ? 'active' : ''} ${!hasLiveAccess ? 'locked' : ''}`}
-                            onClick={() => {
+                            onClick={async () => {
                                 if (hasLiveAccess) {
+                                    const { data: { session } } = await supabase.auth.getSession();
                                     const liveUrl = import.meta.env.VITE_LIVE_MODULE_URL || (import.meta.env.PROD ? 'https://live.kolaydugun.de' : 'http://localhost:5175');
-                                    window.open(`${liveUrl}/dashboard`, '_blank');
+                                    if (session) {
+                                        window.open(`${liveUrl}/login#access_token=${session.access_token}&refresh_token=${session.refresh_token}`, '_blank');
+                                    } else {
+                                        window.open(`${liveUrl}/dashboard`, '_blank');
+                                    }
                                 } else {
                                     handleTabChange('live-request');
                                 }

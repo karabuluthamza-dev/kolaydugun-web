@@ -16,6 +16,38 @@ const LoginPage = () => {
 
     const from = location.state?.from?.pathname || "/dashboard";
 
+    React.useEffect(() => {
+        const handleSSO = async () => {
+            const hash = window.location.hash.substring(1);
+            if (!hash) return;
+
+            const params = new URLSearchParams(hash);
+            const accessToken = params.get('access_token');
+            const refreshToken = params.get('refresh_token');
+
+            if (accessToken && refreshToken) {
+                setLoading(true);
+                try {
+                    const { error } = await supabase.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: refreshToken
+                    });
+                    if (error) throw error;
+
+                    // Clear hash and tokens from history
+                    window.history.replaceState(null, '', window.location.pathname);
+                    navigate(from, { replace: true });
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+
+        handleSSO();
+    }, [navigate, from]);
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
