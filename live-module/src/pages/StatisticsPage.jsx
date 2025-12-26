@@ -224,7 +224,7 @@ const StatisticsPage = () => {
                                         )}
                                         <span className="font-bold text-slate-200 group-hover:text-white transition-colors">{song.title}</span>
                                     </div>
-                                    <span className="bg-prime/10 text-prime px-3 py-1 rounded-full text-[10px] font-black">{song.count} İSTEK</span>
+                                    <span className="bg-prime/10 text-prime px-3 py-1 rounded-full text-[10px] font-black">{song.count} {t('dashboard.eventCard.requests', { defaultValue: 'İSTEK' })}</span>
                                 </div>
                             ))}
                             {stats.topSongs.length === 0 && (
@@ -248,7 +248,7 @@ const StatisticsPage = () => {
                                         </div>
                                         <span className="font-bold text-slate-200 group-hover:text-white transition-colors">{guest.name}</span>
                                     </div>
-                                    <span className="bg-blue-500/10 text-blue-500 px-3 py-1 rounded-full text-[10px] font-black">{guest.count} TALEP</span>
+                                    <span className="bg-blue-500/10 text-blue-500 px-3 py-1 rounded-full text-[10px] font-black">{guest.count} {t('dashboard.eventCard.requests', { defaultValue: 'TALEP' })}</span>
                                 </div>
                             ))}
                             {stats.topGuests.length === 0 && (

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabase'; // Changed from '../supabaseClient'
+import { supabase } from '../lib/supabase';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext'; // Added useLanguage import
@@ -39,12 +40,28 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         if (user) {
-            fetchStats();
+            // Try to load from cache first
+            const cachedStats = sessionStorage.getItem('admin_dashboard_stats');
+            const cachedActivity = sessionStorage.getItem('admin_dashboard_activity');
+            const cacheTime = sessionStorage.getItem('admin_dashboard_cache_time');
+
+            const now = Date.now();
+            const fiveMinutes = 5 * 60 * 1000;
+
+            if (cachedStats && cachedActivity && cacheTime && (now - parseInt(cacheTime) < fiveMinutes)) {
+                setStats(JSON.parse(cachedStats));
+                setRecentActivity(JSON.parse(cachedActivity));
+                setLoading(false);
+                // Still fetch in background to keep it fresh
+                fetchStats(false);
+            } else {
+                fetchStats(true);
+            }
         }
     }, [user]);
 
-    const fetchStats = async () => {
-        setLoading(true);
+    const fetchStats = async (showLoader = true) => {
+        if (showLoader) setLoading(true);
 
         // Total vendors (excluding soft-deleted)
         const { count: vendorCount } = await supabase
@@ -201,6 +218,28 @@ const AdminDashboard = () => {
         ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
             .slice(0, 15); // Show top 15 most recent activities
 
+        setRecentActivity(combinedActivity);
+
+        // Update Cache
+        sessionStorage.setItem('admin_dashboard_stats', JSON.stringify({
+            totalVendors: vendorCount || 0,
+            proVendors: premiumCount || 0,
+            totalLeads: leadCount || 0,
+            wonLeads: wonCount || 0,
+            newLeads: newCount || 0,
+            conversionRate: leadCount > 0 ? ((wonCount || 0) / leadCount * 100).toFixed(1) : 0,
+            todayLeads: todayCount || 0,
+            pendingCreditRequests: pendingCount || 0,
+            totalRevenue: totalRevenue,
+            totalPosts: postCount || 0,
+            publishedPosts: publishedPostCount || 0,
+            pendingCommissions: pendingCommissions,
+            activeAffiliates: activeAffiliates
+        }));
+        sessionStorage.setItem('admin_dashboard_activity', JSON.stringify(combinedActivity));
+        sessionStorage.setItem('admin_dashboard_cache_time', Date.now().toString());
+
+        // Update local state (incase it was a background refresh)
         setStats({
             totalVendors: vendorCount || 0,
             proVendors: premiumCount || 0,
@@ -210,15 +249,12 @@ const AdminDashboard = () => {
             conversionRate: leadCount > 0 ? ((wonCount || 0) / leadCount * 100).toFixed(1) : 0,
             todayLeads: todayCount || 0,
             pendingCreditRequests: pendingCount || 0,
-
             totalRevenue: totalRevenue,
             totalPosts: postCount || 0,
             publishedPosts: publishedPostCount || 0,
             pendingCommissions: pendingCommissions,
             activeAffiliates: activeAffiliates
         });
-
-        setRecentActivity(combinedActivity);
 
         // Fetch chart data
         await fetchChartData();

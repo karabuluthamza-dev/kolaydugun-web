@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import './WeddingWebsiteSetup.css';
 
 const WeddingWebsiteSetup = () => {
-    const { t } = useLanguage();
-    const { user } = useAuth();
+    const { t } = useLanguage() || { t: (k, d) => d || k };
+    const { user } = useAuth() || {};
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('settings');
     const [guests, setGuests] = useState([]);

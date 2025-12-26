@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -229,86 +230,87 @@ const AdminVendors = () => {
     };
 
     // Fetch Dashboard Metrics
-    const fetchDashboardMetrics = async () => {
+    const fetchDashboardMetrics = async (forceRefetch = false) => {
+        // Try Cache
+        const cachedMetrics = sessionStorage.getItem('admin_vendors_metrics');
+        const cachedImageIds = sessionStorage.getItem('admin_vendor_image_ids');
+        const cacheTime = sessionStorage.getItem('admin_vendors_cache_time');
+        const now = Date.now();
+
+        if (!forceRefetch && cachedMetrics && cachedImageIds && cacheTime && (now - parseInt(cacheTime) < 5 * 60 * 1000)) {
+            setDashboardMetrics(JSON.parse(cachedMetrics));
+            setVendorIdsWithImages(JSON.parse(cachedImageIds));
+            return;
+        }
+
         try {
-            // Total vendors
-            const { count: total } = await supabase
-                .from('vendors')
-                .select('*', { count: 'exact', head: true })
-                .is('deleted_at', null);
+            // Parallel execution for better performance
+            const [
+                { count: total },
+                { count: verified },
+                { count: claimed },
+                { count: leads }
+            ] = await Promise.all([
+                supabase.from('vendors').select('*', { count: 'exact', head: true }).is('deleted_at', null),
+                supabase.from('vendors').select('*', { count: 'exact', head: true }).is('deleted_at', null).eq('is_verified', true),
+                supabase.from('vendors').select('*', { count: 'exact', head: true }).is('deleted_at', null).eq('is_claimed', true),
+                supabase.from('leads').select('*', { count: 'exact', head: true }).gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString())
+            ]);
 
-            // Verified vendors
-            const { count: verified } = await supabase
-                .from('vendors')
-                .select('*', { count: 'exact', head: true })
-                .is('deleted_at', null)
-                .eq('is_verified', true);
+            // Count vendors with/without images chunked
+            let withImages = 0;
+            let vendorIdsWithImgs = [];
+            try {
+                let allGalleryData = [];
+                let offset = 0;
+                const batchSize = 1000;
+                let hasMore = true;
 
-            // Claimed vendors
-            const { count: claimed } = await supabase
-                .from('vendors')
-                .select('*', { count: 'exact', head: true })
-                .is('deleted_at', null)
-                .eq('is_claimed', true);
+                while (hasMore) {
+                    const { data, error } = await supabase
+                        .from('vendors')
+                        .select('id, gallery')
+                        .is('deleted_at', null)
+                        .range(offset, offset + batchSize - 1);
 
-            // Total leads this month
-            const startOfMonth = new Date();
-            startOfMonth.setDate(1);
-            startOfMonth.setHours(0, 0, 0, 0);
-
-            const { count: leads } = await supabase
-                .from('leads')
-                .select('*', { count: 'exact', head: true })
-                .gte('created_at', startOfMonth.toISOString());
-
-            // Count vendors with/without images (fetch id and gallery columns)
-            // We need to fetch ALL vendors in chunks because Supabase limits to 1000 rows
-            let allGalleryData = [];
-            let offset = 0;
-            const batchSize = 1000;
-            let hasMore = true;
-
-            while (hasMore) {
-                const { data, error } = await supabase
-                    .from('vendors')
-                    .select('id, gallery')
-                    .is('deleted_at', null)
-                    .range(offset, offset + batchSize - 1);
-
-                if (error) {
-                    console.error('Error fetching gallery chunk:', error);
-                    break;
+                    if (error) throw error;
+                    if (data && data.length > 0) {
+                        allGalleryData = [...allGalleryData, ...data];
+                        offset += batchSize;
+                        if (data.length < batchSize) hasMore = false;
+                    } else {
+                        hasMore = false;
+                    }
                 }
 
-                if (data && data.length > 0) {
-                    allGalleryData = [...allGalleryData, ...data];
-                    offset += batchSize;
-                    if (data.length < batchSize) hasMore = false;
-                } else {
-                    hasMore = false;
-                }
+                const vendorsWithGallery = allGalleryData.filter(v =>
+                    v.gallery && Array.isArray(v.gallery) && v.gallery.length > 0
+                ) || [];
+                withImages = vendorsWithGallery.length;
+                vendorIdsWithImgs = vendorsWithGallery.map(v => v.id);
+                setVendorIdsWithImages(vendorIdsWithImgs);
+            } catch (err) {
+                console.warn('[AdminVendors] Gallery metrics failed:', err);
             }
 
-            const vendorsWithGallery = allGalleryData.filter(v =>
-                v.gallery && Array.isArray(v.gallery) && v.gallery.length > 0
-            ) || [];
-            const withImages = vendorsWithGallery.length;
-            const withoutImages = (total || 0) - withImages;
-
-            // Save IDs of vendors with images for filtering
-            setVendorIdsWithImages(vendorsWithGallery.map(v => v.id));
-
-            setDashboardMetrics({
+            const metrics = {
                 totalVendors: total || 0,
                 verifiedVendors: verified || 0,
                 claimedVendors: claimed || 0,
                 weeklyViews: 0,
                 totalLeads: leads || 0,
                 withImages,
-                withoutImages
-            });
+                withoutImages: (total || 0) - withImages
+            };
+
+            setDashboardMetrics(metrics);
+
+            // Update Cache
+            sessionStorage.setItem('admin_vendors_metrics', JSON.stringify(metrics));
+            sessionStorage.setItem('admin_vendor_image_ids', JSON.stringify(vendorIdsWithImgs));
+            sessionStorage.setItem('admin_vendors_cache_time', Date.now().toString());
         } catch (error) {
-            console.error('Error fetching dashboard metrics:', error);
+            console.error('[AdminVendors] Error fetching dashboard metrics:', error);
         }
     };
 

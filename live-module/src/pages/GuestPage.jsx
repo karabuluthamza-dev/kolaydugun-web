@@ -163,12 +163,12 @@ const GuestPage = () => {
                 .single();
 
             if (err) throw err;
-            if (data.is_closed) throw new Error('Bu etkinlik şu an istek kabul etmiyor.');
+            if (data.is_closed) throw new Error(t('guest.limitReached'));
 
             setEvent(data);
         } catch (err) {
             console.error('Fetch error:', err);
-            setError(err.message || 'Etkinlik bulunamadı.');
+            setError(err.message || t('common.error'));
         } finally {
             setLoading(false);
         }
@@ -199,7 +199,7 @@ const GuestPage = () => {
 
             const limit = event.settings?.request_limit || 20;
             if (count >= limit) {
-                throw new Error('Bu etkinlik için maksimum istek limitine ulaşıldı.');
+                throw new Error(t('guest.limitReached'));
             }
 
             // 2. Insert the request
@@ -207,7 +207,7 @@ const GuestPage = () => {
                 event_id: event.id,
                 song_title: filterProfanity(song.trim()),
                 note: filterProfanity(note.trim()),
-                requester_name: filterProfanity(name.trim()) || 'Misafir',
+                requester_name: filterProfanity(name.trim()) || t('liveFeed.guestLabel'),
                 mood: mood,
                 status: 'pending',
                 song_link: selectedSongLink,
@@ -271,7 +271,7 @@ const GuestPage = () => {
                 }
             }
         } catch (err) {
-            alert('Hata: ' + err.message);
+            alert(t('common.error') + ': ' + err.message);
         } finally {
             setSending(false);
         }
@@ -337,14 +337,14 @@ const GuestPage = () => {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
                 <AlertCircle className="w-16 h-16 text-yellow-500 mb-4" />
-                <h1 className="text-xl font-bold mb-2">Hata</h1>
+                <h1 className="text-xl font-bold mb-2">{t('common.error')}</h1>
                 <p className="text-slate-400">{error}</p>
             </div>
         );
     }
 
     return (
-        <div className={`max-w-md mx-auto min-h-screen flex flex-col transition-colors duration-500 ${styles.bg} ${styles.text} p-6`}>
+        <div className={`w-full max-w-md mx-auto min-h-screen flex flex-col transition-colors duration-500 ${styles.bg} ${styles.text} p-4 md:p-6`}>
             {/* Header */}
             <div className="text-center mb-8 pt-8">
                 <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${styles.theme === 'light' ? 'bg-slate-200' : 'bg-white/10'}`}>
@@ -372,7 +372,7 @@ const GuestPage = () => {
                                         type="button"
                                         onClick={() => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(song || 'music')}`, '_blank')}
                                         className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-all"
-                                        title="YouTube'da Ara"
+                                        title={t('guest.searchYouTube')}
                                     >
                                         <Youtube className="w-3.5 h-3.5" />
                                     </button>
@@ -380,7 +380,7 @@ const GuestPage = () => {
                                         type="button"
                                         onClick={() => window.open(`https://open.spotify.com/search/${encodeURIComponent(song || 'music')}`, '_blank')}
                                         className="p-1.5 bg-[#1DB954]/10 hover:bg-[#1DB954]/20 text-[#1DB954] rounded-lg transition-all"
-                                        title="Spotify'da Ara"
+                                        title={t('guest.searchSpotify')}
                                     >
                                         <Music className="w-3.5 h-3.5" />
                                     </button>
@@ -487,18 +487,18 @@ const GuestPage = () => {
 
                         <div className="space-y-3">
                             <div className="flex items-center justify-between ml-1">
-                                <label className={`text-[11px] font-bold ${styles.muted} uppercase tracking-wider`}>MEDYA DEDİKASYONU (LİNK)</label>
+                                <label className={`text-[11px] font-bold ${styles.muted} uppercase tracking-wider`}>{t('guest.mediaDedication')}</label>
                             </div>
 
                             <div className="flex gap-4">
                                 <div className="flex-1 space-y-2">
                                     <input
-                                        placeholder="Görsel URL (Pinterest, Instagram vb.)"
+                                        placeholder={t('guest.mediaPlaceholder')}
                                         value={image || ''}
                                         onChange={(e) => setImage(e.target.value)}
                                         className={`w-full border rounded-2xl px-5 py-4 focus:ring-2 transition-all outline-none ${styles.input} focus:ring-slate-700`}
                                     />
-                                    <p className="text-[9px] text-slate-500 italic ml-1">* Depolama alanı kullanmaz, sistemimizi korur.</p>
+                                    <p className="text-[9px] text-slate-500 italic ml-1">{t('guest.mediaTip')}</p>
                                 </div>
                             </div>
                         </div>
@@ -513,8 +513,8 @@ const GuestPage = () => {
                                             <ThumbsUp className={`w-5 h-5 ${isVipRequest ? 'fill-current' : ''}`} />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-sm">VIP İSTEK (ÖNCELİKLİ)</h4>
-                                            <p className="text-[10px] opacity-70">Sıranın en başına geç ve DJ'i destekle!</p>
+                                            <h4 className="font-bold text-sm">{t('guest.vipTitle')}</h4>
+                                            <p className="text-[10px] opacity-70">{t('guest.vipSubtitle')}</p>
                                         </div>
                                     </div>
                                     <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isVipRequest ? 'border-prime bg-prime' : 'border-slate-700'}`}>
@@ -568,7 +568,7 @@ const GuestPage = () => {
                             disabled={sending}
                             className={`w-full font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 transform active:scale-[0.98] transition-all border-none disabled:opacity-50 ${styles.button}`}
                         >
-                            {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : isVipRequest ? 'VIP İSTEĞİ ÖDE VE GÖNDER' : t('guest.send')}
+                            {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : isVipRequest ? t('guest.vipSend') : t('guest.send')}
                         </button>
                     </motion.form>
                 ) : (
@@ -581,7 +581,7 @@ const GuestPage = () => {
                         <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mb-2">
                             <CheckCircle2 className="w-12 h-12 text-green-500" />
                         </div>
-                        <h2 className="text-2xl font-bold">{t('common.success_title', { defaultValue: 'Harika!' })}</h2>
+                        <h2 className="text-2xl font-bold">{t('common.success_title')}</h2>
                         <p className={styles.muted}>{t('guest.success')}</p>
                         <button
                             onClick={() => {
@@ -609,7 +609,7 @@ const GuestPage = () => {
                         <div className="absolute top-0 right-0 p-4">
                             <Flame className="w-6 h-6 text-orange-500 animate-pulse" />
                         </div>
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500/60 mb-2">CANLI OYLAMA</h3>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500/60 mb-2">{t('liveFeed.battle.active')}</h3>
                         <h4 className="text-xl font-black mb-6 pr-8 uppercase tracking-tight">{activeBattle.title}</h4>
 
                         <div className="grid grid-cols-2 gap-3">
@@ -632,7 +632,7 @@ const GuestPage = () => {
                         </div>
                         {userVote && (
                             <p className="text-center text-[9px] font-black text-orange-500/60 uppercase tracking-[0.2em] mt-6 bg-orange-500/10 py-3 rounded-2xl">
-                                OYUNUZ KAYDEDİLDİ! EKRANI TAKİP EDİN 🔥
+                                {t('guest.voted')}
                             </p>
                         )}
                     </motion.div>
@@ -664,7 +664,7 @@ const GuestPage = () => {
                                         <div className="flex items-center gap-2 mb-1">
                                             <span className="text-lg">{req.mood}</span>
                                             <span className={`text-[10px] font-black uppercase tracking-widest ${styles.muted}`}>
-                                                {req.requester_name || 'MISAFIR'}
+                                                {req.requester_name || t('liveFeed.guestLabel')}
                                             </span>
                                         </div>
                                         <h4 className="font-bold truncate">{req.song_title}</h4>

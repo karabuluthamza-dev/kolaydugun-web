@@ -160,7 +160,7 @@ const DJDashboard = () => {
             setShowModal(false);
             setNewEvent({ name: '', slug: '' });
         } catch (err) {
-            alert('Hata: ' + err.message);
+            alert(t('common.error') + ': ' + err.message);
         } finally {
             setCreating(false);
         }
@@ -204,7 +204,7 @@ const DJDashboard = () => {
             setSettingsModal({ isOpen: false, event: null });
         } catch (err) {
             console.error('Live settings update error:', err);
-            alert('Hata: ' + (err.message || JSON.stringify(err)));
+            alert(t('common.error') + ': ' + (err.message || JSON.stringify(err)));
         } finally {
             setUpdating(false);
         }
@@ -229,7 +229,7 @@ const DJDashboard = () => {
             setDeleteModal({ isOpen: false, eventId: null });
         } catch (err) {
             console.error("handleDeleteEvent failed:", err);
-            alert('Hata: ' + (err.message || 'Silme işlemi gerçekleştirilemedi'));
+            alert(t('common.error') + ': ' + (err.message || t('dashboard.eventCard.deleteError', { defaultValue: 'Silme işlemi gerçekleştirilemedi' })));
         } finally {
             setDeletingId(null);
         }
@@ -286,7 +286,7 @@ const DJDashboard = () => {
             alert(`${successTitle}\n\n${orderLabel}: ${details.id}\n\n${helpLabel}\n${contactLabel}: ${sysSettings.support_email || 'kontakt@kolaydugun.de'}`);
         } catch (err) {
             console.error('Payment processing failed:', err);
-            alert('Ödeme tamamlandı ancak hesap güncellenirken bir hata oluştu. Lütfen destek ile iletişime geçin.');
+            alert(t('dashboard.support.paymentError', { defaultValue: 'Ödeme tamamlandı ancak hesap güncellenirken bir hata oluştu. Lütfen destek ile iletişime geçin.' }));
         }
     };
 
@@ -295,22 +295,22 @@ const DJDashboard = () => {
             <div className="max-w-6xl mx-auto p-6 lg:p-12">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 relative">
                     <div className="absolute -top-24 -left-24 w-64 h-64 bg-prime/10 blur-[100px] rounded-full pointer-events-none"></div>
-                    <div className="relative">
+                    <div className="relative text-center md:text-left">
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="flex items-center gap-3 mb-4"
+                            className="flex items-center justify-center md:justify-start gap-3 mb-4"
                         >
                             <div className="p-2 bg-prime/10 rounded-lg">
                                 <TrendingUp className="w-4 h-4 text-prime" />
                             </div>
-                            <span className="text-prime font-bold text-[10px] uppercase tracking-widest">DJ Control Center</span>
+                            <span className="text-prime font-bold text-[10px] uppercase tracking-widest">{t('dashboard.controlCenter', { defaultValue: 'DJ Control Center' })}</span>
                         </motion.div>
-                        <h1 className="text-5xl md:text-6xl font-black text-white mb-4 premium-text tracking-tight uppercase">
-                            {t('dashboard.panel')}
+                        <h1 className="text-4xl md:text-6xl font-black text-white mb-4 premium-text tracking-tight uppercase">
+                            {t('dashboard.title')}
                         </h1>
-                        <p className="text-slate-400 text-lg font-medium max-w-md">
-                            Canlı etkinliklerinizi buradan yönetin
+                        <p className="text-slate-400 text-base md:text-lg font-medium max-w-md mx-auto md:mx-0">
+                            {t('dashboard.subtitle')}
                         </p>
                     </div>
 
@@ -322,7 +322,7 @@ const DJDashboard = () => {
                             animate={{ opacity: 1, scale: 1 }}
                         >
                             <div className="flex flex-col">
-                                <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-0.5 opacity-50">PAKET</span>
+                                <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-0.5 opacity-50">{t('dashboard.sidebar.package', { defaultValue: 'PAKET' })}</span>
                                 <span className="text-white font-black text-sm uppercase flex items-center gap-2">
                                     {vendor?.subscription_tier === 'premium' ? <Sparkles className="w-3 h-3 text-yellow-400" /> : <Zap className="w-3 h-3 text-slate-400" />}
                                     {vendor?.subscription_tier === 'premium' ? 'PREMIUM' : 'FREE'}
@@ -330,7 +330,7 @@ const DJDashboard = () => {
                             </div>
                             <div className="w-px h-8 bg-white/10"></div>
                             <div className="flex flex-col">
-                                <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-0.5 opacity-50">KREDİ</span>
+                                <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-0.5 opacity-50">{t('dashboard.sidebar.credits', { defaultValue: 'KREDİ' })}</span>
                                 <span className="text-white font-black text-sm flex items-center gap-2 tracking-tighter">
                                     <Wallet className="w-3 h-3 text-emerald-400" />
                                     {vendor?.credit_balance || 0}
@@ -338,11 +338,11 @@ const DJDashboard = () => {
                             </div>
                         </motion.div>
 
-                        <div className="flex bg-white/5 p-1.5 rounded-2xl border border-white/5 items-center gap-2 shadow-xl backdrop-blur-md">
+                        <div className="flex bg-white/5 p-1.5 rounded-2xl border border-white/5 items-center gap-1 md:gap-2 shadow-xl backdrop-blur-md w-full md:w-auto justify-center">
                             <button
                                 onClick={() => setShowSubscriptionModal(true)}
                                 className="p-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all group relative"
-                                title="Abonelik ve Krediler"
+                                title={t('dashboard.support.subscriptionTitle', { defaultValue: 'Abonelik ve Krediler' })}
                             >
                                 <CreditCard className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-prime rounded-full"></span>
@@ -350,7 +350,7 @@ const DJDashboard = () => {
                             <button
                                 onClick={() => setShowFAQ(true)}
                                 className="p-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"
-                                title="Yardım / SSS"
+                                title={t('dashboard.support.helpTitle', { defaultValue: 'Yardım / SSS' })}
                             >
                                 <HelpCircle className="w-5 h-5" />
                             </button>
@@ -360,7 +360,7 @@ const DJDashboard = () => {
                                     navigate('/login');
                                 }}
                                 className="p-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"
-                                title="Çıkış Yap"
+                                title={t('common.logout')}
                             >
                                 <LogOut className="w-5 h-5" />
                             </button>
@@ -370,7 +370,7 @@ const DJDashboard = () => {
                             whileHover={{ scale: 1.02, y: -2 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setShowModal(true)}
-                            className="bg-prime hover:bg-rose-600 text-white px-8 py-4 rounded-2xl font-black flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(244,63,94,0.3)] transition-all group"
+                            className="bg-prime hover:bg-rose-600 text-white w-full md:w-auto px-8 py-4 rounded-2xl font-black flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(244,63,94,0.3)] transition-all group"
                         >
                             <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" />
                             <span className="font-black text-sm uppercase tracking-widest">{t('dashboard.createEvent')}</span>
@@ -398,7 +398,7 @@ const DJDashboard = () => {
                                 key={event.id}
                                 className="glass-card rounded-[32px] overflow-hidden group hover:border-white/20 transition-all duration-500 hover:shadow-prime/10"
                             >
-                                <div className="p-8">
+                                <div className="p-6 md:p-8">
                                     <div className="flex justify-between items-start gap-4 mb-8">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-2">
@@ -415,7 +415,7 @@ const DJDashboard = () => {
                                             <button
                                                 onClick={() => navigate(`/stats/${event.id}`)}
                                                 className="p-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all relative"
-                                                title="Analytics"
+                                                title={t('dashboard.eventCard.stats')}
                                             >
                                                 <BarChart3 className="w-5 h-5" />
                                                 {(event.settings?.request_limit || 0) <= 20 && (
@@ -425,7 +425,7 @@ const DJDashboard = () => {
                                             <button
                                                 onClick={() => setSettingsModal({ isOpen: true, event: JSON.parse(JSON.stringify(event)) })}
                                                 className="p-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"
-                                                title="Settings"
+                                                title={t('dashboard.settings.title')}
                                             >
                                                 <Settings className="w-5 h-5" />
                                             </button>
@@ -438,7 +438,7 @@ const DJDashboard = () => {
                                                 }}
                                                 disabled={deletingId === event.id}
                                                 className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all disabled:opacity-50 cursor-pointer relative z-20"
-                                                title="Delete"
+                                                title={t('common.delete')}
                                             >
                                                 {deletingId === event.id ? (
                                                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -457,7 +457,7 @@ const DJDashboard = () => {
                                             className="flex flex-col items-center justify-center p-6 bg-prime/10 border border-prime/20 rounded-[24px] group/btn transition-all hover:bg-prime hover:border-prime"
                                         >
                                             <Play className="w-6 h-6 text-prime group-hover/btn:text-white mb-2 transition-colors" />
-                                            <span className="text-[10px] font-black text-prime group-hover/btn:text-white uppercase tracking-widest">Start Live</span>
+                                            <span className="text-[10px] font-black text-prime group-hover/btn:text-white uppercase tracking-widest">{t('dashboard.eventCard.liveFeed')}</span>
                                         </motion.button>
                                         <div className="grid grid-cols-2 gap-3">
                                             <button
@@ -472,7 +472,7 @@ const DJDashboard = () => {
                                                 className="flex flex-col items-center justify-center p-3 bg-yellow-500/5 border border-yellow-500/10 rounded-[24px] hover:bg-yellow-500/10 transition-all"
                                             >
                                                 <Sparkles className="w-5 h-5 text-yellow-500/60 mb-1" />
-                                                <span className="text-[8px] font-black text-yellow-500/60 uppercase tracking-tighter">Wrapped</span>
+                                                <span className="text-[8px] font-black text-yellow-500/60 uppercase tracking-tighter">{t('dashboard.eventCard.wrapped', { defaultValue: 'Wrapped' })}</span>
                                             </button>
                                         </div>
                                     </div>
@@ -640,7 +640,7 @@ const DJDashboard = () => {
                                     <div className="pt-6 border-t border-white/5 space-y-3">
                                         <div className="flex items-center justify-between px-1">
                                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                                                PayPal.me Kullanıcı Adı veya E-posta
+                                                {t('dashboard.settings.paypalHandle', { defaultValue: 'PayPal.me Kullanıcı Adı veya E-posta' })}
                                             </label>
                                             {(settingsModal.event.paypal_link || settingsModal.event.settings?.paypal_link) && (
                                                 <a
@@ -650,14 +650,14 @@ const DJDashboard = () => {
                                                     className="text-[9px] font-black text-prime hover:underline uppercase tracking-[0.2em] flex items-center gap-1"
                                                 >
                                                     <Sparkles className="w-3 h-3" />
-                                                    Bağlantıyı Test Et
+                                                    {t('dashboard.settings.testLink', { defaultValue: 'Bağlantıyı Test Et' })}
                                                 </a>
                                             )}
                                         </div>
                                         <div className="flex items-center bg-white/[0.03] border border-white/10 rounded-[20px] px-6 py-5 focus-within:ring-4 focus-within:ring-prime/20 focus-within:border-prime/50 transition-all group">
                                             <input
                                                 type="text"
-                                                placeholder="Örn: kullaniciadi veya e-posta@gmail.com"
+                                                placeholder={t('dashboard.settings.paypalPlaceholder', { defaultValue: 'Örn: kullaniciadi veya e-posta@gmail.com' })}
                                                 value={(settingsModal.event.paypal_link || settingsModal.event.settings?.paypal_link || '').replace('https://paypal.me/', '')}
                                                 onChange={(e) => {
                                                     let val = e.target.value.trim().replace(/\s+/g, '');
@@ -690,7 +690,7 @@ const DJDashboard = () => {
                                             />
                                         </div>
                                         <p className="text-[10px] text-slate-600 mt-2 font-medium italic px-2 leading-relaxed">
-                                            * Önemli: <span className="text-slate-400">PayPal.me</span> kullanacaksanız profilinizin aktif olduğundan emin olun. E-posta yazarsanız klasik ödeme sayfası açılır.
+                                            {t('dashboard.settings.paypalNote', { defaultValue: '* Önemli: PayPal.me kullanacaksanız profilinizin aktif olduğundan emin olun. E-posta yazarsanız klasik ödeme sayfası açılır.' })}
                                         </p>
                                     </div>
 
@@ -721,7 +721,7 @@ const DJDashboard = () => {
                                         </div>
                                     </div>
                                     <div className="pt-6 border-t border-white/5 space-y-4">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 block text-glow">HIZLI BAHŞİŞ MİKTARLARI (EURO)</label>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 block text-glow">{t('dashboard.settings.quickTips', { defaultValue: 'HIZLI BAHŞİŞ MİKTARLARI (EURO)' })}</label>
                                         <div className="grid grid-cols-4 gap-3">
                                             {[2, 5, 10, 20].map((amount, idx) => (
                                                 <input
@@ -784,7 +784,7 @@ const DJDashboard = () => {
                                     <Trash2 className="w-10 h-10 text-red-500" />
                                 </div>
 
-                                <h2 className="text-2xl font-black text-white mb-4 premium-text uppercase tracking-tight">Emin misiniz?</h2>
+                                <h2 className="text-2xl font-black text-white mb-4 premium-text uppercase tracking-tight">{t('dashboard.eventCard.deleteAreYouSure', { defaultValue: 'Emin misiniz?' })}</h2>
                                 <p className="text-slate-400 text-sm font-medium leading-relaxed mb-10">
                                     {t('dashboard.eventCard.deleteConfirm')}
                                 </p>
@@ -795,7 +795,7 @@ const DJDashboard = () => {
                                         disabled={deletingId === deleteModal.eventId}
                                         className="w-full py-5 bg-red-500 hover:bg-red-600 text-white font-black rounded-3xl shadow-[0_20px_40px_rgba(239,68,68,0.3)] transition-all uppercase tracking-widest text-xs disabled:opacity-50 flex items-center justify-center gap-2"
                                     >
-                                        {deletingId === deleteModal.eventId ? <Loader2 className="w-5 h-5 animate-spin" /> : 'EVET, SİL'}
+                                        {deletingId === deleteModal.eventId ? <Loader2 className="w-5 h-5 animate-spin" /> : t('dashboard.eventCard.deleteConfirmBtn', { defaultValue: 'EVET, SİL' })}
                                     </button>
                                     <button
                                         onClick={() => setDeleteModal({ isOpen: false, eventId: null })}
@@ -825,25 +825,25 @@ const DJDashboard = () => {
                                         <div className="w-16 h-16 bg-prime/10 rounded-2xl flex items-center justify-center mb-6 mx-auto md:mx-0">
                                             <Sparkles className="w-8 h-8 text-prime" />
                                         </div>
-                                        <h2 className="text-2xl font-black text-white premium-text uppercase tracking-tight mb-2">Abonelik Durumu</h2>
-                                        <p className="text-slate-400 text-sm">Paket ve kredi bilgilerinizi buradan yönetebilirsiniz.</p>
+                                        <h2 className="text-2xl font-black text-white premium-text uppercase tracking-tight mb-2">{t('dashboard.sidebar.subscriptionStatus', { defaultValue: 'Abonelik Durumu' })}</h2>
+                                        <p className="text-slate-400 text-sm">{t('dashboard.sidebar.subNote', { defaultValue: 'Paket ve kredi bilgilerinizi buradan yönetebilirsiniz.' })}</p>
                                     </div>
 
                                     <div className="space-y-6 flex-grow">
                                         <div className="p-5 bg-white/5 rounded-3xl border border-white/10">
-                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">Mevcut Paket</p>
+                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">{t('dashboard.sidebar.currentTier', { defaultValue: 'Mevcut Paket' })}</p>
                                             <div className="flex items-center gap-3">
                                                 <div className={`p-2 rounded-lg ${vendor?.subscription_tier === 'premium' ? 'bg-yellow-400/20 text-yellow-400' : 'bg-slate-400/20 text-slate-400'}`}>
                                                     {vendor?.subscription_tier === 'premium' ? <Sparkles className="w-5 h-5" /> : <Zap className="w-5 h-5" />}
                                                 </div>
                                                 <span className="text-white font-black uppercase tracking-tight">
-                                                    {vendor?.subscription_tier === 'premium' ? 'PREMIUM ÜYE' : 'ÜCRETSİZ ÜYE'}
+                                                    {vendor?.subscription_tier === 'premium' ? t('dashboard.sidebar.premiumMember', { defaultValue: 'PREMIUM ÜYE' }) : t('dashboard.sidebar.freeMember', { defaultValue: 'ÜCRETSİZ ÜYE' })}
                                                 </span>
                                             </div>
                                         </div>
 
                                         <div className="p-5 bg-white/5 rounded-3xl border border-white/10">
-                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">Kredi Bakiyesi</p>
+                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">{t('dashboard.sidebar.credits', { defaultValue: 'KREDİ' })}</p>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
                                                     <div className="p-2 rounded-lg bg-emerald-400/20 text-emerald-400">
@@ -853,7 +853,7 @@ const DJDashboard = () => {
                                                         {vendor?.credit_balance || 0}
                                                     </span>
                                                 </div>
-                                                <span className="text-[10px] text-emerald-400 font-bold bg-emerald-400/10 px-2 py-1 rounded-md">AKTİF</span>
+                                                <span className="text-[10px] text-emerald-400 font-bold bg-emerald-400/10 px-2 py-1 rounded-md">{t('common.active', { defaultValue: 'AKTİF' })}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -862,7 +862,7 @@ const DJDashboard = () => {
                                         onClick={() => setShowSubscriptionModal(false)}
                                         className="mt-8 py-4 px-6 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-2xl transition-all font-bold text-sm uppercase tracking-widest"
                                     >
-                                        Kapat
+                                        {t('common.close')}
                                     </button>
                                 </div>
 
@@ -871,7 +871,7 @@ const DJDashboard = () => {
                                     <div className="flex justify-between items-center mb-8">
                                         <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center gap-3">
                                             <CreditCard className="w-6 h-6 text-prime" />
-                                            Paketini Yükselt
+                                            {t('dashboard.sidebar.upgradeTier', { defaultValue: 'Paketini Yükselt' })}
                                         </h3>
                                     </div>
 
@@ -885,7 +885,7 @@ const DJDashboard = () => {
                                                 <h4 className="text-xl font-black text-white mb-2 uppercase">PREMIUM</h4>
                                                 <div className="flex items-baseline gap-1 mb-6">
                                                     <span className="text-3xl font-black text-white">{parseFloat(plan.price_monthly).toFixed(2)}€</span>
-                                                    <span className="text-slate-500 text-xs font-bold uppercase">/aylık</span>
+                                                    <span className="text-slate-500 text-xs font-bold uppercase">/{t('common.monthly', { defaultValue: 'aylık' })}</span>
                                                 </div>
 
                                                 {selectedCheckout?.id === plan.id ? (
@@ -909,27 +909,27 @@ const DJDashboard = () => {
                                                             onClick={() => setSelectedCheckout(null)}
                                                             className="w-full mt-3 py-2 text-slate-500 text-[10px] font-bold uppercase hover:text-white transition-colors"
                                                         >
-                                                            İptal
+                                                            {t('common.cancel')}
                                                         </button>
                                                     </div>
                                                 ) : (
                                                     <div className="flex flex-col flex-1">
                                                         <ul className="space-y-3 mb-8">
                                                             <li className="flex items-center gap-2 text-slate-300 text-xs font-medium">
-                                                                <CheckCircle2 className="w-3 h-3 text-prime" /> Sınırsız Canlı İstek
+                                                                <CheckCircle2 className="w-3 h-3 text-prime" /> {t('dashboard.faq.a3', { defaultValue: 'Sınırsız Canlı İstek' })}
                                                             </li>
                                                             <li className="flex items-center gap-2 text-slate-300 text-xs font-medium">
-                                                                <CheckCircle2 className="w-3 h-3 text-prime" /> En Üst Sıralarda Görünüm
+                                                                <CheckCircle2 className="w-3 h-3 text-prime" /> {t('dashboard.plans.premiumFeature2', { defaultValue: 'En Üst Sıralarda Görünüm' })}
                                                             </li>
                                                             <li className="flex items-center gap-2 text-slate-300 text-xs font-medium">
-                                                                <CheckCircle2 className="w-3 h-3 text-prime" /> 12 Hediye Kredi / Ay
+                                                                <CheckCircle2 className="w-3 h-3 text-prime" /> {t('dashboard.plans.premiumFeature3', { defaultValue: '12 Hediye Kredi / Ay' })}
                                                             </li>
                                                         </ul>
                                                         <button
                                                             onClick={() => setSelectedCheckout({ id: plan.id, type: 'premium' })}
                                                             className="w-full mt-auto py-4 bg-prime hover:bg-rose-600 text-white font-black rounded-2xl shadow-lg transition-all uppercase tracking-widest text-[10px]"
                                                         >
-                                                            HEMEN YÜKSELT
+                                                            {t('dashboard.plans.upgradeNow', { defaultValue: 'HEMEN YÜKSELT' })}
                                                         </button>
                                                     </div>
                                                 )}
@@ -943,7 +943,7 @@ const DJDashboard = () => {
                                                     <h4 className="text-xl font-black text-white mb-2 uppercase tracking-tight">{pkg.name}</h4>
                                                     <div className="flex items-baseline gap-1 mb-6">
                                                         <span className="text-3xl font-black text-white">{parseFloat(pkg.price).toFixed(2)}€</span>
-                                                        <span className="text-slate-500 text-xs font-bold uppercase">/{pkg.credits} Kredi</span>
+                                                        <span className="text-slate-500 text-xs font-bold uppercase">/{pkg.credits} {t('dashboard.sidebar.credits', { defaultValue: 'Krediler' })}</span>
                                                     </div>
 
                                                     {selectedCheckout?.id === pkg.id ? (
@@ -967,31 +967,31 @@ const DJDashboard = () => {
                                                                 onClick={() => setSelectedCheckout(null)}
                                                                 className="w-full mt-3 py-2 text-slate-500 text-[10px] font-bold uppercase hover:text-white transition-colors"
                                                             >
-                                                                İptal
+                                                                {t('common.cancel')}
                                                             </button>
                                                         </div>
                                                     ) : (
                                                         <div className="flex flex-col flex-1">
-                                                            <p className="text-slate-400 text-[10px] mb-8 font-medium">Sadece ihtiyacın olduğunda kullan. {pkg.credits} kredi ile sistem erişimini aktif tut.</p>
+                                                            <p className="text-slate-400 text-[10px] mb-8 font-medium">{t('dashboard.plans.creditsSub', { defaultValue: 'Sadece ihtiyacın olduğunda kullan. Sistem erişimini aktif tut.' })}</p>
                                                             <ul className="space-y-3 mb-8">
                                                                 <li className="flex items-center gap-2 text-slate-300 text-xs font-medium">
                                                                     <div className="w-3 h-3 rounded-full bg-emerald-400/20 flex items-center justify-center">
                                                                         <CheckCircle2 className="w-2 h-2 text-emerald-400" />
                                                                     </div>
-                                                                    {pkg.credits} Adet Kredi
+                                                                    {pkg.credits} {t('dashboard.sidebar.credits', { defaultValue: 'Kredi' })}
                                                                 </li>
                                                                 <li className="flex items-center gap-2 text-slate-300 text-xs font-medium">
                                                                     <div className="w-3 h-3 rounded-full bg-emerald-400/20 flex items-center justify-center">
                                                                         <CheckCircle2 className="w-2 h-2 text-emerald-400" />
                                                                     </div>
-                                                                    Esnek Kullanım
+                                                                    {t('dashboard.plans.flexibleUse', { defaultValue: 'Esnek Kullanım' })}
                                                                 </li>
                                                             </ul>
                                                             <button
                                                                 onClick={() => setSelectedCheckout({ id: pkg.id, type: 'credits' })}
                                                                 className="w-full mt-auto py-4 bg-white/10 hover:bg-white/20 text-white font-black rounded-2xl transition-all uppercase tracking-widest text-[10px]"
                                                             >
-                                                                KREDİ SATIN AL
+                                                                {t('dashboard.plans.buyCredits', { defaultValue: 'KREDİ SATIN AL' })}
                                                             </button>
                                                         </div>
                                                     )}
@@ -1006,8 +1006,8 @@ const DJDashboard = () => {
                                                 <Zap className="w-6 h-6" />
                                             </div>
                                             <div>
-                                                <h5 className="text-white font-bold text-sm tracking-tight">Güvenli Ödeme</h5>
-                                                <p className="text-slate-400 text-xs">Ödemeleriniz PayPal aracılığıyla uçtan uca şifreli ve güvenli bir şekilde işlenir.</p>
+                                                <h5 className="text-white font-bold text-sm tracking-tight">{t('dashboard.support.securePayment', { defaultValue: 'Güvenli Ödeme' })}</h5>
+                                                <p className="text-slate-400 text-xs">{t('dashboard.support.securePaymentNote', { defaultValue: 'Ödemeleriniz PayPal aracılığıyla uçtan uca şifreli ve güvenli bir şekilde işlenir.' })}</p>
                                             </div>
                                         </div>
 
@@ -1110,7 +1110,7 @@ const DJDashboard = () => {
 
                                 <div className="p-8 border-t border-white/5 text-center bg-white/[0.01]">
                                     <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.3em]">
-                                        KOLAYDÜĞÜN LIVE ASSIST
+                                        {t('common.brand_footer', { defaultValue: 'KOLAYDÜĞÜN LIVE ASSIST' })}
                                     </p>
                                 </div>
                             </motion.div>

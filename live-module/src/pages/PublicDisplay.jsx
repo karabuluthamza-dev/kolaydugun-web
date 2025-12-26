@@ -24,6 +24,25 @@ const PublicDisplay = () => {
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
+                table: 'live_requests',
+                filter: `event_id=eq.${eventId}`
+            }, (payload) => {
+                // New request added
+                if (payload.eventType === 'INSERT') {
+                    fetchRequests();
+                }
+                // Request updated (status change, upvote, etc.)
+                if (payload.eventType === 'UPDATE') {
+                    fetchRequests();
+                }
+                // Request deleted
+                if (payload.eventType === 'DELETE') {
+                    fetchRequests();
+                }
+            })
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
                 table: 'live_battles',
                 filter: `event_id=eq.${eventId}`
             }, (payload) => {
@@ -119,7 +138,7 @@ const PublicDisplay = () => {
     if (loading) return null;
 
     return (
-        <div className="h-screen w-screen bg-black text-white overflow-hidden flex flex-col p-12 relative">
+        <div className="h-screen w-full bg-black text-white overflow-hidden flex flex-col p-4 md:p-8 lg:p-12 relative select-none">
             {/* Animated Background Elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <motion.div
@@ -144,31 +163,31 @@ const PublicDisplay = () => {
             </div>
 
             {/* Header */}
-            <div className="flex justify-between items-center mb-16 relative z-10">
-                <div>
-                    <h1 className="text-4xl font-black tracking-tighter text-prime uppercase mb-2">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 mb-4 md:mb-6 lg:mb-8 relative z-10 text-center md:text-left shrink-0">
+                <div className="w-full md:w-auto">
+                    <h1 className="text-xl md:text-[clamp(1.8rem,3.5vw,3rem)] font-black tracking-tighter text-prime uppercase leading-tight mb-1">
                         {event?.event_name}
                     </h1>
-                    <p className="text-xl font-bold text-white/40 uppercase tracking-[0.3em]">
+                    <p className="text-[10px] md:text-[clamp(0.7rem,1.2vw,1rem)] font-bold text-white/40 uppercase tracking-[0.3em]">
                         {t('publicDisplay.title')}
                     </p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
                     <button
                         onClick={toggleFullScreen}
-                        className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all group"
+                        className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all group hidden lg:block"
                         title={isFullScreen ? t('publicDisplay.actions.exitFullScreen') : t('publicDisplay.actions.fullScreen')}
                     >
-                        {isFullScreen ? <Minimize className="w-6 h-6 text-white/40 group-hover:text-white" /> : <Maximize className="w-6 h-6 text-white/40 group-hover:text-white" />}
+                        {isFullScreen ? <Minimize className="w-5 h-5 text-white/40 group-hover:text-white" /> : <Maximize className="w-5 h-5 text-white/40 group-hover:text-white" />}
                     </button>
-                    <div className="flex items-center gap-6 bg-white/5 border border-white/10 p-6 rounded-[2rem]">
-                        <QrCode className="w-16 h-16 text-white" />
-                        <div>
-                            <p className="text-xs font-black text-white/40 uppercase tracking-widest mb-1">
+                    <div className="flex items-center gap-3 md:gap-6 bg-white/5 border border-white/10 p-2 md:p-3 lg:p-4 rounded-xl md:rounded-[2rem] w-full sm:w-auto justify-center">
+                        <QrCode className="w-8 h-8 md:w-10 lg:w-14 md:h-10 lg:h-14 text-white shrink-0" />
+                        <div className="text-left">
+                            <p className="text-[9px] md:text-xs font-black text-white/40 uppercase tracking-widest leading-tight">
                                 {t('publicDisplay.scanToRequest')}
                             </p>
-                            <p className="text-2xl font-mono font-bold tracking-tight">
-                                kolaydugun.de/e/{event?.slug}
+                            <p className="text-sm md:text-lg lg:text-2xl font-mono font-bold tracking-tight truncate max-w-[130px] md:max-w-none">
+                                {window.location.host}/e/{event?.slug}
                             </p>
                         </div>
                     </div>
@@ -176,73 +195,72 @@ const PublicDisplay = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className={`flex-1 flex gap-12 mt-12 transition-all duration-1000 w-full relative z-10 ${activeBattle ? 'max-w-[120rem]' : 'max-w-6xl'} mx-auto overflow-hidden`}>
+            <div className={`flex-1 flex flex-col md:flex-row gap-6 md:gap-8 transition-all duration-1000 w-full relative z-10 ${activeBattle ? 'max-w-[140rem]' : 'max-w-6xl'} mx-auto overflow-hidden mt-2 pt-6`}>
                 {/* Left Side: Requests (Now half-width if battle is active) */}
-                <div className={`flex flex-col gap-6 transition-all duration-1000 ${activeBattle ? 'w-1/2' : 'w-full'}`}>
+                <div className={`flex flex-col gap-4 md:gap-6 lg:gap-8 transition-all duration-1000 ${activeBattle ? 'w-full md:w-1/2' : 'w-full'}`}>
                     <AnimatePresence mode="popLayout">
                         {requests.length === 0 ? (
                             <motion.div
                                 key="no-requests"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className="flex-1 flex flex-col items-center justify-center text-center opacity-20"
+                                className="flex-1 flex flex-col items-center justify-center text-center opacity-20 py-10"
                             >
-                                <Music2 className="w-48 h-48 mb-6" />
-                                <h3 className="text-4xl font-black uppercase tracking-[0.2em]">{t('publicDisplay.waitingForRequests')}</h3>
+                                <Music2 className="w-20 h-20 md:w-32 lg:w-48 mb-6" />
+                                <h3 className="text-lg md:text-2xl lg:text-4xl font-black uppercase tracking-[0.2em]">{t('publicDisplay.waitingForRequests')}</h3>
                             </motion.div>
                         ) : (
-                            requests.map((req, index) => (
+                            requests.slice(0, activeBattle ? 2 : 5).map((req, index) => (
                                 <motion.div
                                     key={req.id}
                                     layout
                                     initial={{ opacity: 0, x: -100, scale: 0.8 }}
-                                    animate={{ opacity: index === 0 ? 1 : 0.4, x: 0, scale: index === 0 ? 1 : 0.95 }}
+                                    animate={{
+                                        opacity: index === 0 ? 1 : 0.4,
+                                        x: 0,
+                                        scale: index === 0 ? 1 : (window.innerWidth < 768 ? 1 : 0.98)
+                                    }}
                                     exit={{ opacity: 0, scale: 0.8 }}
                                     transition={{ duration: 0.8, ease: "easeOut" }}
-                                    className={`relative p-12 rounded-[3.5rem] border-4 transition-all ${req.is_vip
-                                        ? 'bg-slate-900 border-amber-400 shadow-[0_0_80px_rgba(251,191,36,0.3)]'
+                                    className={`relative p-3.5 md:p-6 lg:p-8 rounded-xl md:rounded-[2.5rem] lg:rounded-[3rem] border-2 md:border-4 transition-all shrink-0 ${req.is_vip
+                                        ? 'bg-slate-900 border-amber-400 shadow-[0_0_80px_rgba(251,191,36,0.2)]'
                                         : index === 0
-                                            ? 'bg-slate-900 border-prime shadow-[0_0_80px_rgba(225,29,72,0.3)]'
+                                            ? 'bg-slate-900 border-prime shadow-[0_0_80px_rgba(225,29,72,0.2)]'
                                             : 'bg-white/5 border-transparent'
                                         }`}
                                 >
-                                    {req.is_vip && (
-                                        <div className="absolute -top-6 left-12 bg-amber-400 text-black px-8 py-2 rounded-full font-black text-sm uppercase tracking-[0.2em]">
-                                            VIP REQUEST
-                                        </div>
-                                    )}
-                                    {index === 0 && !req.is_vip && (
-                                        <div className="absolute -top-6 left-12 bg-prime text-white px-8 py-2 rounded-full font-black text-sm uppercase tracking-[0.2em]">
-                                            {t('publicDisplay.nextUp')}
+                                    {(req.is_vip || index === 0) && (
+                                        <div className={`absolute -top-3 md:-top-4 lg:-top-5 left-5 md:left-10 lg:left-12 px-3 md:px-6 lg:px-8 py-1 md:py-1.5 rounded-full font-black text-[9px] md:text-xs uppercase tracking-[0.2em] z-20 shadow-lg ${req.is_vip ? 'bg-amber-400 text-black' : 'bg-prime text-white'}`}>
+                                            {req.is_vip ? t('guest.vipTitle') : t('publicDisplay.nextUp')}
                                         </div>
                                     )}
 
-                                    <div className="flex items-center gap-10">
-                                        <div className={`bg-prime/10 rounded-3xl flex items-center justify-center overflow-hidden border-2 border-white/5 ${activeBattle ? 'w-24 h-24' : 'w-48 h-48'}`}>
+                                    <div className="flex items-center gap-4 md:gap-6 lg:gap-8">
+                                        <div className={`bg-prime/10 rounded-lg md:rounded-2xl flex items-center justify-center overflow-hidden border border-white/5 ${activeBattle ? 'w-12 h-12 md:w-16 lg:w-20' : 'w-16 h-16 md:w-28 lg:w-36'} shrink-0`}>
                                             {req.image_url ? (
                                                 <img src={req.image_url} className="w-full h-full object-cover" alt="" />
                                             ) : req.metadata?.artworkUrl100 ? (
                                                 <img src={req.metadata.artworkUrl100} className="w-full h-full object-cover" alt="" />
                                             ) : (
-                                                <Music2 className={activeBattle ? 'w-12 h-12 text-prime' : 'w-24 h-24 text-prime'} />
+                                                <Music2 className={activeBattle ? 'w-5 h-5 md:w-8 lg:w-10 text-prime' : 'w-8 h-8 md:w-16 lg:w-20 text-prime'} />
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h2 className={`font-black tracking-tighter uppercase truncate ${activeBattle ? 'text-5xl' : 'text-7xl'}`}>
+                                            <h2 className={`font-black tracking-tighter uppercase line-clamp-2 md:leading-[1.1] ${activeBattle ? 'text-lg md:text-[clamp(1.1rem,2vw,1.8rem)]' : 'text-xl md:text-[clamp(1.4rem,3.5vw,3.2rem)]'}`}>
                                                 {req.song_title}
                                             </h2>
-                                            <p className={`font-bold opacity-40 uppercase tracking-widest ${activeBattle ? 'text-xl' : 'text-3xl'}`}>
-                                                {req.artist_name || req.metadata?.artistName || 'İSTEK'}
+                                            <p className={`font-bold opacity-40 uppercase tracking-widest truncate mt-0.5 ${activeBattle ? 'text-[9px] md:text-sm' : 'text-[10px] md:text-xl'}`}>
+                                                {req.artist_name || req.metadata?.artistName || t('liveFeed.guestLabel')}
                                             </p>
                                         </div>
-                                        <div className="flex items-center gap-6">
+                                        <div className="flex items-center gap-2.5 md:gap-6 shrink-0">
                                             {req.upvote_count > 0 && (
-                                                <div className="flex flex-col items-center gap-1">
-                                                    <ThumbsUp className={`text-prime fill-current ${activeBattle ? 'w-8 h-8' : 'w-12 h-12'}`} />
-                                                    <span className="font-black text-2xl">{req.upvote_count}</span>
+                                                <div className="flex flex-col items-center gap-0.5">
+                                                    <ThumbsUp className={`text-prime fill-current ${activeBattle ? 'w-4 h-4 md:w-6' : 'w-5 h-5 md:w-10'}`} />
+                                                    <span className="font-black text-[10px] md:text-lg lg:text-xl">{req.upvote_count}</span>
                                                 </div>
                                             )}
-                                            {req.mood && <span className={activeBattle ? 'text-6xl' : 'text-8xl'}>{req.mood}</span>}
+                                            {req.mood && <span className={activeBattle ? 'text-xl md:text-4xl lg:text-5xl' : 'text-2xl md:text-6xl lg:text-7xl'}>{req.mood}</span>}
                                         </div>
                                     </div>
                                 </motion.div>
@@ -258,80 +276,80 @@ const PublicDisplay = () => {
                             initial={{ opacity: 0, x: 100 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 100 }}
-                            className="w-1/2 flex flex-col gap-8"
+                            className="w-full md:w-1/2 flex flex-col gap-3 md:gap-4 mb-8 md:mb-0"
                         >
-                            <div className="flex-1 bg-slate-900/50 backdrop-blur-3xl rounded-[4rem] border-4 border-orange-500/30 p-16 flex flex-col relative overflow-hidden shadow-[0_0_100px_rgba(249,115,22,0.1)]">
-                                <div className="absolute -top-24 -right-24 opacity-10">
+                            <div className="flex-1 bg-slate-900/50 backdrop-blur-3xl rounded-2xl md:rounded-[1.5rem] border-4 border-orange-500/30 p-3 md:p-5 lg:p-6 flex flex-col relative shadow-[0_0_100px_rgba(249,115,22,0.1)]">
+                                <div className="absolute -top-24 -right-24 opacity-10 hidden md:block pointer-events-none">
                                     <Flame className="w-[40rem] h-[40rem] text-orange-500" />
                                 </div>
 
-                                <div className="relative z-10 flex flex-col h-full">
-                                    <div className="mb-12">
-                                        <div className="inline-flex items-center gap-3 bg-orange-500 text-black px-8 py-3 rounded-full font-black text-sm uppercase tracking-[0.3em] mb-6">
-                                            <Flame className="w-5 h-5 fill-current" />
+                                <div className="relative z-10 flex flex-col justify-between">
+                                    <div className="mb-1 md:mb-2">
+                                        <div className="inline-flex items-center gap-1.5 bg-orange-500 text-black px-2.5 md:px-4 py-0.5 md:py-1.5 rounded-full font-black text-[7px] md:text-[10px] uppercase tracking-[0.2em] mb-1.5 md:mb-3">
+                                            <Flame className="w-2.5 h-2.5 md:w-3.5 md:h-3.5 fill-current" />
                                             LIVE BATTLE
                                         </div>
-                                        <h2 className="text-7xl font-black leading-[1.1] uppercase tracking-tighter bg-gradient-to-br from-white to-white/40 bg-clip-text text-transparent">
+                                        <h2 className="text-lg md:text-[clamp(1rem,2.5vw,2rem)] lg:text-3xl font-black leading-[1.1] uppercase tracking-tighter bg-gradient-to-br from-white to-white/40 bg-clip-text text-transparent line-clamp-2">
                                             {activeBattle.title}
                                         </h2>
                                     </div>
 
-                                    <div className="flex-1 flex flex-col justify-center gap-16">
+                                    <div className="flex flex-col gap-3 md:gap-4 lg:gap-5 my-2 md:my-3">
                                         {/* Option A */}
-                                        <div className="space-y-6">
-                                            <div className="flex justify-between items-end mb-2">
-                                                <span className="text-4xl font-black uppercase tracking-widest">{activeBattle.option_a_name}</span>
+                                        <div className="space-y-1.5 md:space-y-2">
+                                            <div className="flex justify-between items-end gap-2">
+                                                <span className="text-sm md:text-[clamp(0.9rem,1.8vw,1.3rem)] lg:text-lg font-black uppercase tracking-wider line-clamp-1 flex-1">{activeBattle.option_a_name}</span>
                                                 <motion.span
                                                     key={battleVotes.A}
                                                     initial={{ scale: 1.5, color: '#f97316' }}
                                                     animate={{ scale: 1, color: '#f97316' }}
-                                                    className="text-6xl font-black"
+                                                    className="text-lg md:text-2xl lg:text-3xl font-black shrink-0"
                                                 >
                                                     {Math.round((battleVotes.A / (battleVotes.A + battleVotes.B || 1)) * 100)}%
                                                 </motion.span>
                                             </div>
-                                            <div className="h-16 bg-white/5 rounded-3xl overflow-hidden border-2 border-white/5 p-2 shadow-inner">
+                                            <div className="h-5 md:h-8 lg:h-10 bg-white/5 rounded-md md:rounded-lg overflow-hidden border-2 border-white/5 p-0.5 shadow-inner">
                                                 <motion.div
-                                                    className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-2xl relative"
+                                                    className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-sm md:rounded-md relative"
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${(battleVotes.A / (battleVotes.A + battleVotes.B || 1)) * 100}%` }}
                                                     transition={{ duration: 1, ease: "circOut" }}
                                                 >
-                                                    <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:2rem_2rem] animate-[stripe_1s_linear_infinite]" />
+                                                    <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:1.5rem_1.5rem] animate-[stripe_1s_linear_infinite]" />
                                                 </motion.div>
                                             </div>
                                         </div>
 
                                         {/* Option B */}
-                                        <div className="space-y-6">
-                                            <div className="flex justify-between items-end mb-2">
-                                                <span className="text-4xl font-black uppercase tracking-widest opacity-60">{activeBattle.option_b_name}</span>
+                                        <div className="space-y-1.5 md:space-y-2">
+                                            <div className="flex justify-between items-end gap-2">
+                                                <span className="text-sm md:text-[clamp(0.9rem,1.8vw,1.3rem)] lg:text-lg font-black uppercase tracking-wider opacity-60 line-clamp-1 flex-1">{activeBattle.option_b_name}</span>
                                                 <motion.span
                                                     key={battleVotes.B}
                                                     initial={{ scale: 1.5, color: '#3b82f6' }}
                                                     animate={{ scale: 1, color: '#3b82f6' }}
-                                                    className="text-6xl font-black"
+                                                    className="text-lg md:text-2xl lg:text-3xl font-black shrink-0"
                                                 >
                                                     {Math.round((battleVotes.B / (battleVotes.A + battleVotes.B || 1)) * 100)}%
                                                 </motion.span>
                                             </div>
-                                            <div className="h-16 bg-white/5 rounded-3xl overflow-hidden border-2 border-white/5 p-2 shadow-inner">
+                                            <div className="h-5 md:h-8 lg:h-10 bg-white/5 rounded-md md:rounded-lg overflow-hidden border-2 border-white/5 p-0.5 shadow-inner">
                                                 <motion.div
-                                                    className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-2xl relative"
+                                                    className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-sm md:rounded-md relative"
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${(battleVotes.B / (battleVotes.A + battleVotes.B || 1)) * 100}%` }}
                                                     transition={{ duration: 1, ease: "circOut" }}
                                                 >
-                                                    <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:2rem_2rem] animate-[stripe_1s_linear_infinite]" />
+                                                    <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:1.5rem_1.5rem] animate-[stripe_1s_linear_infinite]" />
                                                 </motion.div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="mt-16 text-center">
-                                        <div className="inline-block bg-white/5 backdrop-blur-3xl px-12 py-6 rounded-[2.5rem] border border-white/10">
-                                            <p className="text-3xl font-black text-white/40 uppercase tracking-[0.4em] animate-pulse">
-                                                TELEFONUNUZDAN OYLAYIN!
+                                    <div className="mt-1.5 md:mt-3 text-center">
+                                        <div className="inline-block bg-white/5 backdrop-blur-3xl px-3 md:px-5 py-1.5 md:py-2 rounded-md md:rounded-lg border border-white/10">
+                                            <p className="text-[8px] md:text-sm lg:text-base font-black text-white/40 uppercase tracking-[0.2em] animate-pulse whitespace-nowrap">
+                                                {t('guest.voteFromPhone')}
                                             </p>
                                         </div>
                                     </div>
@@ -343,8 +361,8 @@ const PublicDisplay = () => {
             </div>
 
             {/* Footer */}
-            <div className="mt-16 text-center relative z-10">
-                <p className="text-sm font-black text-white/10 uppercase tracking-[0.5em]">
+            <div className="mt-auto pt-6 text-center relative z-10 shrink-0">
+                <p className="text-[10px] md:text-sm font-black text-white/10 uppercase tracking-[0.5em]">
                     Powered by KolayDüğün Live
                 </p>
             </div>
