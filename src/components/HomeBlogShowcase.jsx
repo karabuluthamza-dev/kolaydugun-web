@@ -137,6 +137,10 @@ const HomeBlogShowcase = () => {
                                     <img
                                         src={post.featured_image_url || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80'}
                                         alt={title}
+                                        width="400"
+                                        height="200"
+                                        loading="lazy"
+                                        decoding="async"
                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                     />
                                 </div>

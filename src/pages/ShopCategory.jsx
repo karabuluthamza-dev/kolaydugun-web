@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { useLanguage } from '../context/LanguageContext';
 import SEO from '../components/SEO';
+import { generateShopBreadcrumb } from '../utils/breadcrumbSchema';
 import { slugify } from '../utils/text';
 import './Shop.css';
 
@@ -162,6 +163,10 @@ const ShopCategory = () => {
             <SEO
                 title={`${category[`name_${language}`] || category.name_tr} - ${t('shop.title', 'Mağaza')}`}
                 description={category[`description_${language}`] || category.description_tr}
+                structuredData={generateShopBreadcrumb(
+                    category[`name_${language}`] || category.name_tr,
+                    slug
+                )}
             />
 
             {/* Hero with category info */}

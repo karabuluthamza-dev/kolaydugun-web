@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -10,8 +10,11 @@ import FaviconManager from './components/FaviconManager';
 import ScrollToTop from './components/ScrollToTop';
 import MobileBottomNav from './components/MobileBottomNav';
 import SmartAppBanner from './components/SmartAppBanner';
-import PrivacyBanner from './components/PrivacyBanner';
+import GlobalSchema from './components/GlobalSchema';
 import { trackError } from './utils/analytics';
+// AOS - Animate on Scroll
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 // Static Pages (Always loaded)
 import Home from './pages/Home';
@@ -34,6 +37,8 @@ import LiveDemo from './pages/LiveDemo';
 import ToolsDashboard from './pages/ToolsDashboard';
 import CommunityLayout from './pages/community/CommunityLayout';
 import CommunityHome from './pages/community/CommunityHome';
+import VIPDemoPage from './pages/VIPDemoPage';
+import PartnershipProposal from './pages/PartnershipProposal';
 
 // Lazy Dashboard Components
 const VendorDashboard = lazy(() => import('./pages/VendorDashboard'));
@@ -128,6 +133,7 @@ const AdminClaims = lazy(() => import('./pages/AdminClaims'));
 const AdminPoachedInquiries = lazy(() => import('./pages/AdminPoachedInquiries'));
 const AdminCityAliases = lazy(() => import('./pages/AdminCityAliases'));
 const AdminImports = lazy(() => import('./pages/AdminImports'));
+const AdminWarRoom = lazy(() => import('./pages/AdminWarRoom'));
 
 // Legal
 const Impressum = lazy(() => import('./pages/legal/Impressum'));
@@ -143,21 +149,24 @@ const CoupleMessages = lazy(() => import('./components/CoupleMessages'));
 const UserNotifications = lazy(() => import('./pages/UserNotifications'));
 const ProfileSettings = lazy(() => import('./pages/ProfileSettings'));
 
-// AOS - Animate on Scroll
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import { useEffect } from 'react';
-
-
-
 function App() {
   // Initialize AOS
   useEffect(() => {
+    // Remove splash screen when app is ready
+    const splash = document.getElementById('splash-screen');
+    if (splash) {
+      splash.style.opacity = '0';
+      setTimeout(() => {
+        splash.remove();
+      }, 400);
+    }
+
     AOS.init({
       duration: 800,
       easing: 'ease-out',
       once: true,
       offset: 50,
+      disable: import.meta.env.DEV,
     });
   }, []);
 
@@ -183,11 +192,12 @@ function App() {
   return (
     <>
       <ScrollToTop />
+      <GlobalSchema />
       <SmartAppBanner />
       <div className="flex flex-col min-h-screen">
         <MobileBottomNav />
         <Navbar />
-        <div className="flex-grow">
+        <main className="flex-grow">
           <MaintenanceCheck />
           <FaviconManager />
           <SessionTracker />
@@ -213,6 +223,10 @@ function App() {
               <Route path="/live-demo" element={<LiveDemo />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/vip-demo" element={<VIPDemoPage />} />
+              <Route path="/proposals/:category" element={<PartnershipProposal />} />
+              <Route path="/partnership-proposal" element={<PartnershipProposal />} />
+              <Route path="/vendor-dashboard-demo" element={<Suspense fallback={<LoadingSpinner />}><VendorDashboard /></Suspense>} />
               <Route path="/faq" element={<FAQPage />} />
               <Route path="/directory" element={<DirectoryPage />} />
               <Route path="/kurucumuz" element={<Founder />} />
@@ -322,19 +336,19 @@ function App() {
                 <Route path="faq" element={<AdminFAQ />} />
                 <Route path="messaging" element={<AdminMessaging />} />
                 <Route path="claims" element={<AdminClaims />} />
+                <Route path="war-room" element={<AdminWarRoom />} />
                 <Route path="poached-inquiries" element={<AdminPoachedInquiries />} />
                 <Route path="city-aliases" element={<AdminCityAliases />} />
                 <Route path="imports" element={<AdminImports />} />
                 <Route path="/admin/founder" element={<AdminFounder />} />
                 <Route path="help" element={<AdminHelp />} />
                 <Route path="live-requests" element={<AdminLiveRequestPanel />} />
-
               </Route>
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
-        </div>
+        </main>
         <Footer />
       </div>
     </>

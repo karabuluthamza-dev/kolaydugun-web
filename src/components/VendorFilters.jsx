@@ -194,7 +194,7 @@ const VendorFilters = ({ filters, onFilterChange, userLocation, onLocationReques
                                 <option value="">{t('filters.all') || 'Tümü'}</option>
                                 {(STATES[filters.country || 'DE'] || []).map(s => (
                                     <option key={s.id} value={s.id}>
-                                        {dictionary.locations.states[s.id]?.[language] || s[language] || s.en}
+                                        {dictionary.poaching?.locations?.states?.[s.id]?.[language] || s[language] || s.en}
                                     </option>
                                 ))}
                             </select>
@@ -224,14 +224,14 @@ const VendorFilters = ({ filters, onFilterChange, userLocation, onLocationReques
                         >
                             <option value="">{t('filters.all') || 'Tümü'}</option>
                             {!filters.state && (
-                                <optgroup label={dictionary.locations.popularCities?.[language] || "Popüler Şehirler"}>
+                                <optgroup label={dictionary.poaching?.locations?.popularCities?.[language] || "Popüler Şehirler"}>
                                     {POPULAR_CITIES.map(city => (
                                         <option key={`pop-${city}`} value={city}>{city}</option>
                                     ))}
                                 </optgroup>
                             )}
                             {filters.state && (
-                                <optgroup label={dictionary.locations.states[filters.state]?.[language] || filters.state}>
+                                <optgroup label={dictionary.poaching?.locations?.states?.[filters.state]?.[language] || filters.state}>
                                     {(CITIES_BY_STATE[filters.state] || []).map(city => (
                                         <option key={city.id} value={city.id}>{city[language] || city.en || city.id}</option>
                                     ))}

@@ -22,7 +22,7 @@ const WhyUs = () => {
                         data-aos="fade-up"
                         data-aos-delay={index * 150}
                     >
-                        <div className="feature-icon">{feature.icon}</div>
+                        <div className="feature-icon" role="img" aria-hidden="true">{feature.icon}</div>
                         <h3 className="feature-title">{t(`whyUs.${feature.id}.title`)}</h3>
                         <p className="feature-desc">{t(`whyUs.${feature.id}.desc`)}</p>
                     </div>

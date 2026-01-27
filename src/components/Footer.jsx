@@ -49,7 +49,7 @@ const Footer = () => {
                 <div className="footer-grid">
                     {/* Column 1: Planning */}
                     <div className="footer-col">
-                        <h4>{t('footer.planning', language === 'tr' ? 'PLANLAMA' : (language === 'en' ? 'PLANNING' : 'HOCHZEITSPLANUNG'))}</h4>
+                        <h3>{t('footer.planning', language === 'tr' ? 'PLANLAMA' : (language === 'en' ? 'PLANNING' : 'HOCHZEITSPLANUNG'))}</h3>
                         <ul className="footer-links">
                             {planningLinks.map((link, i) => (
                                 <li key={i}><Link to={link.to}>{link.label}</Link></li>
@@ -59,7 +59,7 @@ const Footer = () => {
 
                     {/* Column 2: Services */}
                     <div className="footer-col">
-                        <h4>{t('footer.services', language === 'tr' ? 'HİZMETLER' : (language === 'en' ? 'TOP SERVICES' : 'TOP DIENSTLEISTER'))}</h4>
+                        <h3>{t('footer.services', language === 'tr' ? 'HİZMETLER' : (language === 'en' ? 'TOP SERVICES' : 'TOP DIENSTLEISTER'))}</h3>
                         <ul className="footer-links">
                             {topCategories.map((link, i) => (
                                 <li key={i}><Link to={link.to}>{link.label}</Link></li>
@@ -69,7 +69,7 @@ const Footer = () => {
 
                     {/* Column 3: Cities */}
                     <div className="footer-col">
-                        <h4>{t('footer.cities', language === 'tr' ? 'ŞEHİRLER' : (language === 'en' ? 'CITIES' : 'TOP LOCATIONS'))}</h4>
+                        <h3>{t('footer.cities', language === 'tr' ? 'ŞEHİRLER' : (language === 'en' ? 'CITIES' : 'TOP LOCATIONS'))}</h3>
                         <ul className="footer-links">
                             {topCities.map((link, i) => (
                                 <li key={i}><Link to={link.to}>{link.label}</Link></li>
@@ -79,7 +79,7 @@ const Footer = () => {
 
                     {/* Column 4: About/Legal */}
                     <div className="footer-col">
-                        <h4>{t('footer.corporate', language === 'tr' ? 'KURUMSAL' : (language === 'en' ? 'CORPORATE' : 'ÜBER UNS & RECHTLICHES'))}</h4>
+                        <h3>{t('footer.corporate', language === 'tr' ? 'KURUMSAL' : (language === 'en' ? 'CORPORATE' : 'ÜBER UNS & RECHTLICHES'))}</h3>
                         <ul className="footer-links">
                             {legalLinks.map((link, i) => (
                                 <li key={i}><Link to={link.to}>{link.label}</Link></li>
@@ -97,7 +97,8 @@ const Footer = () => {
                     </div>
 
                     <div className="footer-contact-info">
-                        <a href="mailto:kontakt@kolaydugun.de" className="footer-email">📧 kontakt@kolaydugun.de</a>
+                        <a href="tel:+491628726192" className="footer-email"><span role="img" aria-hidden="true">📞</span> +49 162 8726192</a>
+                        <a href="mailto:kontakt@kolaydugun.de" className="footer-email"><span role="img" aria-hidden="true">📧</span> kontakt@kolaydugun.de</a>
                         <div className="footer-social-wrapper">
                             {settings?.social_media && (
                                 <SocialMediaLinks socialMedia={settings.social_media} />

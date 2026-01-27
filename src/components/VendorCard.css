@@ -20,7 +20,9 @@
 .vendor-card-image-wrapper {
     position: relative;
     height: 240px;
+    aspect-ratio: 16 / 10;
     overflow: hidden;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
 .vendor-card-image {
@@ -68,7 +70,7 @@
 }
 
 .vendor-card-badge.featured {
-    background: linear-gradient(135deg, #FF6B9D, #ff8e53);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
     color: white;
     border: none;
 }
@@ -79,7 +81,8 @@
 }
 
 .vendor-card-badge.claimed-badge {
-    background: #4caf50 !important;
+    background: #15803d !important;
+    /* Dark green for accessibility */
     color: white !important;
     box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4) !important;
 }
@@ -128,9 +131,11 @@
 }
 
 .vendor-card-category {
-    font-size: 0.7rem;
-    color: #64748b;
-    font-weight: 700;
+    font-size: 0.8rem;
+    /* Increased for legibility */
+    color: #374151;
+    /* Darkened for accessibility */
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1.2px;
 }
@@ -156,7 +161,8 @@
 }
 
 .reviews {
-    color: #64748b;
+    color: #4b5563;
+    /* Darkened for accessibility */
     font-size: 0.75rem;
     font-weight: 500;
 }
@@ -178,7 +184,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #64748b;
+    color: #374151;
+    /* Darkened for accessibility */
     font-size: 0.9rem;
     font-weight: 500;
 }

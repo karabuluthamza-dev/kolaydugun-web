@@ -126,6 +126,7 @@ const AdminLayout = () => {
                     <NavItem to="/admin/categories" icon="🖼️" label={getMenu('categories')} />
                     <NavItem to="/admin/messages" icon="💬" label={getMenu('messages')} />
                     <NavItem to="/admin/claims" icon="🛡️" label={getMenu('claims')} description={menuDescriptions.claims} />
+                    <NavItem to="/admin/war-room" icon="🎯" label={getMenu('warRoom')} description={menuDescriptions.warRoom} />
                     <NavItem to="/admin/imports" icon="📥" label={language === 'tr' ? 'Veri Aktarımı' : 'Imports'} description={language === 'tr' ? 'Dış kaynaklardan çekilen verileri onayla/reddet' : 'Manage imported vendors'} />
 
                     <div className="admin-nav-divider"></div>

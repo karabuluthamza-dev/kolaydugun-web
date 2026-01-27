@@ -235,6 +235,7 @@ const LiveRequestBanner = () => {
                         {/* Close Button */}
                         <button
                             onClick={handleDismiss}
+                            aria-label={t('liveRequest.closeBanner', 'Banner schließen')}
                             style={{
                                 position: 'absolute',
                                 right: 16,

@@ -12,7 +12,7 @@ export const de = {
     },
     "hero": {
         "title": "Ihre Traumhochzeit in Deutschland",
-        "subtitle": "Perfektion bis ins kleinste Detail. Wir gestalten unvergessliche Momente.",
+        "subtitle": "Finden Sie die besten Hochzeitsdienstleister in Deutschland. Türkische und internationale Hochzeiten leicht gemacht. Vergleichen Sie Angebote kostenlos.",
         "getFreeQuote": "Gratis Angebot erhalten",
         "ctaSubtext": "Erhalten Sie individuelle Angebote"
     },
@@ -372,5 +372,59 @@ export const de = {
         "skip": "Vorerst überspringen (Zum Dashboard)",
         "success": "Zahlung erfolgreich! Willkommen bei Premium.",
         "error": "Zahlung fehlgeschlagen. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support."
+    },
+    "vip": {
+        "badges": {
+            "eliteCandidate": "ELITE PARTNER KANDIDAT",
+            "viewingNow": "{{count}} PERSONEN SCHAUEN SICH DAS JETZT AN",
+            "vipPromo": "VIP Promotion",
+            "eliteSalon": "Elite Location"
+        },
+        "nav": {
+            "general": "Allgemein",
+            "prices": "Preise",
+            "virtualTour": "Virtuelle Tour",
+            "capacity": "Kapazität",
+            "calendar": "Kalender",
+            "stats": "Statistiken",
+            "whyUs": "Warum wir?",
+            "partner": "Partner",
+            "reviews": "Bewertungen"
+        },
+        "hero": {
+            "regionAvg": "(Regionsdurchschnitt)"
+        },
+        "sections": {
+            "pricesTitle": "{{name}} Hochzeitspreise",
+            "capacityTitle": "Kapazitätsinformationen",
+            "virtualTourTitle": "360° Virtueller Rundgang & Fotos",
+            "availabilityTitle": "Live-Verfügbarkeit ({{year}})",
+            "whyUsTitle": "Warum diese Location wählen?",
+            "reviewsTitle": "Beliebte Bewertungen",
+            "partnerTitle": "Elite-Partner-Kooperation",
+            "statsTitle": "Location-Management-Panel (Demo)",
+            "statsSubtitle": "Die Leistung Ihres Profils in den letzten 30 Tagen",
+            "capacity": {
+                "area": "Bereichsname",
+                "meal": "Bankettkapazität",
+                "cocktail": "Cocktailkapazität"
+            }
+        },
+        "common": {
+            "weekDay": "Wochentags (Pro Person)",
+            "weekEnd": "Wochenende (Pro Person)",
+            "updated": "Aktuelles Angebot",
+            "lastUpdated": "Letztes Update: {{date}}",
+            "freeQuote": "Kostenloses Angebot",
+            "fastResponse": "Rückmeldung innerhalb 1 Stunde."
+        },
+        "cta": {
+            "whatsapp": "Per WhatsApp schreiben",
+            "getOffer": "ANGEBOT EINHOLEN",
+            "claimProfile": "PROFIL BEANSPRUCHEN (Kostenlos)",
+            "claimTitle": "Ist das Ihre Seite?",
+            "claimDesc": "Diese professionelle Präsentationsseite und alle Anfragen könnten Ihnen gehören. Beanspruchen Sie jetzt Ihr Profil und genießen Sie Elite-Partner-Vorteile.",
+            "testDashboard": "Management-Panel testen"
+        }
     }
 };

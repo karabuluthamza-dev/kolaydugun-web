@@ -54,7 +54,7 @@ const PlanningTools = () => {
                             {tool.key === 'liveDJ' ? t('planningTools.trial') : t('planningTools.free')}
                         </span>
                         <div className="planning-tool-icon-wrapper">
-                            <span className="planning-tool-icon">{tool.icon}</span>
+                            <span className="planning-tool-icon" role="img" aria-hidden="true">{tool.icon}</span>
                         </div>
                         <h3 className="planning-tool-name">{t(`planningTools.${tool.key}.title`)}</h3>
                         <p className="planning-tool-desc">{t(`planningTools.${tool.key}.desc`)}</p>

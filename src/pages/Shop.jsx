@@ -177,6 +177,7 @@ const Shop = () => {
                 description={t('shop.subtitle')}
                 image="/images/shop/hero-bride.png"
                 url="/shop"
+                hreflangUrls={{ de: '/shop', tr: '/shop', en: '/shop' }}
             />
 
             {/* ========== HERO - Split Layout ========== */}

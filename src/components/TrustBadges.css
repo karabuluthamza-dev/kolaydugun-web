@@ -11,7 +11,9 @@
     justify-content: center;
     gap: 16px;
     padding: 12px 24px;
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.6);
+    /* High contrast for accessibility */
+    /* Darkened for accessibility contrast */
     /* More opaque bg as alternative */
     /* Removed backdrop-filter to reduce GPU load on video */
     border-radius: 40px;

@@ -30,6 +30,8 @@ const BlogCard = ({ post, lang, categories = [] }) => {
                     alt={title}
                     loading="lazy"
                     decoding="async"
+                    width="400"
+                    height="250"
                     style={{
                         position: 'absolute',
                         top: 0,
@@ -66,10 +68,10 @@ const BlogCard = ({ post, lang, categories = [] }) => {
                 <div className="blog-meta" style={{ fontSize: '0.85rem', color: '#888', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                     <span>{date}</span>
                     {post.reading_time && (
-                        <span>⏱️ {post.reading_time} {lang === 'tr' ? 'dk' : 'min'}</span>
+                        <span><span role="img" aria-hidden="true">⏱️</span> {post.reading_time} {lang === 'tr' ? 'dk' : 'min'}</span>
                     )}
                     {post.view_count > 0 && (
-                        <span>👁️ {post.view_count.toLocaleString()}</span>
+                        <span><span role="img" aria-hidden="true">👁️</span> {post.view_count.toLocaleString()}</span>
                     )}
                 </div>
 

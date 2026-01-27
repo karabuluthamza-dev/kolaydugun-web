@@ -1,4 +1,5 @@
 import React, { Suspense } from 'react';
+console.info('🚀 [BOOT] main.jsx module loading...');
 import ReactDOM from 'react-dom/client';
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -25,6 +26,10 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
+    // Top-level error catch: Ensure splash screen is removed so error UI is visible
+    const splash = document.getElementById('splash-screen');
+    if (splash) splash.remove();
+
     // Production'da console.log zaten kaldırılacak, ama burada da kontrol edelim
     if (import.meta.env.DEV) {
       console.error("Uncaught error:", error, errorInfo);
@@ -54,10 +59,10 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       // Use i18next directly for ErrorBoundary since it's outside LanguageProvider
       const t = {
-        title: i18n.t('error.title', 'Bir şeyler ters gitti'),
-        message: i18n.t('error.message', 'Sayfa yüklenirken beklenmedik bir hata oluştu.'),
-        refresh: i18n.t('error.refresh', 'Sayfayı Yenile'),
-        home: i18n.t('error.home', 'Ana Sayfaya Dön')
+        title: i18n.t('common.error.title', 'Bir şeyler ters gitti'),
+        message: i18n.t('common.error.message', 'Sayfa yüklenirken beklenmedik bir hata oluştu.'),
+        refresh: i18n.t('common.error.refresh', 'Sayfayı Yenile'),
+        home: i18n.t('common.error.home', 'Ana Sayfaya Dön')
       };
 
       return (
@@ -66,7 +71,7 @@ class ErrorBoundary extends React.Component {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#fdf2f8',
+          backgroundColor: '#fff1f8',
           padding: '20px',
           fontFamily: 'system-ui, -apple-system, sans-serif'
         }}>
@@ -87,7 +92,7 @@ class ErrorBoundary extends React.Component {
               ⚠️
             </div>
             <h1 style={{
-              color: '#831843',
+              color: '#ff1a8c',
               fontSize: '28px',
               marginBottom: '16px',
               fontWeight: '600'
@@ -95,7 +100,7 @@ class ErrorBoundary extends React.Component {
               {t.title}
             </h1>
             <p style={{
-              color: '#6b7280',
+              color: '#4b5563',
               fontSize: '16px',
               marginBottom: '32px',
               lineHeight: '1.6'
@@ -106,7 +111,7 @@ class ErrorBoundary extends React.Component {
               <button
                 onClick={() => window.location.reload()}
                 style={{
-                  background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+                  background: 'linear-gradient(135deg, #ff7eb3 0%, #ff1a8c 100%)',
                   color: 'white',
                   border: 'none',
                   padding: '12px 24px',
@@ -155,7 +160,13 @@ const paypalOptions = {
   intent: "capture"
 };
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+// Splash Screen removal when React is ready
+const rootElement = document.getElementById('root');
+console.info('📍 [BOOT] Root element found:', !!rootElement);
+const root = ReactDOM.createRoot(rootElement);
+
+console.info('⚛️ [BOOT] Triggering root.render...');
+root.render(
   <React.StrictMode>
     <HelmetProvider>
       <ErrorBoundary>

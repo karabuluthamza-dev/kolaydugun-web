@@ -31,10 +31,23 @@ export const VendorProvider = ({ children }) => {
     const getFilteredVendors = React.useCallback(async ({ filters, page = 1, pageSize = 20 }) => {
         try {
             setLoading(true);
+
+            // Safety check for supabase connection
+            if (!supabase) {
+                console.error('[VendorContext] Supabase client not initialized');
+                return { vendors: [], total: 0 };
+            }
+
             let query = supabase
                 .from('vendors')
-                .select('id, slug, business_name, category, city, zip_code, state, country, price_range, image_url, gallery, rating, reviews, featured_active, latitude, longitude, is_claimed, is_verified, user_id, ai_performance_score', { count: 'exact' })
+                .select('id, slug, business_name, category, city, zip_code, state, country, price_range, image_url, gallery, rating, reviews, featured_active, latitude, longitude, is_claimed, is_verified, user_id, details', { count: 'exact' })
                 .is('deleted_at', null);
+
+            // Hide Shadow Profiles (War Room targets) unless they are elite OR claimed/verified
+            // Logic: (is_elite (JSON contains) OR (source != war_room OR (claimed AND verified)))
+            // TEMPORARILY DISABLED - causing query issues
+            // query = query.or(`details.cs.{"vip_demo_config": {"is_elite": true}},source.neq.war_room,and(is_claimed.eq.true,is_verified.eq.true)`);
+            console.log('[VendorContext] Fetching vendors with filters:', filters);
 
             // Filters
             if (filters.category) {
@@ -46,6 +59,9 @@ export const VendorProvider = ({ children }) => {
             if (filters.search) {
                 // Search in business_name or category
                 query = query.or(`business_name.ilike.%${filters.search}%,category.ilike.%${filters.search}%`);
+            }
+            if (filters.is_elite) {
+                query = query.contains('details', { vip_demo_config: { is_elite: true } });
             }
 
             // Pagination
@@ -61,32 +77,41 @@ export const VendorProvider = ({ children }) => {
             } else if (filters.sort === 'price_desc') {
                 query = query.order('price_range', { ascending: false });
             } else {
-                // Default: Featured first, then by sort order (lower = higher priority), then rating
+                // Default: Featured first, then Elite, then sort order, then rating
                 query = query.order('featured_active', { ascending: false })
+                    // .order('details->vip_demo_config->is_elite', { ascending: false })
                     .order('featured_sort_order', { ascending: true, nullsFirst: false })
                     .order('rating', { ascending: false });
             }
 
             const { data, count, error } = await query;
 
-            if (error) throw error;
+            if (error) {
+                console.error('[VendorContext] Supabase Query Error:', error);
+                throw error;
+            }
+
+            if (!data || data.length === 0) {
+                console.warn('[VendorContext] No vendors found for query filters:', filters);
+                console.warn('[VendorContext] Check: count =', count, '- If count > 0 but data is empty, there may be a RLS or range issue');
+            }
 
             const mapped = (data || []).map(v => ({
                 ...v,
-                name: v.business_name || v.name,
+                name: v.business_name || v.name || 'İsimsiz İşletme',
                 location: v.city,
                 price: v.price_range,
                 priceRange: v.price_range,
                 isFeatured: v.featured_active,
                 image: v.image_url,
-                features: [], // Column not found in DB
-                tags: [],     // Column not found in DB
+                features: [],
+                tags: [],
                 gallery: Array.isArray(v.gallery) ? v.gallery : []
             }));
 
             return { vendors: mapped, total: count };
         } catch (err) {
-            console.error('Error in getFilteredVendors:', err);
+            console.error('[VendorContext] Error in getFilteredVendors catch block:', err);
             return { vendors: [], total: 0 };
         } finally {
             setLoading(false);

@@ -27,6 +27,7 @@ export const getCategoryTranslationKey = (category) => {
     if (cat.includes('saç') && cat.includes('makyaj')) return 'hair_makeup';
     if (cat.includes('ven')) return 'wedding_venues';
     if (cat.includes('mekan')) return 'wedding_venues';
+    if (cat.includes('salon')) return 'wedding_venues';
     if (cat.includes('foto')) return 'wedding_photography';
     if (cat.includes('video')) return 'wedding_videography';
     if (cat.includes('pasta')) return 'wedding_cakes';

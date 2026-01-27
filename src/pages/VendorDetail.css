@@ -49,16 +49,18 @@
     bottom: 1rem;
     right: 1rem;
     background: white;
+    color: #0f172a;
+    /* Ensure text is visible on white background */
     padding: 0.5rem 1rem;
     border-radius: 8px;
     font-weight: 600;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 0.5rem;
     transition: all 0.2s;
-    z-index: 2;
+    z-index: 10;
 }
 
 .view-all-photos:hover {
@@ -451,4 +453,385 @@
         padding: 1rem;
         padding-top: 0;
     }
+}
+
+/* ==========================================
+   VIP/ELITE THEME (Black & Gold)
+   ========================================== */
+.vendor-vip-theme {
+    background-color: #0f172a !important;
+    /* Deep dark background */
+    color: #f1f5f9 !important;
+}
+
+.vendor-vip-theme .vendor-main-info,
+.vendor-vip-theme .vendor-booking-card,
+.vendor-vip-theme .faq-item,
+.vendor-vip-theme .tab-btn.active,
+.vendor-vip-theme .feature-item {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+.vendor-vip-theme .booking-form label {
+    color: #cbd5e1 !important;
+}
+
+.vendor-vip-theme .booking-price {
+    color: #f1f5f9 !important;
+}
+
+.vendor-vip-theme .booking-price span {
+    color: #94a3b8 !important;
+}
+
+.vendor-vip-theme .booking-form input,
+.vendor-vip-theme .booking-form textarea {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+.vendor-vip-theme .booking-form input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+.vendor-vip-theme .booking-form input:focus,
+.vendor-vip-theme .booking-form textarea:focus {
+    border-color: #d4af37 !important;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1) !important;
+}
+
+.vendor-vip-theme .feature-icon {
+    background: rgba(212, 175, 55, 0.1) !important;
+}
+
+.vendor-vip-theme .feature-label {
+    color: #94a3b8 !important;
+}
+
+.vendor-vip-theme .feature-value {
+    color: #f1f5f9 !important;
+}
+
+.vendor-vip-theme .booking-submit-btn {
+    background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 100%) !important;
+    color: #0f172a !important;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3) !important;
+}
+
+/* VIP Shop Card */
+.vendor-shop-card.vip-shop-card {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+    border: 2px solid #d4af37 !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+.vip-shop-card .shop-icon {
+    background: linear-gradient(135deg, #d4af37, #f4e4bc) !important;
+}
+
+.vip-shop-card h4 {
+    color: #f4e4bc !important;
+}
+
+.vip-shop-card p {
+    color: #94a3b8 !important;
+}
+
+.vip-shop-card .visit-shop-btn {
+    background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 100%) !important;
+    color: #0f172a !important;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2) !important;
+}
+
+.vendor-vip-theme .tab-content p {
+    color: #cbd5e1 !important;
+}
+
+/* VIP Map Styles */
+.vendor-vip-theme .map-view-container {
+    background: #1e293b !important;
+    color: #f1f5f9 !important;
+}
+
+.vendor-vip-theme .map-header h3 {
+    color: #f1f5f9 !important;
+}
+
+.vendor-vip-theme .map-address {
+    color: #94a3b8 !important;
+}
+
+.vendor-vip-theme .vendor-title {
+    color: #f1f5f9 !important;
+    background: linear-gradient(135deg, #fff 0%, #d4af37 50%, #fff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.vendor-vip-theme .vendor-category {
+    color: #d4af37 !important;
+}
+
+.vendor-vip-theme .tag-badge {
+    background: #334155 !important;
+    color: #94a3b8 !important;
+}
+
+.vendor-vip-theme .tag-badge.featured {
+    background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 100%) !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    border: none !important;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4) !important;
+    text-shadow: none !important;
+}
+
+.vendor-vip-theme .social-link {
+    background: #1e293b !important;
+    color: #d4af37 !important;
+    border: 1px solid #334155 !important;
+}
+
+.vendor-vip-theme .social-link:hover {
+    border-color: #d4af37 !important;
+    background: #334155 !important;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.2) !important;
+}
+
+/* DJ Partner Block */
+.dj-partner-block {
+    margin: 2rem 0;
+    padding: 2.5rem;
+    background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+    border: 1px solid #d4af37;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.dj-partner-block::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
+    z-index: 0;
+}
+
+.dj-partner-content {
+    position: relative;
+    z-index: 1;
+}
+
+.dj-badge {
+    background: #d4af37;
+    color: #000;
+    padding: 6px 15px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.8rem;
+    display: inline-block;
+    margin-bottom: 1rem;
+    letter-spacing: 1px;
+}
+
+.dj-partner-block h3 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #fff !important;
+}
+
+.dj-partner-block p {
+    color: #94a3b8 !important;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+}
+
+.dj-video-preview {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #334155;
+    background-image: url('https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    color: #fff;
+    font-weight: bold;
+}
+
+.dj-video-preview::after {
+    content: '▶️';
+    font-size: 3rem;
+    color: #d4af37;
+    background: rgba(0, 0, 0, 0.6);
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid #d4af37;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.dj-video-preview:hover::after {
+    transform: scale(1.1);
+    background: rgba(212, 175, 55, 0.2);
+}
+
+/* VIP Sticky CTA */
+.vip-sticky-cta {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 2px solid #d4af37;
+    padding: 1rem 0;
+    z-index: 1000;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.sticky-cta-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.cta-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.cta-text strong {
+    font-size: 1.2rem;
+    color: #fff;
+}
+
+.cta-text span {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .sticky-cta-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .vip-sticky-cta {
+        padding: 1.5rem 1rem;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 1s ease-out;
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Base Shop Card Styles */
+.vendor-shop-card {
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 2px solid #FF6B9D;
+}
+
+.shop-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #FF6B9D, #c084fc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.vendor-shop-card h4 {
+    margin: 0 !important;
+    font-size: 0.95rem !important;
+    color: #be185d;
+    /* Removed !important to allow VIP override */
+}
+
+.vendor-shop-card.vip-shop-card h4 {
+    color: #f4e4bc !important;
+}
+
+.vendor-shop-card p {
+    margin: 0 !important;
+    font-size: 0.8rem !important;
+    color: #db2777;
+    /* Removed !important to allow VIP override */
+}
+
+.vendor-shop-card.vip-shop-card p {
+    color: #94a3b8 !important;
+}
+
+.visit-shop-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #FF6B9D 0%, #c084fc 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
+    transition: all 0.2s;
+}
+
+.visit-shop-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
 }

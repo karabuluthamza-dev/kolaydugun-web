@@ -18,7 +18,8 @@
 
 .featured-vendors .section-subtitle {
     text-align: center;
-    color: #6b7280;
+    color: #4b5563;
+    /* Darkened for accessibility */
     font-size: 1.1rem;
     margin-bottom: 3rem;
 }
@@ -95,7 +96,8 @@
     position: absolute;
     top: 12px;
     right: 12px;
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: linear-gradient(135deg, #15803d, #166534);
+    /* Compliant emeralds */
     color: white;
     padding: 6px 12px;
     border-radius: 20px;
@@ -133,7 +135,8 @@
     display: flex;
     justify-content: space-between;
     font-size: 0.9rem;
-    color: #6b7280;
+    color: #374151;
+    /* Darkened for accessibility */
     padding-top: 0.75rem;
     border-top: 1px solid #f3f4f6;
 }

@@ -19,21 +19,21 @@ const MobileAppShowcase = () => {
                             <div className="feature-item">
                                 <div className="feature-icon"><Bell size={20} /></div>
                                 <div>
-                                    <h4>{t('pwa.feature1Title') || 'Anlık Bildirimler'}</h4>
+                                    <h3>{t('pwa.feature1Title') || 'Anlık Bildirimler'}</h3>
                                     <p>{t('pwa.feature1Text') || 'Düğün hazırlıklarında hiçbir detayı kaçırmayın.'}</p>
                                 </div>
                             </div>
                             <div className="feature-item">
                                 <div className="feature-icon"><Zap size={20} /></div>
                                 <div>
-                                    <h4>{t('pwa.feature2Title') || 'Hızlı Erişim'}</h4>
+                                    <h3>{t('pwa.feature2Title') || 'Hızlı Erişim'}</h3>
                                     <p>{t('pwa.feature2Text') || 'Ana ekranınızdan tek tıkla platforma ulaşın.'}</p>
                                 </div>
                             </div>
                             <div className="feature-item">
                                 <div className="feature-icon"><Cloud size={20} /></div>
                                 <div>
-                                    <h4>{t('pwa.feature3Title') || 'Çevrimdışı Mod'}</h4>
+                                    <h3>{t('pwa.feature3Title') || 'Çevrimdışı Mod'}</h3>
                                     <p>{t('pwa.feature3Text') || 'Planlarınıza internetiniz olmasa bile göz atın.'}</p>
                                 </div>
                             </div>
@@ -42,7 +42,15 @@ const MobileAppShowcase = () => {
 
                     <div className="showcase-visual" data-aos="fade-left">
                         <div className="mockup-container">
-                            <img src="/mobile-app-preview.png" alt="KolayDüğün Mobile App" className="app-mockup-img" />
+                            <img
+                                src="/mobile-app-preview.png"
+                                alt={t('pwa.showcaseAlt', 'KolayDugun Mobile App Vorschau')}
+                                className="app-mockup-img"
+                                loading="lazy"
+                                decoding="async"
+                                width="380"
+                                height="780"
+                            />
                         </div>
                         <div className="floating-elements">
                             <div className="float-card card-1"><Smartphone size={24} /></div>

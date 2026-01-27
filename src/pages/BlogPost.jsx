@@ -244,6 +244,7 @@ const BlogPost = () => {
                 url={`/blog/${slug}`}
                 type="article"
                 structuredData={structuredData}
+                hreflangUrls={{ de: `/blog/${slug}`, tr: `/blog/${slug}`, en: `/blog/${slug}` }}
             />
             {/* Hero / Cover Image */}
             <div className="blog-post-hero" style={{

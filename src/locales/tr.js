@@ -12,7 +12,7 @@ export const tr = {
     },
     "hero": {
         "title": "Almanya'da Hayalinizdeki Düğün",
-        "subtitle": "En ince ayrıntısına kadar mükemmellik. Unutulmaz anlar tasarlıyoruz.",
+        "subtitle": "Almanya'daki en iyi düğün hizmet sağlayıcılarını bulun. Türk ve uluslararası düğünler için kolay planlama. Ücretsiz teklif alın ve hayalinizdeki düğünü planlayın.",
         "getFreeQuote": "Ücretsiz Teklif Al",
         "ctaSubtext": "Size özel teklifler alın"
     },
@@ -377,5 +377,59 @@ export const tr = {
         "skip": "Şimdilik atla (Panele Git)",
         "success": "Ödeme başarılı! Premium'a hoş geldiniz.",
         "error": "Ödeme başarısız. Lütfen tekrar deneyin veya destekle iletişime geçin."
+    },
+    "vip": {
+        "badges": {
+            "eliteCandidate": "ELITE PARTNER ADAYI",
+            "viewingNow": "ŞU AN {{count}} KİŞİ İNCELİYOR",
+            "vipPromo": "VIP Tanıtım",
+            "eliteSalon": "Elite Salon"
+        },
+        "nav": {
+            "general": "Genel",
+            "prices": "Fiyatlar",
+            "virtualTour": "Sanal Tur",
+            "capacity": "Kapasite",
+            "calendar": "Takvim",
+            "stats": "İstatistikler",
+            "whyUs": "Neden Biz?",
+            "partner": "Partner",
+            "reviews": "Yorumlar"
+        },
+        "hero": {
+            "regionAvg": "(Bölge Ortalaması)"
+        },
+        "sections": {
+            "pricesTitle": "{{name}} Düğün Fiyatları",
+            "capacityTitle": "Kapasite Bilgileri",
+            "virtualTourTitle": "360° Sanal Tur & Fotoğraflar",
+            "availabilityTitle": "Canlı Müsaitlik Durumu ({{year}})",
+            "whyUsTitle": "Mekanı Neden Tercih Etmelisin?",
+            "reviewsTitle": "Popüler Yorumlar",
+            "partnerTitle": "Elite Partner İş Birliği",
+            "statsTitle": "Salon Yönetim Paneli (Demo)",
+            "statsSubtitle": "Profilinizin son 30 günlük performansı",
+            "capacity": {
+                "area": "Alan Adı",
+                "meal": "Yemekli Kapasite",
+                "cocktail": "Kokteyl Kapasite"
+            }
+        },
+        "common": {
+            "weekDay": "Hafta İçi (Kişi Başı)",
+            "weekEnd": "Hafta Sonu (Kişi Başı)",
+            "updated": "Güncel Teklif",
+            "lastUpdated": "Son Güncelleme: {{date}}",
+            "freeQuote": "Ücretsiz Teklif Al",
+            "fastResponse": "En geç 1 saat içinde geri dönüş yapılır."
+        },
+        "cta": {
+            "whatsapp": "WhatsApp'tan Yazın",
+            "getOffer": "TEKLİF AL",
+            "claimProfile": "PROFİLİ SAHİPLEN (Ücretsiz)",
+            "claimTitle": "Bu Sayfa Sizin mi?",
+            "claimDesc": "Bu profesyonel tanıtım sayfası ve gelen tüm teklifler size ait olabilir. Hemen profilinizi sahiplenin ve Elite Partner avantajlarından yararlanın.",
+            "testDashboard": "Yönetim Panelini Test Et"
+        }
     }
 };

@@ -1,28 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { supabase } from '../supabaseClient';
 import Hero from '../components/Hero';
-import FeaturedCategories from '../components/FeaturedCategories';
-import WhyUs from '../components/WhyUs';
-import Services from '../components/Services';
-import About from '../components/About';
-import Contact from '../components/Contact';
 import SEO from '../components/SEO';
 import { useLanguage } from '../context/LanguageContext';
 
-import PlanningTools from '../components/PlanningTools';
+// Lazy load below-the-fold components for better initial load performance
+const PlanningTools = lazy(() => import('../components/PlanningTools'));
+const LiveRequestBanner = lazy(() => import('../components/Home/LiveRequestBanner'));
+const FeaturedCategories = lazy(() => import('../components/FeaturedCategories'));
+const WhyUs = lazy(() => import('../components/WhyUs'));
+const Services = lazy(() => import('../components/Services'));
+const About = lazy(() => import('../components/About'));
+const Contact = lazy(() => import('../components/Contact'));
+const FeaturedVendors = lazy(() => import('../components/FeaturedVendors'));
+const HomePricing = lazy(() => import('../components/HomePricing'));
+const FAQSection = lazy(() => import('../components/FAQSection'));
+const HomeBlogShowcase = lazy(() => import('../components/HomeBlogShowcase'));
+const FloatingCTA = lazy(() => import('../components/FloatingCTA'));
+const HomeShopPromo = lazy(() => import('../components/HomeShopPromo'));
+const MobileAppShowcase = lazy(() => import('../components/Home/MobileAppShowcase'));
+const EliteShowcase = lazy(() => import('../components/EliteShowcase'));
 
-import FeaturedVendors from '../components/FeaturedVendors';
-import HomePricing from '../components/HomePricing';
-import FAQSection from '../components/FAQSection';
-import HomeBlogShowcase from '../components/HomeBlogShowcase';
-import FloatingCTA from '../components/FloatingCTA';
-import HomeShopPromo from '../components/HomeShopPromo';
-import MobileAppShowcase from '../components/Home/MobileAppShowcase';
-import LiveRequestBanner from '../components/Home/LiveRequestBanner';
+// Suspense fallback for CLS prevention
+import SuspenseSkeleton from '../components/SuspenseSkeleton';
+
 
 const Home = () => {
     const { t, language } = useLanguage();
-    // Video enabled - works on live site
+    // Video optimized with lazy load and poster fallback
     const [heroSettings, setHeroSettings] = useState({
         hero_settings: {
             use_video: true,
@@ -45,9 +50,14 @@ const Home = () => {
                     // Keep the default video settings
                 } else if (data) {
                     // Merge database settings with defaults, preserving video settings if not specified
+                    // Merge database settings with defaults, ensuring use_video is true if not explicitly false
                     setHeroSettings(prev => ({
                         ...data,
-                        hero_settings: data.hero_settings || prev.hero_settings
+                        hero_settings: {
+                            ...prev.hero_settings, // Start with previous hero settings
+                            ...(data.hero_settings || {}), // Overlay with fetched settings if they exist
+                            use_video: data.hero_settings?.use_video !== false // Explicitly set to true unless database says false
+                        }
                     }));
                 }
 
@@ -62,7 +72,13 @@ const Home = () => {
 
     /* Replaced useSEO with SEO component */
     const heroTitle = heroSettings?.hero_title?.[language] || t('hero.title');
-    const heroSubtitle = heroSettings?.hero_subtitle?.[language] || t('hero.subtitle');
+    let heroSubtitle = heroSettings?.hero_subtitle?.[language] || t('hero.subtitle');
+
+    // HOTFIX: Fix known truncated text from database
+    if (heroSubtitle && (heroSubtitle === "Almanya'da hayalinizdeki d" || heroSubtitle.endsWith("hayalinizdeki d"))) {
+        heroSubtitle = t('hero.subtitle'); // Use the full text from dictionary
+    }
+
     const heroImage = heroSettings?.hero_image_url;
     const onlineConfig = heroSettings?.online_counter_config;
     const trustBadges = heroSettings?.trust_badges;
@@ -75,6 +91,8 @@ const Home = () => {
                 title={heroTitle || 'Wedding Planner Germany'}
                 description={heroSubtitle || 'Plan your dream wedding in Germany with KolayDugun.'}
                 image={heroImage}
+                url="/"
+                hreflangUrls={{ de: '/', tr: '/', en: '/' }}
             />
             <Hero
                 title={heroTitle}
@@ -84,20 +102,24 @@ const Home = () => {
                 trustBadges={trustBadges}
                 heroSettings={videoSettings}
             />
-            <LiveRequestBanner />
-            <PlanningTools />
-            <FeaturedCategories />
-            <FeaturedVendors />
-            <WhyUs />
-            <MobileAppShowcase />
-            <Services />
-            <HomeShopPromo />
-            <HomeBlogShowcase />
-            <HomePricing />
-            <About />
-            <FAQSection />
-            <Contact />
-            <FloatingCTA settings={ctaSettings} />
+            {/* Lazy-loaded components wrapped in Suspense */}
+            <Suspense fallback={<SuspenseSkeleton />}>
+                <LiveRequestBanner />
+                <PlanningTools />
+                <FeaturedCategories />
+                <EliteShowcase />
+                <FeaturedVendors />
+                <WhyUs />
+                <MobileAppShowcase />
+                <Services />
+                <HomeShopPromo />
+                <HomeBlogShowcase />
+                <HomePricing />
+                <About />
+                <FAQSection />
+                <Contact />
+                <FloatingCTA settings={ctaSettings} />
+            </Suspense>
         </>
     );
 };

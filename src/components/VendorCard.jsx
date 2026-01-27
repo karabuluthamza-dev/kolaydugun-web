@@ -9,27 +9,47 @@ import { supabase } from '../supabaseClient';
 import { formatDistance } from '../utils/geoUtils';
 import './VendorCard.css';
 
-const VendorCard = ({ id, name, slug, category, location, city, zip_code, state, country, price, image, rating, reviews, isFeatured, gallery, categoryImage, distance, ai_performance_score, is_claimed, is_verified, user_id }) => {
+const VendorCard = ({ id, name, slug, category, location, city, zip_code, state, country, price, image, rating, reviews, isFeatured, gallery, categoryImage, distance, ai_performance_score, is_claimed, is_verified, user_id, details }) => {
     const { t, language } = useLanguage();
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    // Category normalization for fallback images
-    const getNormalizedCategory = (cat) => {
-        if (!cat) return null;
-        const normalized = cat.trim();
-        // Handle common variations
-        if (normalized.toLowerCase() === 'dj' || normalized.toLowerCase() === 'djs') return 'DJs';
-        if (normalized.toLowerCase() === 'wedding photography' || normalized.toLowerCase() === 'photography') return 'Wedding Photography';
-        if (normalized.toLowerCase() === 'wedding videography' || normalized.toLowerCase() === 'videography') return 'Wedding Videography';
-        return normalized;
+    // Improved Category Normalization
+    const getNormalizedCategoryKey = (cat) => {
+        const key = getCategoryTranslationKey(cat);
+        // Map snake_case keys back to Title Case keys used in categoryImages
+        const keyMap = {
+            'wedding_venues': 'Wedding Venues',
+            'bridal_fashion': 'Bridal Fashion',
+            'hair_makeup': 'Hair & Make-Up',
+            'groom_suits': 'Groom Suits',
+            'wedding_cakes': 'Wedding Cakes',
+            'wedding_planners': 'Wedding Planners',
+            'wedding_cars': 'Wedding Cars',
+            'catering_party': 'Catering & Party Service',
+            'wedding_speakers': 'Wedding Speakers (Trauredner)',
+            'flowers_decoration': 'Flowers & Decoration',
+            'invitations_stationery': 'Invitations & Stationery',
+            'wedding_rings': 'Wedding Rings',
+            'wedding_photography': 'Wedding Photography',
+            'wedding_videography': 'Wedding Videography',
+            'photobox': 'Photobox',
+            'djs': 'DJs',
+            'musicians': 'Musicians',
+            'entertainment': 'Entertainment'
+        };
+        return keyMap[key] || cat; // Fallback to original if no map found
     };
 
-    const normalizedCat = getNormalizedCategory(category);
+    const normalizedCat = getNormalizedCategoryKey(category);
+    // categoryImage prop takes precedence, then normalized default, then raw category default, then global default
     const categoryDefault = categoryImage || categoryImages[normalizedCat] || categoryImages[category] || defaultImage;
 
     const getValidImage = () => {
-        if (image) return image;
+        // stricter check for valid image URL
+        if (image && typeof image === 'string' && image.length > 5 && image !== 'null' && image !== 'undefined' && !image.includes('undefined') && !image.includes('null')) {
+            return image;
+        }
         if (Array.isArray(gallery) && gallery.length > 0 && gallery[0]) return gallery[0];
         return categoryDefault;
     };
@@ -38,11 +58,22 @@ const VendorCard = ({ id, name, slug, category, location, city, zip_code, state,
     const [currentImage, setCurrentImage] = useState(validImage);
     const [imageError, setImageError] = useState(false);
 
+    // Sync state with props - CRITICAL for when data updates after mount
+    useEffect(() => {
+        setCurrentImage(getValidImage());
+        setImageError(false);
+    }, [image, category, categoryImage, gallery]);
+
     // If constructed URL fails, fallback to category default
-    const handleImageError = () => {
+    const handleImageError = (e) => {
         if (!imageError) {
-            setCurrentImage(categoryDefault);
-            setImageError(true);
+            console.warn(`Image load failed for ${name}, falling back to default.`);
+            e.target.onerror = null; // Prevent infinite loop
+            if (e.target.src !== categoryDefault) {
+                e.target.src = categoryDefault;
+                setCurrentImage(categoryDefault);
+                setImageError(true);
+            }
         }
     };
     const [isHovered, setIsHovered] = useState(false);
@@ -158,7 +189,7 @@ const VendorCard = ({ id, name, slug, category, location, city, zip_code, state,
 
     return (
         <div
-            className="vendor-card"
+            className={`vendor-card ${details?.vip_demo_config?.is_elite ? 'is-elite-card' : ''}`}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
@@ -167,6 +198,10 @@ const VendorCard = ({ id, name, slug, category, location, city, zip_code, state,
                     src={currentImage}
                     alt={name}
                     className="vendor-card-image"
+                    loading="lazy"
+                    decoding="async"
+                    width="400"
+                    height="250"
                     onError={handleImageError}
                 />
                 {isFeatured === true && (
@@ -192,7 +227,7 @@ const VendorCard = ({ id, name, slug, category, location, city, zip_code, state,
                         alignItems: 'center',
                         gap: '4px'
                     }}>
-                        🏆 {t('vendorCard.perfectService', 'Mükemmel Hizmet')}
+                        <span role="img" aria-hidden="true">🏆</span> {t('vendorCard.perfectService', 'Mükemmel Hizmet')}
                     </span>
                 )}
                 <button
@@ -201,13 +236,13 @@ const VendorCard = ({ id, name, slug, category, location, city, zip_code, state,
                     onClick={toggleFavorite}
                     disabled={favLoading}
                 >
-                    {isFavorite ? '❤️' : '🤍'}
+                    {isFavorite ? <span role="img" aria-hidden="true">❤️</span> : <span role="img" aria-hidden="true">🤍</span>}
                 </button>
 
                 {/* Admin Shortcut */}
                 {user?.role === 'admin' && (
                     <Link to="/admin/vendors" className="admin-manage-btn" style={{ bottom: '10px', left: '50%', transform: 'translateX(-50%)', width: 'auto' }}>
-                        ⚙️ Yönet
+                        <span role="img" aria-hidden="true">⚙️</span> Yönet
                     </Link>
                 )}
 
@@ -215,7 +250,7 @@ const VendorCard = ({ id, name, slug, category, location, city, zip_code, state,
                 {(is_claimed === true || is_verified === true) && (
                     <span className="vendor-card-badge claimed-badge" style={{
                         position: 'absolute',
-                        background: '#4caf50',
+                        background: '#15803d', /* Dark green for accessibility */
                         color: 'white',
                         top: '10px',
                         left: '10px',
@@ -226,10 +261,32 @@ const VendorCard = ({ id, name, slug, category, location, city, zip_code, state,
                         display: 'flex',
                         alignItems: 'center',
                         gap: '4px',
-                        boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
+                        boxShadow: '0 4px 12px rgba(21, 128, 61, 0.3)',
                         zIndex: 5
                     }}>
-                        ✓ {t('common.claimed') || 'Doğrulanmış'}
+                        <span role="img" aria-hidden="true">✓</span> {t('common.claimed') || 'Doğrulanmış'}
+                    </span>
+                )}
+
+                {/* Elite Badge */}
+                {details?.vip_demo_config?.is_elite === true && (
+                    <span className="vendor-card-badge elite-badge-premium" style={{
+                        position: 'absolute',
+                        bottom: '10px',
+                        right: '10px',
+                        background: 'linear-gradient(45deg, #FFD700, #B8860B)',
+                        color: 'black', /* High contrast black text on gold */
+                        fontSize: '0.7rem',
+                        fontWeight: '900',
+                        padding: '4px 10px',
+                        borderRadius: '4px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '1px',
+                        boxShadow: '0 2px 10px rgba(184, 134, 11, 0.5)',
+                        zIndex: 5,
+                        border: '1px solid rgba(0, 0, 0, 0.1)'
+                    }}>
+                        <span role="img" aria-hidden="true">💎</span> ELITE
                     </span>
                 )}
             </div>
@@ -238,7 +295,7 @@ const VendorCard = ({ id, name, slug, category, location, city, zip_code, state,
                 <div className="vendor-card-header">
                     <span className="vendor-card-category">{displayCategory}</span>
                     <div className="vendor-card-rating">
-                        <span className="star">⭐</span>
+                        <span className="star" role="img" aria-hidden="true">⭐</span>
                         <span className="score">{rating}</span>
                         {reviews > 0 && <span className="reviews">({reviews})</span>}
                     </div>
@@ -249,7 +306,7 @@ const VendorCard = ({ id, name, slug, category, location, city, zip_code, state,
                 </h3>
 
                 <div className="vendor-card-location">
-                    <span className="icon">📍</span>
+                    <span className="icon" role="img" aria-hidden="true">📍</span>
                     {zip_code && <span className="zip-code" style={{ marginRight: '4px', fontWeight: 'bold' }}>{zip_code}</span>}
                     {location || city} {state && <span className="state-name" style={{ marginLeft: '4px', opacity: 0.7, fontSize: '0.85em' }}>• {getStateName(state, country, language)}</span>}
                 </div>

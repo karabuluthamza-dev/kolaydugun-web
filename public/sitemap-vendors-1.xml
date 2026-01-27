@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://kolaydugun.de/vendors/bordo-eventlocation-594</loc>
+    <lastmod>2026-01-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://kolaydugun.de/vendors/screencatch-foto-video-design</loc>
     <lastmod>2025-12-23</lastmod>
     <changefreq>weekly</changefreq>
@@ -4675,13 +4681,13 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kolaydugun.de/vendors/aylina-baudis-photography-1</loc>
+    <loc>https://kolaydugun.de/vendors/blickpunkt-e-fotoavantgarde</loc>
     <lastmod>2025-12-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kolaydugun.de/vendors/blickpunkt-e-fotoavantgarde</loc>
+    <loc>https://kolaydugun.de/vendors/aylina-baudis-photography-1</loc>
     <lastmod>2025-12-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -5491,13 +5497,13 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kolaydugun.de/vendors/mancuc-la-feuershow-1</loc>
+    <loc>https://kolaydugun.de/vendors/anke-schmidt-fotografie</loc>
     <lastmod>2025-12-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://kolaydugun.de/vendors/anke-schmidt-fotografie</loc>
+    <loc>https://kolaydugun.de/vendors/mancuc-la-feuershow-1</loc>
     <lastmod>2025-12-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -5990,12 +5996,6 @@
   </url>
   <url>
     <loc>https://kolaydugun.de/vendors/zauberkunstler-thomaselli-1</loc>
-    <lastmod>2025-12-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://kolaydugun.de/vendors/zauberkunstler-thomaselli</loc>
     <lastmod>2025-12-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

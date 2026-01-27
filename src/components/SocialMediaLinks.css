@@ -11,8 +11,11 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: #f1f5f9;
-    color: #64748b;
+    background: rgba(255, 255, 255, 0.95);
+    /* High contrast background safety */
+    color: #1a1a1a;
+    /* Maximum contrast icon color */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
 }
 

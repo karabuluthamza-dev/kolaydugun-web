@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -190,7 +189,7 @@ const AdminDashboard = () => {
             ?.filter(e => e.status === 'pending' || e.status === 'approved')
             .reduce((sum, e) => sum + parseFloat(e.commission_amount || 0), 0) || 0;
 
-        const activeAffiliates = new Set(affiliateEarnings?.map(e => e.earning_shop_id)).size;
+        const activeAffiliates = new Set((affiliateEarnings || []).map(e => e.earning_shop_id)).size;
 
         // Recent Transactions (Last 5)
         const { data: recentTransactions } = await supabase

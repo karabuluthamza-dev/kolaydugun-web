@@ -78,7 +78,7 @@ const Navbar = () => {
                     )}
                 </Link>
 
-                <button className="hamburger-btn" onClick={toggleMobileMenu} aria-label="Toggle menu">
+                <button className="hamburger-btn" onClick={toggleMobileMenu} aria-label={t('nav.toggleMenu') || 'Menüyü Aç/Kapat'}>
                     <span className={`hamburger-line ${isMobileMenuOpen ? 'open' : ''}`}></span>
                     <span className={`hamburger-line ${isMobileMenuOpen ? 'open' : ''}`}></span>
                     <span className={`hamburger-line ${isMobileMenuOpen ? 'open' : ''}`}></span>
@@ -87,8 +87,9 @@ const Navbar = () => {
                 <div className={`navbar-links ${isMobileMenuOpen ? 'active' : ''}`}>
                     <Link to="/vendors" className="navbar-link" onClick={closeMobileMenu}>{t('nav.services')}</Link>
                     <Link to="/blog" className="navbar-link" onClick={closeMobileMenu}>Blog</Link>
-                    <Link to="/shop" className="navbar-link" onClick={closeMobileMenu}>🛍️ {t('shop.title', 'Mağaza')}</Link>
-                    <Link to="/community" className="navbar-link text-purple-600 font-medium" onClick={closeMobileMenu}>{t('nav.forum')}</Link>
+                    <Link to="/vendors?is_elite=true" className="navbar-link" style={{ color: '#8b4513', fontWeight: '800' }} onClick={closeMobileMenu}><span role="img" aria-hidden="true">💎</span> Elite</Link>
+                    <Link to="/shop" className="navbar-link" onClick={closeMobileMenu}><span role="img" aria-hidden="true">🛍️</span> {t('shop.title', 'Mağaza')}</Link>
+                    <Link to="/community" className="navbar-link text-purple-800 font-medium" onClick={closeMobileMenu}>{t('nav.forum')}</Link>
 
                     <Link to="/tools" className="navbar-link" onClick={closeMobileMenu}>{t('nav.tools')}</Link>
                     <Link to="/vendor-landing" className="navbar-link" onClick={closeMobileMenu}>{t('nav.vendorJoin')}</Link>
@@ -107,16 +108,16 @@ const Navbar = () => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '8px',
-                                        background: 'linear-gradient(135deg, #FF6B9D, #FF8E53)',
+                                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
                                         color: 'white',
                                         padding: '10px 20px',
                                         borderRadius: '25px',
                                         margin: '5px 0',
                                         position: 'relative',
-                                        boxShadow: '0 4px 15px rgba(255, 107, 157, 0.3)'
+                                        boxShadow: '0 4px 15px rgba(219, 39, 119, 0.3)'
                                     }}
                                 >
-                                    🎯 {t('nav.dashboard') || 'Panel'}
+                                    <span role="img" aria-hidden="true">🎯</span> {t('nav.dashboard') || 'Panel'}
                                     {user.role === 'vendor' && unreadCount > 0 && (
                                         <span className="unread-badge" style={{
                                             position: 'absolute',
@@ -134,14 +135,14 @@ const Navbar = () => {
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: '8px',
-                                            background: 'linear-gradient(135deg, #9333ea, #c084fc)',
+                                            background: '#7c3aed', /* Darker purple for accessibility */
                                             color: 'white',
                                             padding: '10px 20px',
                                             borderRadius: '25px',
                                             margin: '5px 0'
                                         }}
                                     >
-                                        👤 {t('nav.profile')}
+                                        <span role="img" aria-hidden="true">👤</span> {t('nav.profile')}
                                     </Link>
                                 )}
                                 {/* Shop Panel Button - for shop owners */}
@@ -154,14 +155,14 @@ const Navbar = () => {
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: '8px',
-                                            background: 'linear-gradient(135deg, #10b981, #059669)',
+                                            background: 'var(--color-secondary)',
                                             color: 'white',
                                             padding: '10px 20px',
                                             borderRadius: '25px',
                                             margin: '5px 0'
                                         }}
                                     >
-                                        🏪 {t('nav.shopPanel')}
+                                        <span role="img" aria-hidden="true">🏪</span> {t('nav.shopPanel')}
                                     </Link>
                                 )}
                                 {user.role === 'couple' && (
@@ -173,7 +174,7 @@ const Navbar = () => {
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: '8px',
-                                            background: 'linear-gradient(135deg, #ff6b6b, #ff8e53)',
+                                            background: 'linear-gradient(135deg, #c026d3, #ff1a8c)',
                                             color: 'white',
                                             padding: '10px 20px',
                                             borderRadius: '25px',
@@ -181,7 +182,7 @@ const Navbar = () => {
                                             position: 'relative'
                                         }}
                                     >
-                                        💬 {t('nav.messages')}
+                                        <span role="img" aria-hidden="true">💬</span> {t('nav.messages')}
                                         {unreadCount > 0 && (
                                             <span className="unread-badge" style={{
                                                 position: 'absolute',
@@ -215,7 +216,7 @@ const Navbar = () => {
                                 className="btn-dashboard"
                                 style={{ position: 'relative' }}
                             >
-                                {t('nav.dashboard') || 'Panelim'}
+                                <span role="img" aria-label="bullseye">🎯</span> {t('nav.dashboard') || 'Panelim'}
                                 {user.role === 'vendor' && unreadCount > 0 && (
                                     <span className="unread-badge">{unreadCount}</span>
                                 )}
@@ -227,7 +228,7 @@ const Navbar = () => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '4px',
-                                        background: '#9333ea',
+                                        background: '#7c3aed',
                                         color: 'white',
                                         padding: '6px 12px',
                                         borderRadius: '18px',
@@ -246,7 +247,7 @@ const Navbar = () => {
                                         e.target.style.boxShadow = '0 2px 8px rgba(147, 51, 234, 0.3)';
                                     }}
                                 >
-                                    <span style={{ fontSize: '1rem' }}>👤</span>
+                                    <span role="img" aria-hidden="true" style={{ fontSize: '1rem' }}>👤</span>
                                     <span>{t('nav.profile')}</span>
                                 </Link>
                             )}
@@ -258,7 +259,7 @@ const Navbar = () => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '4px',
-                                        background: 'linear-gradient(135deg, #10b981, #059669)',
+                                        background: 'var(--color-secondary)',
                                         color: 'white',
                                         padding: '6px 12px',
                                         borderRadius: '18px',
@@ -277,7 +278,7 @@ const Navbar = () => {
                                         e.target.style.boxShadow = '0 2px 8px rgba(16, 185, 129, 0.3)';
                                     }}
                                 >
-                                    <span style={{ fontSize: '1rem' }}>🏪</span>
+                                    <span role="img" aria-hidden="true" style={{ fontSize: '1rem' }}>🏪</span>
                                     <span>{t('nav.shop')}</span>
                                 </Link>
                             )}
@@ -288,7 +289,7 @@ const Navbar = () => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '4px',
-                                        background: '#ff6b6b',
+                                        background: '#e11d48', /* Darker red for contrast */
                                         color: 'white',
                                         padding: '6px 12px',
                                         borderRadius: '18px',
@@ -308,7 +309,7 @@ const Navbar = () => {
                                         e.target.style.boxShadow = '0 2px 8px rgba(255, 107, 107, 0.3)';
                                     }}
                                 >
-                                    <span style={{ fontSize: '1.1rem' }}>💬</span>
+                                    <span role="img" aria-hidden="true" style={{ fontSize: '1.1rem' }}>💬</span>
                                     <span>{t('nav.messages')}</span>
                                     {unreadCount > 0 && (
                                         <span className="unread-badge" style={{
@@ -325,31 +326,8 @@ const Navbar = () => {
                                     )}
                                 </Link>
                             )}
-                            <button
-                                onClick={handleLogout}
-                                className="btn-logout"
-                                aria-label="Logout"
-                                style={{
-                                    background: 'transparent',
-                                    border: '1px solid #e0e0e0',
-                                    color: '#666',
-                                    padding: '6px 12px',
-                                    borderRadius: '20px',
-                                    fontSize: '0.85rem',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    whiteSpace: 'nowrap'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.target.style.borderColor = '#ff6b6b';
-                                    e.target.style.color = '#ff6b6b';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.target.style.borderColor = '#e0e0e0';
-                                    e.target.style.color = '#666';
-                                }}
-                            >
-                                🚪 {t('nav.logout')}
+                            <button onClick={handleLogout} className="btn-logout">
+                                <span role="img" aria-hidden="true">🚪</span> {t('nav.logout')}
                             </button>
                         </div>
                     ) : (

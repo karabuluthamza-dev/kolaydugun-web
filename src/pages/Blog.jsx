@@ -120,6 +120,7 @@ const Blog = () => {
                 title={blogTitle}
                 description={blogDesc}
                 url="/blog"
+                hreflangUrls={{ de: '/blog', tr: '/blog', en: '/blog' }}
             />
             {/* Hero Section for Blog */}
             <div className="blog-hero" style={{

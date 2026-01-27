@@ -19,7 +19,7 @@ const VendorDashboard = () => {
     const { t, language } = useLanguage();
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
-    const isDemo = searchParams.get('demo') === 'true';
+    const isDemo = searchParams.get('demo') === 'true' || window.location.pathname === '/vendor-dashboard-demo';
 
     // Initialize tab from URL or default to 'overview'
     const initialTab = searchParams.get('tab') || 'overview';
@@ -49,14 +49,17 @@ const VendorDashboard = () => {
 
     useEffect(() => {
         if (isDemo) {
+            const venueParam = searchParams.get('venue') || 'Kemer Country Club';
+            const cityParam = searchParams.get('city') || 'Eyüp, İstanbul';
+
             // Mock Data for Demo Mode
             setVendor({
                 id: 'demo-v-99',
-                business_name: 'DJ34Istanbul – Wedding & Event DJ',
-                category: 'DJs',
-                city: 'Ulm',
+                business_name: venueParam,
+                category: 'wedding_venues',
+                city: cityParam,
                 subscription_tier: 'premium',
-                credit_balance: 500,
+                credit_balance: 750,
                 is_claimed: true
             });
             setCategorySupport(true);
@@ -64,10 +67,10 @@ const VendorDashboard = () => {
             setRecentInsight({
                 performance_score: 95,
                 summary: language === 'tr'
-                    ? 'DJ34Istanbul harika bir performans sergiliyor! Görünürlüğünüz geçen aya göre %45 arttı ve ziyaretçilerinizin %12si teklif istedi.'
+                    ? `${venueParam} harika bir performans sergiliyor! Görünürlüğünüz geçen aya göre %45 arttı ve ziyaretçilerinizin %12si teklif istedi.`
                     : (language === 'de'
-                        ? 'DJ34Istanbul zeigt eine großartige Leistung! Ihre Sichtbarkeit hat sich im Vergleich zum Vormonat um 45% erhöht.'
-                        : 'DJ34Istanbul is performing great! Your visibility has increased by 45% compared to last month.'),
+                        ? `${venueParam} zeigt eine großartige Leistung! Ihre Sichtbarkeit hat sich im Vergleich zum Vormonat um 45% erhöht.`
+                        : `${venueParam} is performing great! Your visibility has increased by 45% compared to last month.`),
                 recommendations: [
                     'Yeni referans fotoğrafları ekleyerek ivmeyi koruyun.',
                     'Tedarikçi başarı öykünüzü bizimle paylaşın!',
@@ -76,8 +79,8 @@ const VendorDashboard = () => {
             });
             setRankInfo({
                 rank: 1,
-                category: 'wedding_dj',
-                city: 'Ulm',
+                category: 'wedding_venues',
+                city: cityParam,
                 points_to_next: 0
             });
             setLoading(false);
@@ -500,7 +503,7 @@ const VendorDashboard = () => {
             case 'gallery':
                 return <GalleryManager vendor={vendor} onUpdate={fetchVendorProfile} />;
             case 'leads':
-                return <LeadsViewer vendor={vendor} highlightLeadId={searchParams.get('leadId')} />;
+                return <LeadsViewer vendor={vendor} isDemo={isDemo} highlightLeadId={searchParams.get('leadId')} />;
             case 'messages':
                 return <VendorMessages vendor={vendor} />;
             case 'shop':

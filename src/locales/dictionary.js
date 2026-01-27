@@ -58,6 +58,33 @@ export const dictionary = {
             "en": "Sitemap"
         }
     },
+    "hero": {
+        "title": {
+            "en": "Perfect Start for Your Dream Wedding",
+            "de": "Perfekter Start für Ihre Traumhochzeit",
+            "tr": "Hayalinizdeki Düğün İçin Kusursuz Başlangıç"
+        },
+        "subtitle": {
+            "en": "Plan your dream wedding in Germany with the best vendors.",
+            "de": "Planen Sie Ihre Traumhochzeit in Deutschland mit den besten Anbietern.",
+            "tr": "Almanya'da hayalinizdeki düğünü en iyi tedarikçilerle planlayın."
+        },
+        "cta": {
+            "en": "Get Free Quote",
+            "de": "Kostenloses Angebot",
+            "tr": "Ücretsiz Teklif Al"
+        },
+        "ctaSubtext": {
+            "en": "Take the first step",
+            "de": "Machen Sie den ersten Schritt",
+            "tr": "Hayalindeki düğün için ilk adımı at"
+        },
+        "getFreeQuote": {
+            "en": "Get Free Quote",
+            "de": "Kostenloses Angebot",
+            "tr": "ÜCRETSİZ TEKLİF AL"
+        }
+    },
     "sitemapLink": {
         "tr": "Site Haritası",
         "de": "Sitemap",
@@ -1836,6 +1863,11 @@ export const dictionary = {
                     "de": "Besitzansprüche",
                     "tr": "Sahiplik Talepleri"
                 },
+                "warRoom": {
+                    "en": "War Room (Venues)",
+                    "de": "War Room (Locations)",
+                    "tr": "Savaş Odası (Salonlar)"
+                },
                 "blog": {
                     "en": "Blog",
                     "de": "Blog",
@@ -2038,6 +2070,11 @@ export const dictionary = {
                     "en": "Guide for system management, claim system, and other features.",
                     "de": "Leitfaden für Systemverwaltung, Sahiplen-System und andere Funktionen.",
                     "tr": "Sistem yönetimi, claim (sahiplik) sistemi ve diğer özellikler hakkında rehber."
+                },
+                "warRoom": {
+                    "en": "Strategic venue onboarding and DJ partnership management.",
+                    "de": "Strategisches Location-Onboarding und DJ-Partnerschafts-Management.",
+                    "tr": "Stratejik salon katılımı ve DJ ortaklık yönetimi."
                 }
             },
             "pageTitles": {
@@ -2070,6 +2107,11 @@ export const dictionary = {
                     "en": "Admin Help",
                     "de": "Admin-Hilfe",
                     "tr": "Yönetici Yardımı"
+                },
+                "warRoom": {
+                    "en": "War Room",
+                    "de": "War Room",
+                    "tr": "Savaş Odası"
                 }
             }
         },
@@ -4288,6 +4330,26 @@ export const dictionary = {
             "de": "Community",
             "tr": "Forum"
         },
+        "toggleMenu": {
+            "en": "Toggle Menu",
+            "de": "Menü umschalten",
+            "tr": "Menüyü Aç/Kapat"
+        },
+        "registerBtn": {
+            "en": "Register",
+            "de": "Registrieren",
+            "tr": "Kayıt Ol"
+        },
+        "vendorJoin": {
+            "en": "Join as Vendor",
+            "de": "Als Anbieter beitreten",
+            "tr": "Tedarikçi Ol"
+        },
+        "tools": {
+            "en": "Planning Tools",
+            "de": "Planungstools",
+            "tr": "Planlama Araçları"
+        },
         "newTopic": {
             "button": {
                 "en": "New Topic",
@@ -5138,7 +5200,7 @@ export const dictionary = {
         "subtitle": {
             "en": "Perfection down to the last detail. We create unforgettable moments.",
             "de": "Perfektion bis ins kleinste Detail. Wir gestalten unvergessliche Momente.",
-            "tr": "En ince ayrıntısına kadar mükemmellik. Unutulmaz anlar tasarlıyoruz."
+            "tr": "Almanya'da hayalinizdeki düğünü en iyi tedarikçilerle planlayın."
         },
         "getFreeQuote": {
             "en": "Get Free Quote",
@@ -13894,3 +13956,59 @@ if (dictionary.dashboard && dictionary.dashboard.profile) {
         "tr": "Önce eyalet seçiniz"
     };
 }
+
+// VIP Demo Page Translations
+dictionary.vip = {
+    badges: {
+        eliteCandidate: { en: "ELITE PARTNER CANDIDATE", de: "ELITE PARTNER KANDIDAT", tr: "ELITE PARTNER ADAYI" },
+        viewingNow: { en: "{{count}} PEOPLE VIEWING NOW", de: "{{count}} PERSONEN SCHAUEN JETZT", tr: "ŞU AN {{count}} KİŞİ İNCELİYOR" },
+        vipPromo: { en: "VIP Promotion", de: "VIP Promotion", tr: "VIP Tanıtım" },
+        eliteSalon: { en: "Elite Venue", de: "Elite Location", tr: "Elite Salon" }
+    },
+    nav: {
+        general: { en: "General", de: "Allgemein", tr: "Genel" },
+        prices: { en: "Prices", de: "Preise", tr: "Fiyatlar" },
+        virtualTour: { en: "Virtual Tour", de: "Virtuelle Tour", tr: "Sanal Tur" },
+        capacity: { en: "Capacity", de: "Kapazität", tr: "Kapasite" },
+        calendar: { en: "Calendar", de: "Kalender", tr: "Takvim" },
+        stats: { en: "Statistics", de: "Statistiken", tr: "İstatistikler" },
+        whyUs: { en: "Why Us?", de: "Warum wir?", tr: "Neden Biz?" },
+        partner: { en: "Partner", de: "Partner", tr: "Partner" },
+        reviews: { en: "Reviews", de: "Bewertungen", tr: "Yorumlar" }
+    },
+    hero: {
+        regionAvg: { en: "(Region Average)", de: "(Regionsdurchschnitt)", tr: "(Bölge Ortalaması)" }
+    },
+    sections: {
+        pricesTitle: { en: "{{name}} Wedding Prices", de: "{{name}} Hochzeitspreise", tr: "{{name}} Düğün Fiyatları" },
+        capacityTitle: { en: "Capacity Information", de: "Kapazitätsinformationen", tr: "Kapasite Bilgileri" },
+        virtualTourTitle: { en: "360° Virtual Tour & Photos", de: "360° Virtueller Rundgang & Fotos", tr: "360° Sanal Tur & Fotoğraflar" },
+        availabilityTitle: { en: "Live Availability ({{year}})", de: "Live-Verfügbarkeit ({{year}})", tr: "Canlı Müsaitlik Durumu ({{year}})" },
+        whyUsTitle: { en: "Why Choose This Venue?", de: "Warum diese Location wählen?", tr: "Mekanı Neden Tercih Etmelisin?" },
+        reviewsTitle: { en: "Popular Reviews", de: "Beliebte Bewertungen", tr: "Popüler Yorumlar" },
+        partnerTitle: { en: "Elite Partner Collaboration", de: "Elite-Partner-Kooperation", tr: "Elite Partner İş Birliği" },
+        statsTitle: { en: "Venue Management Panel (Demo)", de: "Location-Management-Panel (Demo)", tr: "Salon Yönetim Paneli (Demo)" },
+        statsSubtitle: { en: "Your profile's performance in the last 30 days", de: "Die Leistung Ihres Profils in den letzten 30 Tagen", tr: "Profilinizin son 30 günlük performansı" },
+        capacity: {
+            area: { en: "Area Name", de: "Bereichsname", tr: "Alan Adı" },
+            meal: { en: "Banquet Capacity", de: "Bankettkapazität", tr: "Yemekli Kapasite" },
+            cocktail: { en: "Cocktail Capacity", de: "Cocktailkapazität", tr: "Kokteyl Kapasite" }
+        }
+    },
+    common: {
+        weekDay: { en: "Weekday (Per Person)", de: "Wochentags (Pro Person)", tr: "Hafta İçi (Kişi Başı)" },
+        weekEnd: { en: "Weekend (Per Person)", de: "Wochenende (Pro Person)", tr: "Hafta Sonu (Kişi Başı)" },
+        updated: { en: "Current Offer", de: "Aktuelles Angebot", tr: "Güncel Teklif" },
+        lastUpdated: { en: "Last Updated: {{date}}", de: "Letztes Update: {{date}}", tr: "Son Güncelleme: {{date}}" },
+        freeQuote: { en: "Get Free Quote", de: "Kostenloses Angebot", tr: "Ücretsiz Teklif Al" },
+        fastResponse: { en: "Response within 1 hour.", de: "Rückmeldung innerhalb 1 Stunde.", tr: "En geç 1 saat içinde geri dönüş yapılır." }
+    },
+    cta: {
+        whatsapp: { en: "Write via WhatsApp", de: "Per WhatsApp schreiben", tr: "WhatsApp'tan Yazın" },
+        getOffer: { en: "GET QUOTE", de: "ANGEBOT EINHOLEN", tr: "TEKLİF AL" },
+        claimProfile: { en: "CLAIM PROFILE (Free)", de: "PROFIL BEANSPRUCHEN (Kostenlos)", tr: "PROFİLİ SAHİPLEN (Ücretsiz)" },
+        claimTitle: { en: "Is This Your Page?", de: "Ist das Ihre Seite?", tr: "Bu Sayfa Sizin mi?" },
+        claimDesc: { en: "This professional showcase page and all inquiries could be yours. Claim your profile now to enjoy Elite Partner benefits.", de: "Diese professionelle Präsentationsseite und alle Anfragen könnten Ihnen gehören. Beanspruchen Sie jetzt Ihr Profil.", tr: "Bu profesyonel tanıtım sayfası ve gelen tüm teklifler size ait olabilir. Hemen profilinizi sahiplenin ve Elite Partner avantajlarından yararlanın." },
+        testDashboard: { en: "Test Management Panel", de: "Management-Panel testen", tr: "Yönetim Panelini Test Et" }
+    }
+};

@@ -7,6 +7,7 @@ import AffiliateDisclosure from '../components/AffiliateDisclosure';
 import AmazonTrustBadges from '../components/AmazonTrustBadges';
 import SocialShareButtons from '../components/SocialShareButtons';
 import { trackLeadContact, trackFunnelStep } from '../utils/analytics';
+import { generateShopBreadcrumb } from '../utils/breadcrumbSchema';
 import './ShopProduct.css';
 
 const ShopProduct = () => {
@@ -472,6 +473,12 @@ const ShopProduct = () => {
                     .join(', ')}
                 type="product"
                 hreflangUrls={getHreflangUrls()}
+                structuredData={generateShopBreadcrumb(
+                    product.shop?.business_name,
+                    product.shop?.slug,
+                    getLocalizedField(product, 'name'),
+                    product.id
+                )}
             />
 
             {/* Lightbox */}

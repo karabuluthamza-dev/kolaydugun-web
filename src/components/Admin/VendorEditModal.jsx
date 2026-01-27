@@ -63,7 +63,8 @@ const VendorEditModal = ({ isOpen, onClose, importItem, vendor, onSaveSuccess })
             description: item.description || '',
             faq: item.faq || [],
             payment_methods: item.payment_methods || [],
-            languages: item.languages || []
+            languages: item.languages || [],
+            details: item.details || {}
         };
     };
 
@@ -141,7 +142,8 @@ const VendorEditModal = ({ isOpen, onClose, importItem, vendor, onSaveSuccess })
                     instagram: formData.instagram,
                     facebook: formData.facebook,
                     twitter: formData.twitter
-                }
+                },
+                details: formData.details
             };
 
             // Table specific schema differences
@@ -515,6 +517,8 @@ const VendorEditModal = ({ isOpen, onClose, importItem, vendor, onSaveSuccess })
                             </label>
                         </div>
                     </div>
+
+
 
                     {/* SEO Preview - Same as before but styled a bit nicer */}
                     <div className="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm space-y-3">

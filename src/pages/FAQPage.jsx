@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useLanguage } from '../context/LanguageContext';
-import useSEO from '../hooks/useSEO';
+import SEO from '../components/SEO';
 import './FAQPage.css';
 
 const FAQPage = () => {
@@ -11,12 +11,6 @@ const FAQPage = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [expandedFaq, setExpandedFaq] = useState(null);
-
-    useSEO({
-        title: t('faq.title') || 'Sıkça Sorulan Sorular',
-        description: t('faq.subtitle') || 'KolayDugun hakkında merak ettiğiniz her şey. Platform kullanımı, fiyatlandırma, tedarikçi kayıt ve daha fazlası.',
-        keywords: 'düğün planlama faq, kolaydugun sorular, düğün tedarikçi, wedding planning germany'
-    });
 
     const categories = [
         { value: 'all', label: t('faq.categories.all') || 'Tümü', icon: '📋' },
@@ -98,10 +92,15 @@ const FAQPage = () => {
 
     return (
         <div className="faq-page">
-            {/* Structured Data */}
-            <script type="application/ld+json">
-                {JSON.stringify(structuredData)}
-            </script>
+            {/* SEO with Structured Data and Hreflang */}
+            <SEO
+                title={t('faq.title') || 'Sıkça Sorulan Sorular'}
+                description={t('faq.subtitle') || 'KolayDugun hakkında merak ettiğiniz her şey. Platform kullanımı, fiyatlandırma, tedarikçi kayıt ve daha fazlası.'}
+                keywords="düğün planlama faq, kolaydugun sorular, düğün tedarikçi, wedding planning germany"
+                url="/faq"
+                structuredData={structuredData}
+                hreflangUrls={{ de: '/faq', tr: '/faq', en: '/faq' }}
+            />
 
             <div className="section container" style={{ marginTop: '80px' }}>
                 {/* Header */}

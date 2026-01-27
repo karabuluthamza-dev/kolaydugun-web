@@ -32,7 +32,7 @@ const FakeOnlineCounter = ({ config }) => {
 
                     return next;
                 });
-            }, 8000);
+            }, 15000);
             return () => clearInterval(interval);
         }
     }, [mode, base, range]);
@@ -40,9 +40,9 @@ const FakeOnlineCounter = ({ config }) => {
     if (mode === 'off') return null;
 
     return (
-        <div className="flex items-center gap-2 text-sm font-medium text-gray-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100">
+        <div className="flex items-center gap-2 text-sm font-medium text-gray-800 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100">
             <span className="relative flex h-2.5 w-2.5">
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" aria-hidden="true"></span>
             </span>
             <span>
                 <span className="font-bold text-gray-800">{count}</span> {t('onlineCounter.text')}

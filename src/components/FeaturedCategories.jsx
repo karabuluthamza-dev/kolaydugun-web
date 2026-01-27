@@ -87,21 +87,23 @@ const FeaturedCategories = () => {
                             to={`/vendors?category=${cat.slug || cat.name.toLowerCase().replace(/\s+/g, '-')}`}
                             key={cat.id}
                             className="category-card"
-                            data-aos="fade-up"
-                            data-aos-delay={index * 100}
                         >
                             <div className="category-image-wrapper">
                                 {cat.image_url ? (
                                     <img
                                         src={cat.image_url}
                                         alt={translatedName}
+                                        loading="lazy"
+                                        decoding="async"
+                                        width="300"
+                                        height="200"
                                     />
                                 ) : (
-                                    <span className="category-icon">{cat.icon}</span>
+                                    <span className="category-icon" role="img" aria-hidden="true">{cat.icon}</span>
                                 )}
                             </div>
                             <h3 className="category-name">
-                                {cat.icon && cat.image_url && <span style={{ marginRight: '8px' }}>{cat.icon}</span>}
+                                {cat.icon && cat.image_url && <span style={{ marginRight: '8px' }} role="img" aria-hidden="true">{cat.icon}</span>}
                                 {translatedName}
                             </h3>
                         </Link>

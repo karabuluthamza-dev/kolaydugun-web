@@ -100,6 +100,10 @@ const FeaturedVendors = () => {
                                 <img
                                     src={initialImage}
                                     alt={vendor.business_name}
+                                    loading="lazy"
+                                    decoding="async"
+                                    width="400"
+                                    height="300"
                                     onError={(e) => {
                                         e.target.onerror = null; // Prevent infinite loop
                                         e.target.src = categoryDefault;
@@ -107,13 +111,29 @@ const FeaturedVendors = () => {
                                 />
                                 {(vendor.is_claimed || vendor.is_verified) ? (
                                     <span className="claimed-badge-small">
-                                        ✓ {t('common.claimed')}
+                                        <span role="img" aria-hidden="true">✓</span> {t('common.claimed')}
                                     </span>
                                 ) : !vendor.user_id ? (
-                                    <span className="claimed-badge-small" style={{ background: 'rgba(255, 255, 255, 0.9)', color: '#e91e63', border: '1px solid #e91e63' }}>
-                                        🛡️ {t('common.vendorClaim.badge')}
+                                    <span className="claimed-badge-small" style={{ background: 'rgba(255, 255, 255, 0.95)', color: '#ff1a8c', border: '1px solid #ff1a8c' }}>
+                                        <span role="img" aria-hidden="true">🛡️</span> {t('common.vendorClaim.badge')}
                                     </span>
                                 ) : null}
+                                {vendor.details?.vip_demo_config?.is_elite && (
+                                    <span className="elite-badge-small" style={{
+                                        position: 'absolute',
+                                        top: '10px',
+                                        right: '10px',
+                                        background: 'linear-gradient(45deg, #FFD700, #B8860B)',
+                                        color: '#000',
+                                        fontSize: '0.6rem',
+                                        fontWeight: '900',
+                                        padding: '3px 8px',
+                                        borderRadius: '4px',
+                                        zIndex: 5
+                                    }}>
+                                        <span role="img" aria-hidden="true">💎</span> ELITE
+                                    </span>
+                                )}
                             </div>
                             <div className="vendor-info">
                                 <h3 className="vendor-name">{vendor.business_name}</h3>
@@ -121,7 +141,7 @@ const FeaturedVendors = () => {
                                     <span className="vendor-category">
                                         {categoryName && t(`categories.${categoryName.toLowerCase().replace(/ & /g, '_').replace(/ /g, '_')}`) || categoryName}
                                     </span>
-                                    <span className="vendor-city">📍 {vendor.city || '---'}</span>
+                                    <span className="vendor-city"><span role="img" aria-hidden="true">📍</span> {vendor.city || '---'}</span>
                                 </div>
                             </div>
                         </Link>

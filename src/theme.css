@@ -1,16 +1,16 @@
 :root {
-    /* Color Palette - Premium & Elegant */
-    --color-primary: #D4AF37;
-    /* Gold */
-    --color-primary-dark: #AA8C2C;
-    --color-primary-light: #F3E5AB;
+    /* Color Palette - Radical Neon Pink Theme */
+    --color-primary: #ff4d94;
+    /* Neon Pink */
+    --color-primary-dark: #db2777;
+    --color-primary-light: #ff7eb3;
 
     --color-secondary: #2C3E50;
     /* Dark Blue/Slate */
     --color-secondary-light: #34495E;
 
-    --color-accent: #E74C3C;
-    /* Soft Red for actions/errors */
+    --color-accent: #ff007f;
+    /* Soft Neon Pink for actions/errors */
 
     --color-text-main: #2C3E50;
     --color-text-light: #7F8C8D;
@@ -78,7 +78,7 @@ a {
 }
 
 a:hover {
-    color: var(--color-primary-dark);
+    color: #ff1a8c;
 }
 
 /* Utility Classes */

@@ -51,8 +51,13 @@ const Register = () => {
 
     useEffect(() => {
         const type = searchParams.get('type');
+        const claim = searchParams.get('claim');
+
         if (type === 'vendor') {
             setUserType('vendor');
+            if (claim) {
+                setFormData(prev => ({ ...prev, name: decodeURIComponent(claim) }));
+            }
         } else if (type === 'couple') {
             setUserType('couple');
         }

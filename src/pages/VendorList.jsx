@@ -11,6 +11,7 @@ import useGeolocation from '../hooks/useGeolocation';
 import { calculateDistance, formatDistance, isWithinRadius } from '../utils/geoUtils';
 import { STATES, CITIES_BY_STATE, getCategoryTranslationKey } from '../constants/vendorData';
 import { supabase } from '../supabaseClient';
+import { generateVendorListBreadcrumb } from '../utils/breadcrumbSchema';
 import './VendorList.css';
 
 const VendorList = () => {
@@ -39,7 +40,8 @@ const VendorList = () => {
         zip_code: searchParams.get('zip_code') || '',
         price: searchParams.get('price') || '',
         capacity: searchParams.get('capacity') || '',
-        radius: searchParams.get('radius') || ''
+        radius: searchParams.get('radius') || '',
+        is_elite: searchParams.get('is_elite') === 'true'
     }), [searchParams]);
 
     // Dynamic SEO Titles based on Category and City
@@ -61,9 +63,16 @@ const VendorList = () => {
         return `${cityName} bölgesindeki en iyi ${catName} seçeneklerini keşfedin. ${totalCount} tedarikçi arasından seçim yapın, fiyat teklifi alın ve hayalinizdeki düğünü planlayın.`;
     }, [filters.category, filters.city, totalCount, language, t]);
 
-    // Generate structural data for SEO
+    // Generate structural data for SEO (ItemList + Breadcrumb)
     const structuredData = useMemo(() => {
-        return {
+        const catKey = filters.category ? getCategoryTranslationKey(filters.category) : '';
+        const catName = catKey ? t(`categories.${catKey}`) : null;
+
+        // Breadcrumb schema
+        const breadcrumb = generateVendorListBreadcrumb(catName, filters.category, filters.city);
+
+        // ItemList schema
+        const itemList = {
             "@context": "https://schema.org",
             "@type": "ItemList",
             "numberOfItems": vendors.length,
@@ -74,7 +83,10 @@ const VendorList = () => {
                 "name": v.name
             }))
         };
-    }, [vendors]);
+
+        // Return as array for multiple schemas
+        return [breadcrumb, itemList].filter(Boolean);
+    }, [vendors, filters.category, filters.city, t]);
 
     // Main Fetch Effect
     useEffect(() => {
@@ -85,7 +97,18 @@ const VendorList = () => {
                 page: currentPage,
                 pageSize: itemsPerPage
             });
-            setVendors(data || []);
+
+            // Sort data to put Elite vendors on top if not already handled by backend
+            // Also filter out hidden vendors (is_public_visible === false)
+            const sortedData = data ? [...data]
+                .filter(v => v.details?.vip_demo_config?.is_public_visible !== false)
+                .sort((a, b) => {
+                    const aElite = a.details?.vip_demo_config?.is_elite ? 1 : 0;
+                    const bElite = b.details?.vip_demo_config?.is_elite ? 1 : 0;
+                    return bElite - aElite;
+                }) : [];
+
+            setVendors(sortedData);
             setTotalCount(total || 0);
             setLoading(false);
         };
@@ -117,12 +140,31 @@ const VendorList = () => {
             }
             setTopLoading(true);
             try {
+                // Fetch Top 5 + Any Elite vendors for this category/city
                 const { data, error } = await supabase.rpc('get_top_vendors', {
                     p_category: filters.category,
                     p_city: filters.city || null,
                     p_limit: 5
                 });
-                if (!error) setTopVendors(data || []);
+
+                // Also fetch Elite vendors for this specific search to include them in stars
+                const { data: eliteData } = await supabase
+                    .from('vendors')
+                    .select('*')
+                    .eq('category', filters.category)
+                    .or('details.cs.{"vip_demo_config": {"is_elite": true}}')
+                    .limit(3);
+
+                const combined = [...(data || [])];
+                if (eliteData) {
+                    eliteData.forEach(ev => {
+                        if (!combined.find(v => v.id === ev.id)) {
+                            combined.push(ev);
+                        }
+                    });
+                }
+
+                if (!error) setTopVendors(combined.slice(0, 6));
             } catch (err) {
                 console.error('Error fetching top stars:', err);
             } finally {
@@ -167,6 +209,7 @@ const VendorList = () => {
                 description={seoDescription}
                 url={`/vendors${filters.category ? `?category=${filters.category}` : ''}${filters.city ? `&city=${filters.city}` : ''}`}
                 structuredData={structuredData}
+                hreflangUrls={{ de: '/vendors', tr: '/vendors', en: '/vendors' }}
             />
             <VendorHero totalVendors={totalCount} />
 
@@ -219,6 +262,7 @@ const VendorList = () => {
                             </div>
                         )}
 
+
                         <div className="vendor-grid">
                             {loading ? (
                                 // Show skeletons while loading
@@ -227,7 +271,7 @@ const VendorList = () => {
                                 ))
                             ) : vendors.length > 0 ? (
                                 vendors.map((vendor, index) => (
-                                    <div key={vendor.id} data-aos="fade-up" data-aos-delay={index * 50}>
+                                    <div key={vendor.id}>
                                         <VendorCard
                                             {...vendor}
                                             categoryImage={categoryMap[vendor.category] || categoryMap[getCategoryTranslationKey(vendor.category)]}

@@ -7,7 +7,6 @@ import './SmartAppBanner.css';
 const SmartAppBanner = () => {
     const { isInstallable, isInstalled, installPWA } = usePWAInstall();
     const languageContext = useLanguage();
-    console.log('[DEBUG] SmartAppBanner useLanguage() returned:', languageContext);
     const { t } = languageContext;
     const [isVisible, setIsVisible] = useState(false);
 
@@ -38,12 +37,12 @@ const SmartAppBanner = () => {
 
     return (
         <div className="smart-app-banner">
-            <button className="banner-close" onClick={handleDismiss}>
+            <button className="banner-close" onClick={handleDismiss} aria-label="Kapat">
                 <X size={18} />
             </button>
 
             <div className="banner-icon">
-                <img src="/pwa-icon.png" alt="App Icon" />
+                <img src="/pwa-icon.png" alt="KolayDüğün Uygulama İkonu" width="48" height="48" loading="lazy" decoding="async" />
             </div>
 
             <div className="banner-content">

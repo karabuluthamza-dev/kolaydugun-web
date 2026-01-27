@@ -26,8 +26,10 @@
     align-items: center;
     gap: 0.25rem;
     text-decoration: none;
-    color: #64748b;
-    font-size: 0.7rem;
+    color: #334155;
+    /* Darkened for accessibility contrast */
+    font-size: 0.8rem;
+    /* Increased for legibility */
     font-weight: 500;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     flex: 1;
@@ -40,7 +42,7 @@
 }
 
 .mobile-nav-item.active {
-    color: #8B2252;
+    color: #ff1a8c;
 }
 
 .mobile-nav-item.active .nav-icon {
@@ -68,7 +70,7 @@
 .action-btn-inner {
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, #FF6B9D 0%, #FF8E53 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -86,7 +88,7 @@
     margin-top: 4px;
     font-size: 0.65rem;
     font-weight: 700;
-    color: #8B2252;
+    color: #ff1a8c;
     text-align: center;
     white-space: nowrap;
 }

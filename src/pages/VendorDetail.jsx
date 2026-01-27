@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { useVendors } from '../context/VendorContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -35,6 +35,7 @@ const VendorDetail = () => {
     const [vendorShop, setVendorShop] = useState(null);
     const [categorySchema, setCategorySchema] = useState(null);
     const [formError, setFormError] = useState('');
+    const [isVip, setIsVip] = useState(false);
 
 
     // Check if vendor has a shop account
@@ -143,6 +144,12 @@ const VendorDetail = () => {
                     setCategoryImage(fetchedCatImage);
                     setCategorySchema(catData?.form_schema || null);
 
+                    // Detect VIP status (Elite/Premium branding)
+                    // Decoupled from source - only explicit Elite status triggers VIP theme
+                    const isElite = data.details?.vip_demo_config?.is_elite;
+                    const vipStatus = isElite === true || isElite === 'true';
+                    setIsVip(vipStatus);
+
                     const mappedVendor = {
                         ...data,
                         name: data.business_name,
@@ -243,16 +250,62 @@ const VendorDetail = () => {
     }
 
     // Determine default image based on category
-    const categoryDefault = categoryImage || categoryImages[vendor.category] || categoryImages[getCategoryTranslationKey(vendor.category)] || defaultImage;
-    const mainImage = vendor.image || categoryDefault;
+    // Improved Category Normalization for Image Lookup
+    const getNormalizedCategoryKey = (cat) => {
+        const key = getCategoryTranslationKey(cat);
+        const keyMap = {
+            'wedding_venues': 'Wedding Venues',
+            'bridal_fashion': 'Bridal Fashion',
+            'hair_makeup': 'Hair & Make-Up',
+            'groom_suits': 'Groom Suits',
+            'wedding_cakes': 'Wedding Cakes',
+            'wedding_planners': 'Wedding Planners',
+            'wedding_cars': 'Wedding Cars',
+            'catering_party': 'Catering & Party Service',
+            'wedding_speakers': 'Wedding Speakers (Trauredner)',
+            'flowers_decoration': 'Flowers & Decoration',
+            'invitations_stationery': 'Invitations & Stationery',
+            'wedding_rings': 'Wedding Rings',
+            'wedding_photography': 'Wedding Photography',
+            'wedding_videography': 'Wedding Videography',
+            'photobox': 'Photobox',
+            'djs': 'DJs',
+            'musicians': 'Musicians',
+            'entertainment': 'Entertainment'
+        };
+        return keyMap[key] || cat;
+    };
 
-    // Fallback for images if not array (for newly added vendors)
-    const images = Array.isArray(vendor.images) ? vendor.images : [mainImage, mainImage, mainImage, mainImage, mainImage];
-    // Ensure we have at least 5 images for the grid
-    const galleryImages = [...(vendor.gallery || []), ...images].slice(0, 5);
+    const normalizedCat = getNormalizedCategoryKey(vendor.category);
+    const categoryDefault = categoryImage || categoryImages[normalizedCat] || categoryImages[vendor.category] || defaultImage;
+
+    // Robust Image Validation Helper
+    const isValidImage = (url) => {
+        return url && typeof url === 'string' && url.length > 5 && url !== 'null' && url !== 'undefined' && !url.includes('undefined') && !url.includes('null');
+    };
+
+    const mainImage = isValidImage(vendor.image) ? vendor.image : categoryDefault;
+
+    // Safe Gallery Construction
+    let galleryImages = [];
+
+    // 1. Add valid gallery items
+    if (Array.isArray(vendor.gallery)) {
+        galleryImages = [...galleryImages, ...vendor.gallery.filter(isValidImage)];
+    }
+
+    // 2. Add valid images from images array
+    if (Array.isArray(vendor.images)) {
+        galleryImages = [...galleryImages, ...vendor.images.filter(isValidImage)];
+    }
+
+    // 3. Fallback: Fill with mainImage (which is guaranteed to be valid or default)
     while (galleryImages.length < 5) {
         galleryImages.push(mainImage);
     }
+
+    // ensure we have exactly 5 or slice
+    galleryImages = galleryImages.slice(0, 5);
 
 
 
@@ -441,8 +494,95 @@ const VendorDetail = () => {
     ] : null;
 
     return (
-        <div className="vendor-detail-page">
+        <div className={`vendor-detail-page ${isVip ? 'vendor-vip-theme' : ''}`}>
             <div className="section container" style={{ marginTop: '80px' }}>
+                {isVip && (
+                    <div className="elite-partner-banner" style={{
+                        position: 'relative',
+                        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%)',
+                        color: '#fff',
+                        textAlign: 'center',
+                        padding: '20px 30px',
+                        borderRadius: '16px',
+                        marginBottom: '2rem',
+                        fontWeight: 'bold',
+                        letterSpacing: '2px',
+                        boxShadow: '0 8px 32px rgba(212, 175, 55, 0.3), 0 0 60px rgba(212, 175, 55, 0.1)',
+                        border: '2px solid transparent',
+                        borderImage: 'linear-gradient(90deg, transparent, #d4af37, transparent) 1',
+                        overflow: 'hidden'
+                    }}>
+                        {/* Animated shimmer effect */}
+                        <div style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: '-100%',
+                            width: '200%',
+                            height: '100%',
+                            background: 'linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent)',
+                            animation: 'shimmer 3s infinite',
+                            pointerEvents: 'none'
+                        }} />
+
+                        {/* Crown icon */}
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '12px'
+                        }}>
+                            <span style={{
+                                fontSize: '1.8rem',
+                                filter: 'drop-shadow(0 0 8px rgba(212, 175, 55, 0.8))'
+                            }}>👑</span>
+
+                            <div>
+                                <div style={{
+                                    fontSize: '0.7rem',
+                                    color: '#d4af37',
+                                    letterSpacing: '4px',
+                                    marginBottom: '4px',
+                                    textTransform: 'uppercase'
+                                }}>
+                                    KOLAYDUGUN SEÇKİSİ
+                                </div>
+                                <div style={{
+                                    fontSize: '1.4rem',
+                                    background: 'linear-gradient(90deg, #d4af37, #f4e4bc, #d4af37)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    backgroundClip: 'text',
+                                    fontWeight: '800',
+                                    textShadow: 'none'
+                                }}>
+                                    ✨ ELITE PARTNER VENUE ✨
+                                </div>
+                            </div>
+
+                            <span style={{
+                                fontSize: '1.8rem',
+                                filter: 'drop-shadow(0 0 8px rgba(212, 175, 55, 0.8))'
+                            }}>👑</span>
+                        </div>
+
+                        {/* Bottom accent line */}
+                        <div style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: '20%',
+                            right: '20%',
+                            height: '2px',
+                            background: 'linear-gradient(90deg, transparent, #d4af37, transparent)'
+                        }} />
+
+                        <style>{`
+                            @keyframes shimmer {
+                                0% { transform: translateX(-50%); }
+                                100% { transform: translateX(50%); }
+                            }
+                        `}</style>
+                    </div>
+                )}
                 <SEO
                     title={vendor ? `${vendor.name} - ${t('categories.' + getCategoryTranslationKey(vendor.category))} ${vendor.city || ''}` : 'Vendor Details'}
                     description={vendor ? `${vendor.name}: ${vendor.description?.substring(0, 150)}... ${vendor.city} düğün hazırlıkları için en iyi seçenekler.` : 'Vendor details page'}
@@ -450,6 +590,7 @@ const VendorDetail = () => {
                     image={mainImage}
                     url={`/vendors/${vendor?.slug || id}`}
                     structuredData={structuredData}
+                    hreflangUrls={vendor ? { de: `/vendors/${vendor.slug || id}`, tr: `/vendors/${vendor.slug || id}`, en: `/vendors/${vendor.slug || id}` } : null}
                 />
 
                 <div className="vendor-detail-header">
@@ -460,18 +601,34 @@ const VendorDetail = () => {
                     {/* Modern Hero Gallery Grid */}
                     <div className="vendor-hero-gallery">
                         <div className="gallery-main">
-                            <img src={galleryImages[0]} alt={vendor.name} className="gallery-image" />
+                            <img
+                                src={galleryImages[0]}
+                                alt={vendor.name}
+                                className="gallery-image"
+                                onError={(e) => { e.target.onerror = null; e.target.src = categoryDefault; }}
+                            />
                         </div>
                         <div className="gallery-sub">
-                            <img src={galleryImages[1]} alt="Gallery 2" className="gallery-image" />
+                            <img
+                                src={galleryImages[1]}
+                                alt="Gallery 2"
+                                className="gallery-image"
+                                onError={(e) => { e.target.onerror = null; e.target.src = categoryDefault; }}
+                            />
                         </div>
                         <div className="gallery-sub">
-                            <img src={galleryImages[2]} alt="Gallery 3" className="gallery-image" />
+                            <img
+                                src={galleryImages[2]}
+                                alt="Gallery 3"
+                                className="gallery-image"
+                                onError={(e) => { e.target.onerror = null; e.target.src = categoryDefault; }}
+                            />
                             <div className="view-all-photos">
                                 📷 {t('vendorDetail.viewAllPhotos') || 'Tüm Fotoğraflar'}
                             </div>
                         </div>
                     </div>
+
                 </div>
 
                 <div className="vendor-content-grid">
@@ -569,6 +726,10 @@ const VendorDetail = () => {
 
                                             // CRITICAL: Strip "schemas." prefix from KEY itself (dirty data)
                                             const cleanKey = key.replace(/^schemas\./, '');
+
+                                            // EXCLUDE INTERNAL FLAGS
+                                            const internalFlags = ['war_room_status', 'ai_imported', 'scraper_source_url', 'vip_demo_config', 'usps', 'prices', 'contact', 'hero_image', 'hero_title', 'hero_description', 'gallery', 'multilingual_description'];
+                                            if (internalFlags.includes(cleanKey)) return null;
 
                                             // MANUAL KEY MAPPING: Database keys vs Dictionary label keys
                                             const labelKeyMap = {
@@ -747,31 +908,16 @@ const VendorDetail = () => {
 
                         {/* Vendor Shop Card */}
                         {vendorShop && (
-                            <div className="vendor-shop-card" style={{
-                                marginBottom: '1.5rem',
-                                background: 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)',
-                                borderRadius: '16px',
-                                padding: '1.5rem',
-                                border: '2px solid #FF6B9D'
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                                    <div style={{
-                                        width: '50px',
-                                        height: '50px',
-                                        borderRadius: '12px',
-                                        background: 'linear-gradient(135deg, #FF6B9D, #c084fc)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '1.5rem'
-                                    }}>🏪</div>
+                            <div className={`vendor-shop-card ${isVip ? 'vip-shop-card' : ''}`}>
+                                <div className="shop-header-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                                    <div className="shop-icon">🏪</div>
                                     <div>
-                                        <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#be185d' }}>
+                                        <h4>
                                             {language === 'de' ? 'Dieser Anbieter hat einen Shop!'
                                                 : language === 'en' ? 'This vendor has a shop!'
                                                     : 'Bu tedarikçinin mağazası var!'}
                                         </h4>
-                                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#db2777' }}>
+                                        <p>
                                             {language === 'de' ? 'Produkte entdecken'
                                                 : language === 'en' ? 'Browse products'
                                                     : 'Ürünlerini keşfet'}
@@ -780,19 +926,7 @@ const VendorDetail = () => {
                                 </div>
                                 <a
                                     href={`/shop/magaza/${vendorShop.slug}`}
-                                    style={{
-                                        display: 'block',
-                                        width: '100%',
-                                        textAlign: 'center',
-                                        padding: '12px 20px',
-                                        background: 'linear-gradient(135deg, #FF6B9D 0%, #c084fc 100%)',
-                                        color: 'white',
-                                        textDecoration: 'none',
-                                        borderRadius: '10px',
-                                        fontWeight: '600',
-                                        fontSize: '0.95rem',
-                                        boxShadow: '0 4px 15px rgba(255, 107, 157, 0.3)'
-                                    }}
+                                    className="visit-shop-btn"
                                 >
                                     🛍️ {language === 'de' ? 'Shop besuchen'
                                         : language === 'en' ? 'Visit Shop'
@@ -895,19 +1029,10 @@ const VendorDetail = () => {
                                     type="submit"
                                     className="booking-submit-btn"
                                     disabled={submitting}
-                                    style={{
+                                    style={!isVip ? {
                                         background: !vendor.is_claimed ? 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)' : 'linear-gradient(135deg, #FF6B9D 0%, #FF8E53 100%)',
-                                        color: '#ffffff',
-                                        width: '100%',
-                                        padding: '1rem',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        fontWeight: '600',
-                                        fontSize: '1rem',
-                                        cursor: 'pointer',
                                         boxShadow: !vendor.is_claimed ? '0 4px 15px rgba(79, 70, 233, 0.3)' : '0 4px 15px rgba(255, 107, 157, 0.3)',
-                                        opacity: submitting ? 0.7 : 1
-                                    }}
+                                    } : {}}
                                 >
                                     {submitting
                                         ? (t('vendorLeads.processing') || 'Gönderiliyor...')
@@ -968,9 +1093,96 @@ const VendorDetail = () => {
                                 </p>
                             </form>
                         </div>
+
+                        {/* Internal Linking - Related Vendors */}
+                        <div style={{
+                            marginTop: '1.5rem',
+                            padding: '1.25rem',
+                            background: '#f8fafc',
+                            borderRadius: '12px',
+                            border: '1px solid #e2e8f0'
+                        }}>
+                            <h4 style={{
+                                margin: '0 0 1rem 0',
+                                fontSize: '0.95rem',
+                                fontWeight: '700',
+                                color: '#334155',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}>
+                                🔗 {language === 'tr' ? 'İlgili Aramalar' : language === 'de' ? 'Ähnliche Suchen' : 'Related Searches'}
+                            </h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <Link
+                                    to={`/vendors?category=${encodeURIComponent(vendor.category)}`}
+                                    style={{
+                                        color: '#4f46e5',
+                                        textDecoration: 'none',
+                                        fontSize: '0.85rem',
+                                        padding: '6px 10px',
+                                        background: '#eef2ff',
+                                        borderRadius: '6px',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    📂 {t('categories.' + getCategoryTranslationKey(vendor.category))} {language === 'tr' ? 'Kategorisi' : language === 'de' ? 'Kategorie' : 'Category'}
+                                </Link>
+                                {vendor.city && (
+                                    <Link
+                                        to={`/vendors?city=${encodeURIComponent(vendor.city)}`}
+                                        style={{
+                                            color: '#4f46e5',
+                                            textDecoration: 'none',
+                                            fontSize: '0.85rem',
+                                            padding: '6px 10px',
+                                            background: '#eef2ff',
+                                            borderRadius: '6px',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        📍 {vendor.city} {language === 'tr' ? 'Tedarikçileri' : language === 'de' ? 'Anbieter' : 'Vendors'}
+                                    </Link>
+                                )}
+                                {vendor.city && (
+                                    <Link
+                                        to={`/vendors?category=${encodeURIComponent(vendor.category)}&city=${encodeURIComponent(vendor.city)}`}
+                                        style={{
+                                            color: '#4f46e5',
+                                            textDecoration: 'none',
+                                            fontSize: '0.85rem',
+                                            padding: '6px 10px',
+                                            background: '#eef2ff',
+                                            borderRadius: '6px',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        🎯 {t('categories.' + getCategoryTranslationKey(vendor.category))} - {vendor.city}
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
                     </aside>
                 </div>
             </div>
+
+            {isVip && !vendor.is_claimed && (
+                <div className="vip-sticky-cta fade-in-up">
+                    <div className="sticky-cta-content">
+                        <div className="cta-text">
+                            <strong>✨ Bu sizin salonunuz mu?</strong>
+                            <span>Gölge profilinizi sahiplenerek hemen müşteri teklifleri almaya başlayın.</span>
+                        </div>
+                        <button
+                            className="btn-cta"
+                            style={{ padding: '12px 24px', fontSize: '0.9rem' }}
+                            onClick={() => navigate(`/vendor-dashboard-demo?venue=${encodeURIComponent(vendor.name)}&city=${encodeURIComponent(vendor.city)}`)}
+                        >
+                            DASHBOARD DEMO GÖR
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -14,7 +14,7 @@ const TrustBadges = ({ badges }) => {
             <div className="trust-badges">
                 {badges.items.map((badge, index) => (
                     <div key={index} className="trust-badge">
-                        <span className="trust-badge-icon">{badge.icon}</span>
+                        <span className="trust-badge-icon" role="img" aria-hidden="true">{badge.icon}</span>
                         <span className="trust-badge-text">
                             {badge.text?.[language] || badge.text?.tr || badge.text}
                         </span>

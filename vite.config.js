@@ -6,7 +6,7 @@ import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
-    ViteImageOptimizer({
+    mode === 'production' && ViteImageOptimizer({
       png: {
         quality: 80,
       },
@@ -23,8 +23,30 @@ export default defineConfig(({ mode }) => ({
     }),
   ],
   esbuild: {
-    // Production build'de console.log ve debugger'ları otomatik kaldır
-    drop: mode === 'production' ? ['console', 'debugger'] : [],
+    // Temporarily disabled console dropping for debugging production issues
+    drop: [],
   },
-  server: {},
+  server: {
+    watch: {
+      usePolling: true,
+      interval: 1000,
+      ignored: ['**/node_modules/**', '**/dist/**', '**/.git/**']
+    },
+    hmr: {
+      overlay: true
+    }
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: './index.html'
+      },
+      output: {
+        // Letting Vite handle chunks automatically for maximum stability during debug
+      }
+    }
+  },
+  optimizeDeps: {
+    entries: ['./index.html', './src/main.jsx']
+  }
 }))

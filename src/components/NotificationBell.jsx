@@ -124,8 +124,8 @@ const NotificationBell = () => {
             case 'admin_new_vendor': return '🏢';
             case 'admin_new_contact': return '✉️';
             case 'admin_forum_report': return '🚩';
-            case 'admin_new_user': return '👤';
-            default: return '📬';
+            case 'admin_new_user': return <span role="img" aria-hidden="true">👤</span>;
+            default: return <span role="img" aria-hidden="true">📬</span>;
         }
     };
 
@@ -152,7 +152,7 @@ const NotificationBell = () => {
                 onClick={() => setShowDropdown(!showDropdown)}
                 aria-label={t('dashboard.notifications.title')}
             >
-                🔔
+                <span role="img" aria-hidden="true">🔔</span>
                 {unreadCount > 0 && (
                     <span className="notification-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
                 )}
@@ -161,7 +161,7 @@ const NotificationBell = () => {
             {showDropdown && (
                 <div className="notification-dropdown">
                     <div className="notification-dropdown-header">
-                        <h3>📬 {t('dashboard.notifications.title')}</h3>
+                        <h3><span role="img" aria-hidden="true" style={{ marginRight: '8px' }}>📬</span> {t('dashboard.notifications.title')}</h3>
                         {unreadCount > 0 && (
                             <span className="unread-count">{unreadCount} {t('dashboard.notifications.unread')}</span>
                         )}

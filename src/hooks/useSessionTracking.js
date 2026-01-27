@@ -82,8 +82,8 @@ export const useSessionTracking = () => {
         const updateActivity = async () => {
             if (!sessionIdRef.current) return;
 
-            // Only update if 30 seconds passed
-            if (Date.now() - lastActivityRef.current < 30000) return;
+            // Only update if 120 seconds passed (more efficient)
+            if (Date.now() - lastActivityRef.current < 120000) return;
 
             try {
                 await supabase
@@ -93,16 +93,17 @@ export const useSessionTracking = () => {
 
                 lastActivityRef.current = Date.now();
             } catch (error) {
-                console.error('Error updating activity:', error);
+                // Silently handle session update errors to avoid UI console spray
             }
         };
 
-        const interval = setInterval(updateActivity, 30000);
+        const interval = setInterval(updateActivity, 120000);
 
-        // Also update on user interaction events
+        // Also update on user interaction events with heavy debounce
         const handleInteraction = () => {
-            lastActivityRef.current = Date.now() - 25000; // Force update sooner
-            updateActivity();
+            if (Date.now() - lastActivityRef.current > 60000) {
+                updateActivity();
+            }
         };
 
         window.addEventListener('click', handleInteraction);

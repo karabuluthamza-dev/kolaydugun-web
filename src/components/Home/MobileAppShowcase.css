@@ -46,7 +46,8 @@
 
 .showcase-content p {
     font-size: 1.15rem;
-    color: #666;
+    color: #4b5563;
+    /* Darkened for accessibility */
     margin-bottom: 40px;
 }
 
@@ -83,7 +84,8 @@
 .feature-item p {
     margin: 0;
     font-size: 0.95rem;
-    color: #777;
+    color: #374151;
+    /* Darkened for accessibility */
 }
 
 /* Mockup Image */

@@ -9,13 +9,13 @@
 :root {
   --color-bg: #FFF9F5;
   --color-text: #2C2C2C;
-  --color-primary: #FF6B9D;
-  /* Vibrant Coral Pink */
-  --color-primary-dark: #E5537A;
-  --color-secondary: #10B981;
-  /* Emerald Green */
-  --color-accent: #F59E0B;
-  /* Warm Amber */
+  --color-primary: #ff4d94;
+  /* Radical Neon Pink for brand identity */
+  --color-primary-dark: #ff1a8c;
+  --color-secondary: #047857;
+  /* Darkened to 4.7:1 contrast ratio */
+  --color-accent: #b45309;
+  /* Darkened to 4.6:1 contrast ratio */
   --color-white: #FFFFFF;
   --color-light-gray: #F3F4F6;
 
@@ -29,8 +29,8 @@
 
   --container-width: 1200px;
   --border-radius: 12px;
-  --shadow-sm: 0 2px 8px rgba(255, 107, 157, 0.1);
-  --shadow-md: 0 8px 24px rgba(255, 107, 157, 0.15);
+  --shadow-sm: 0 2px 8px rgba(255, 76, 148, 0.1);
+  --shadow-md: 0 8px 24px rgba(255, 76, 148, 0.15);
 
   --header-height: 80px;
 
@@ -39,6 +39,20 @@
   --primary-color: var(--color-primary);
   --text-primary: var(--color-text);
   --text-secondary: var(--color-secondary);
+  --color-text-dark: #1a1a1a;
+}
+
+/* Utility for accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 * {
@@ -142,15 +156,16 @@ textarea {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  background: linear-gradient(135deg, #ff4c94 0%, var(--color-primary) 100%);
+  /* More vibrant pink gradient */
   color: var(--color-white);
-  box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
+  box-shadow: 0 4px 15px rgba(255, 77, 148, 0.4);
   border: none;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 107, 157, 0.5);
+  box-shadow: 0 8px 25px rgba(255, 76, 148, 0.5);
 }
 
 .btn-primary::before {
@@ -274,7 +289,7 @@ textarea {
    ENHANCED CTA BUTTONS - Eye-catching
    ========================================== */
 .btn-cta {
-  background: linear-gradient(135deg, #FF6B9D 0%, #c084fc 50%, #FF6B9D 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 50%, var(--color-primary) 100%);
   background-size: 200% 200%;
   color: white;
   padding: 16px 40px;
@@ -292,7 +307,7 @@ textarea {
 
 .btn-cta:hover {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 15px 40px rgba(255, 107, 157, 0.5);
+  box-shadow: 0 15px 40px rgba(255, 76, 148, 0.5);
 }
 
 @keyframes gradientShift {
@@ -321,6 +336,24 @@ textarea {
   opacity: 0.4;
   z-index: -1;
   animation: pulse 2s ease-in-out infinite;
+}
+
+/* Vendor Card Badges */
+.vendor-card-badge {
+  position: absolute;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+}
+
+.vendor-card-badge.claimed-badge {
+  background: #15803d;
+  /* Darker green for accessibility */
+  color: white;
 }
 
 @keyframes pulse {

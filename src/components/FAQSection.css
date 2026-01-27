@@ -92,8 +92,10 @@
 .faq-card-answer p {
     margin: 0;
     line-height: 1.7;
-    color: var(--text-secondary);
-    font-size: 0.95rem;
+    color: #374151;
+    /* Darkened for accessibility */
+    font-size: 1rem;
+    /* Increased for accessibility */
 }
 
 /* Footer */
@@ -131,6 +133,6 @@
     }
 
     .faq-card-question h3 {
-        font-size: 1rem;
+        font-size: 1.1rem;
     }
 }

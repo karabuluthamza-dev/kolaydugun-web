@@ -14,11 +14,21 @@ const LeadsViewer = (props) => {
     const [unlockCost, setUnlockCost] = useState(5); // Default fallback
 
     useEffect(() => {
+        if (props.isDemo) {
+            setLoading(false);
+            setLeads([
+                { id: 'mock-1', contact_name: 'Ayşe & Mehmet', created_at: new Date().toISOString(), event_date: '2026-06-15', guest_count: 250, message: 'Fiyat teklifi alabilir miyiz? Kır düğünü düşünüyoruz.' },
+                { id: 'mock-2', contact_name: 'Selin & Can', created_at: new Date(Date.now() - 86400000).toISOString(), event_date: '2026-08-20', guest_count: 400, message: 'Menü seçenekleriniz ve müsaitlik durumunuz nedir?' },
+                { id: 'mock-3', contact_name: 'Melis & Berk', created_at: new Date(Date.now() - 172800000).toISOString(), event_date: '2025-09-10', guest_count: 150, message: 'Dış çekim dahil paketiniz var mı?' }
+            ]);
+            return;
+        }
+
         if (vendor?.id) {
             fetchLeadsAndUnlocks();
             fetchSystemSettings();
         }
-    }, [vendor]);
+    }, [vendor, props.isDemo]);
 
     // Scroll to highlighted lead
     const { highlightLeadId } = props;
@@ -201,6 +211,41 @@ const LeadsViewer = (props) => {
     return (
         <div className="leads-viewer">
             <h2>{t('dashboard.inquiriesLabel')}</h2>
+            {props.isDemo && (
+                <div className="demo-leads-banner" style={{
+                    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                    color: '#fff',
+                    padding: '1.5rem',
+                    borderRadius: '12px',
+                    marginBottom: '2rem',
+                    boxShadow: '0 4px 15px rgba(168, 85, 247, 0.3)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                    gap: '1rem'
+                }}>
+                    <h3 style={{ margin: 0, color: '#fff' }}>🚀 Tebrikler! Bu hafta 3 çift sizinle iletişime geçmek istedi.</h3>
+                    <p style={{ margin: 0, opacity: 0.9 }}>Taleplerin detaylarını görmek ve çiftlerle iletişime geçmek için sayfanızı hemen sahiplenin.</p>
+                    <button
+                        className="btn-claim-profile"
+                        style={{
+                            backgroundColor: '#fff',
+                            color: '#a855f7',
+                            padding: '0.8rem 1.5rem',
+                            borderRadius: '50px',
+                            border: 'none',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                        }}
+                        onClick={() => alert('Profil Sahiplenme Formuna Yönlendiriliyorsunuz...')}
+                    >
+                        Sayfamı Sahiplen & Ücretsiz Kullanmaya Başla
+                    </button>
+                </div>
+            )}
+
             {leads.length === 0 ? (
                 <div className="alert-info" style={{ padding: '1rem', background: '#e0f2fe', borderRadius: '8px', color: '#0369a1' }}>
                     <p>{t('leads.noLeads')}</p>
@@ -223,7 +268,14 @@ const LeadsViewer = (props) => {
                                     </span>
                                 </div>
 
-                                <div className="lead-details" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                <div className="lead-details" style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '1fr 1fr',
+                                    gap: '15px',
+                                    filter: (!isUnlocked && props.isDemo) ? 'blur(5px)' : 'none',
+                                    userSelect: (!isUnlocked && props.isDemo) ? 'none' : 'auto',
+                                    pointerEvents: (!isUnlocked && props.isDemo) ? 'none' : 'auto'
+                                }}>
                                     <div className="info-group">
                                         <strong>{t('vendorLeads.date')}:</strong> {lead.event_date ? formatDate(lead.event_date) : '-'}
                                     </div>
@@ -235,7 +287,7 @@ const LeadsViewer = (props) => {
                                         {isUnlocked ? (
                                             <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>{lead.contact_phone || lead.phone}</span>
                                         ) : (
-                                            <span style={{ filter: 'blur(4px)', userSelect: 'none' }}>0532 123 45 67</span>
+                                            <span>0532 123 45 67</span>
                                         )}
                                     </div>
                                     <div className="info-group">
@@ -243,12 +295,19 @@ const LeadsViewer = (props) => {
                                         {isUnlocked ? (
                                             <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>{lead.contact_email || lead.email}</span>
                                         ) : (
-                                            <span style={{ filter: 'blur(4px)', userSelect: 'none' }}>example@email.com</span>
+                                            <span>example@email.com</span>
                                         )}
                                     </div>
                                 </div>
 
-                                <div className="lead-message" style={{ marginTop: '15px', padding: '10px', background: '#f9f9f9', borderRadius: '4px' }}>
+                                <div className="lead-message" style={{
+                                    marginTop: '15px',
+                                    padding: '10px',
+                                    background: '#f9f9f9',
+                                    borderRadius: '4px',
+                                    filter: (!isUnlocked && props.isDemo) ? 'blur(8px)' : 'none',
+                                    userSelect: (!isUnlocked && props.isDemo) ? 'none' : 'auto'
+                                }}>
                                     <p style={{ margin: 0 }}>{lead.additional_notes || lead.message}</p>
                                 </div>
 

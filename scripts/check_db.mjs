@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 
@@ -8,21 +9,29 @@ const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-async function checkPosts() {
+async function checkBordoVendors() {
     const { data, error } = await supabase
-        .from('posts')
-        .select('id, slug, title, status, created_at')
-        .order('created_at', { ascending: false });
+        .from('vendors')
+        .select('id, slug, business_name, is_claimed, is_verified, source, details')
+        .ilike('business_name', '%Bordo%');
 
     if (error) {
         console.error('Error:', error);
         return;
     }
 
-    console.log('Posts found:', data.length);
-    data.forEach(p => {
-        console.log(`- [${p.id}] [${p.slug}] [${p.status}] [${p.created_at}] ${JSON.stringify(p.title).substring(0, 50)}...`);
+    console.log('Bordo vendors found:', data.length);
+    data.forEach(v => {
+        const isElite = v.details?.vip_demo_config?.is_elite || false;
+        console.log(`\n=== ${v.business_name} ===`);
+        console.log(`  ID: ${v.id}`);
+        console.log(`  Slug: ${v.slug}`);
+        console.log(`  Source: ${v.source}`);
+        console.log(`  is_claimed: ${v.is_claimed}`);
+        console.log(`  is_verified: ${v.is_verified}`);
+        console.log(`  is_elite (vip_demo_config): ${isElite}`);
+        console.log(`  Full details: ${JSON.stringify(v.details, null, 2)}`);
     });
 }
 
-checkPosts();
+checkBordoVendors();

@@ -73,6 +73,12 @@ export const LanguageProvider = ({ children }) => {
         i18n.changeLanguage(language);
     }, [translations, loading, language]);
 
+    // Sync HTML lang attribute with current language for accessibility
+    useEffect(() => {
+        const safeLang = ['de', 'tr', 'en'].includes(language) ? language : 'de';
+        document.documentElement.lang = safeLang;
+    }, [language]);
+
     const changeLanguage = (lng) => {
         i18n.changeLanguage(lng);
         setLanguage(lng);

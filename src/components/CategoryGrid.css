@@ -178,7 +178,7 @@
 }
 
 .category-card:hover .category-info h3 {
-    color: #FF6B9D;
+    color: var(--color-primary);
 }
 
 .category-info span {
@@ -186,7 +186,8 @@
     align-items: center;
     gap: 6px;
     font-size: 0.85rem;
-    color: #6b7280;
+    color: #374151;
+    /* Darkened for accessibility */
     background: linear-gradient(135deg, #fdf4ff 0%, #f0f9ff 100%);
     padding: 6px 14px;
     border-radius: 20px;
@@ -195,7 +196,7 @@
 }
 
 .category-card:hover .category-info span {
-    background: linear-gradient(135deg, #FF6B9D 0%, #c084fc 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     color: white;
 }
 

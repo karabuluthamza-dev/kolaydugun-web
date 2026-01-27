@@ -58,12 +58,13 @@ const Contact = () => {
             <div className="container">
                 <div className="contact-grid">
                     <div>
-                        <h2 className="contact-title">{t('contact.title')}</h2>
+                        <h2 className="contact-title" style={{ color: 'white' }}>{t('contact.title', 'Kontakt')}</h2>
                         <p className="contact-desc">
                             {t('contact.desc')}
                         </p>
                         <div className="contact-info">
                             <div>📍 {t('contact.address')}</div>
+                            <div>📞 <a href="tel:+491628726192" style={{ color: 'inherit', textDecoration: 'none' }}>+49 162 8726192</a></div>
                             <div>✉️ kontakt@kolaydugun.de</div>
                             {settings?.social_media && (
                                 <div style={{ marginTop: '20px' }}>

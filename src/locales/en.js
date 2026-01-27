@@ -12,7 +12,7 @@ export const en = {
     },
     "hero": {
         "title": "Your Dream Wedding in Germany",
-        "subtitle": "Perfection down to the last detail. We create unforgettable moments.",
+        "subtitle": "Find the best wedding vendors in Germany. Turkish and international weddings made easy. Compare quotes for free, find the best location and plan your perfect wedding day.",
         "getFreeQuote": "Get Free Quote",
         "ctaSubtext": "Receive personalized quotes"
     },
@@ -372,5 +372,59 @@ export const en = {
         "skip": "Skip for now (Go to Dashboard)",
         "success": "Payment successful! Welcome to Premium.",
         "error": "Payment failed. Please try again or contact support."
+    },
+    "vip": {
+        "badges": {
+            "eliteCandidate": "ELITE PARTNER CANDIDATE",
+            "viewingNow": "{{count}} PEOPLE VIEWING NOW",
+            "vipPromo": "VIP Promotion",
+            "eliteSalon": "Elite Venue"
+        },
+        "nav": {
+            "general": "General",
+            "prices": "Prices",
+            "virtualTour": "Virtual Tour",
+            "capacity": "Capacity",
+            "calendar": "Calendar",
+            "stats": "Statistics",
+            "whyUs": "Why Us?",
+            "partner": "Partner",
+            "reviews": "Reviews"
+        },
+        "hero": {
+            "regionAvg": "(Region Average)"
+        },
+        "sections": {
+            "pricesTitle": "{{name}} Wedding Prices",
+            "capacityTitle": "Capacity Information",
+            "virtualTourTitle": "360° Virtual Tour & Photos",
+            "availabilityTitle": "Live Availability ({{year}})",
+            "whyUsTitle": "Why Choose This Venue?",
+            "reviewsTitle": "Popular Reviews",
+            "partnerTitle": "Elite Partner Collaboration",
+            "statsTitle": "Venue Management Panel (Demo)",
+            "statsSubtitle": "Your profile\'s performance in the last 30 days",
+            "capacity": {
+                "area": "Area Name",
+                "meal": "Banquet Capacity",
+                "cocktail": "Cocktail Capacity"
+            }
+        },
+        "common": {
+            "weekDay": "Weekday (Per Person)",
+            "weekEnd": "Weekend (Per Person)",
+            "updated": "Current Offer",
+            "lastUpdated": "Last Updated: {{date}}",
+            "freeQuote": "Get Free Quote",
+            "fastResponse": "Response within 1 hour."
+        },
+        "cta": {
+            "whatsapp": "Write via WhatsApp",
+            "getOffer": "GET QUOTE",
+            "claimProfile": "CLAIM PROFILE (Free)",
+            "claimTitle": "Is This Your Page?",
+            "claimDesc": "This professional showcase page and all inquiries could be yours. Claim your profile now to enjoy Elite Partner benefits.",
+            "testDashboard": "Test Management Panel"
+        }
     }
 };

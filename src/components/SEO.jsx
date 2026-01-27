@@ -59,7 +59,7 @@ const SEO = ({
     };
 
     return (
-        <Helmet>
+        <Helmet htmlAttributes={{ lang: language }}>
             {/* Standard metadata */}
             <title>{fullTitle}</title>
             <meta name="description" content={fullDescription} />
@@ -87,11 +87,21 @@ const SEO = ({
             {/* Hreflang for multi-language SEO */}
             {renderHreflang()}
 
-            {/* Structured Data (JSON-LD) */}
+            {/* Structured Data (JSON-LD) - supports both single object and array */}
             {structuredData && (
-                <script type="application/ld+json">
-                    {JSON.stringify(structuredData)}
-                </script>
+                Array.isArray(structuredData)
+                    ? structuredData.map((schema, index) => (
+                        schema && (
+                            <script key={index} type="application/ld+json">
+                                {JSON.stringify(schema)}
+                            </script>
+                        )
+                    ))
+                    : (
+                        <script type="application/ld+json">
+                            {JSON.stringify(structuredData)}
+                        </script>
+                    )
             )}
         </Helmet>
     );

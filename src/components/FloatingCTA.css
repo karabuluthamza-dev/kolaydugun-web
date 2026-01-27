@@ -1,18 +1,21 @@
 .floating-cta {
     position: fixed;
-    bottom: 24px;
+    bottom: 100px;
     right: 24px;
     z-index: 999;
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 14px 22px;
-    background: linear-gradient(135deg, #FF6B9D 0%, #FF8E53 100%);
+    background: linear-gradient(135deg, #ff4c94 0%, #ff1a8c 100%);
+    /* Original vibrant pink-orange gradient */
     color: white;
     border: none;
     border-radius: 30px;
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    /* Contrast safety */
     cursor: pointer;
     box-shadow: 0 6px 20px rgba(255, 107, 157, 0.35);
     transform: translateY(120px);

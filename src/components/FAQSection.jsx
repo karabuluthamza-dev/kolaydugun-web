@@ -60,6 +60,15 @@ const FAQSection = () => {
                             key={faq.id}
                             className={`faq-card ${expandedFaq === faq.id ? 'active' : ''}`}
                             onClick={() => setExpandedFaq(expandedFaq === faq.id ? null : faq.id)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    setExpandedFaq(expandedFaq === faq.id ? null : faq.id);
+                                }
+                            }}
+                            role="button"
+                            tabIndex="0"
+                            aria-expanded={expandedFaq === faq.id}
                         >
                             <div className="faq-card-question">
                                 <h3>{getQuestionByLanguage(faq)}</h3>

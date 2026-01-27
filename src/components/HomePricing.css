@@ -19,7 +19,8 @@
 
 .pricing-subtitle {
     font-size: 1.2rem;
-    color: #666;
+    color: #4b5563;
+    /* Darkened for accessibility */
     max-width: 700px;
     margin: 0 auto;
     line-height: 1.6;
@@ -39,7 +40,8 @@
     border-radius: 25px;
     border: none;
     background: transparent;
-    color: #666;
+    color: #4b5563;
+    /* Darkened for accessibility */
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -128,12 +130,14 @@
 }
 
 .plan-period {
-    color: #666;
+    color: #4b5563;
+    /* Darkened for accessibility */
     margin-left: 5px;
 }
 
 .original-price {
-    color: #999;
+    color: #71717a;
+    /* Darkened for accessibility */
     text-decoration: line-through;
     margin-bottom: 25px;
     font-size: 1.1rem;
@@ -158,7 +162,8 @@
 }
 
 .feature-item.unavailable {
-    color: #9ca3af;
+    color: #71717a;
+    /* Increased contrast even for struck-through text */
     text-decoration: line-through;
 }
 
