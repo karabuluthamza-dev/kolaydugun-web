@@ -49,15 +49,22 @@ const Home = () => {
                     console.error('Error fetching site_settings:', error);
                     // Keep the default video settings
                 } else if (data) {
-                    // Merge database settings with defaults, preserving video settings if not specified
-                    // Merge database settings with defaults, ensuring use_video is true if not explicitly false
+
+                    // Default video settings - ALWAYS use these for video
+                    const defaultVideoSettings = {
+                        use_video: true,
+                        video_url: 'https://rnkyghovurnaizkhwgtv.supabase.co/storage/v1/object/public/homepage/bg_video.mp4',
+                        background_type: 'video'
+                    };
+
+                    // Only disable video if database explicitly says use_video: false
+                    const shouldUseVideo = data.hero_settings?.use_video !== false;
+
                     setHeroSettings(prev => ({
                         ...data,
-                        hero_settings: {
-                            ...prev.hero_settings, // Start with previous hero settings
-                            ...(data.hero_settings || {}), // Overlay with fetched settings if they exist
-                            use_video: data.hero_settings?.use_video !== false // Explicitly set to true unless database says false
-                        }
+                        hero_settings: shouldUseVideo
+                            ? defaultVideoSettings  // Use default video settings
+                            : { ...prev.hero_settings, ...(data.hero_settings || {}), use_video: false }
                     }));
                 }
 

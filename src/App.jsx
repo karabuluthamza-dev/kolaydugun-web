@@ -166,7 +166,8 @@ function App() {
       easing: 'ease-out',
       once: true,
       offset: 50,
-      disable: import.meta.env.DEV,
+      // disable: import.meta.env.DEV, // Enable animations in dev to ensure visibility
+      disable: false,
     });
   }, []);
 

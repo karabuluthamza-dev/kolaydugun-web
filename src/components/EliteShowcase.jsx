@@ -25,11 +25,12 @@ const EliteShowcase = () => {
                 if (error) throw error;
 
                 // Filter to ensure they have at least some basic vip_demo_config or are featured
-                // AND strictly enforce category is Wedding Venues (safeguard against query issues)
+                // AND strictly enforce category is Wedding Venues / Düğün Salonu (safeguard against query issues)
                 // AND only show publicly visible venues
+                const weddingVenueCategories = ['Wedding Venues', 'Düğün Salonu', 'Hochzeitslocations'];
                 const filteredData = data ? data.filter(v =>
                     (v.details?.vip_demo_config || v.is_featured) &&
-                    v.category === 'Wedding Venues' &&
+                    weddingVenueCategories.includes(v.category) &&
                     v.details?.vip_demo_config?.is_public_visible !== false
                 ) : [];
                 setEliteVendors(filteredData.slice(0, 4));

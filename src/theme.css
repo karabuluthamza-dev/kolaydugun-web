@@ -15,11 +15,18 @@
     --color-text-main: #2C3E50;
     --color-text-light: #7F8C8D;
     --color-text-white: #FFFFFF;
+    --color-text-dark: #1a1a1a;
 
     --color-bg-main: #FDFBF7;
     /* Warm Off-White */
     --color-bg-white: #FFFFFF;
     --color-bg-light: #F5F5F5;
+
+    /* Alias variables for component compatibility */
+    --bg-secondary: #f8f9fa;
+    --text-primary: var(--color-text-main);
+    --text-secondary: var(--color-text-light);
+    --radius-lg: var(--border-radius-lg);
 
     /* Typography */
     --font-family-main: 'Inter', system-ui, -apple-system, sans-serif;
