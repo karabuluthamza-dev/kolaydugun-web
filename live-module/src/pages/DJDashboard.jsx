@@ -779,7 +779,7 @@ const DJDashboard = () => {
                                             className="w-full bg-white/[0.03] border border-white/10 rounded-[20px] px-6 py-4 text-white focus:ring-4 focus:ring-prime/20 focus:border-prime/50 transition-all placeholder:text-slate-800 text-sm font-medium"
                                         />
                                         <p className="text-[10px] text-slate-600 font-medium italic px-2 leading-relaxed">
-                                            {t('dashboard.settings.displayBackgroundNote', { defaultValue: '* TV/Projeksiyon ekranında görünecek arka plan görseli. Imgur, Google Drive veya direkt resim linki kullanabilirsiniz.' })}
+                                            {t('dashboard.settings.displayBackgroundNote', { defaultValue: '📐 Önerilen Ebat: 1920x1080 piksel (16:9 TV formatı) • 📁 Format: JPG veya PNG • 💡 Koyu tonlu görseller metin okunabilirliğini artırır • 🔗 Imgur, Google Drive veya direkt resim linki kullanabilirsiniz.' })}
                                         </p>
                                     </div>
 
