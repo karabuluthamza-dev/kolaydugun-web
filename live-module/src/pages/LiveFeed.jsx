@@ -96,7 +96,9 @@ const LiveFeed = () => {
                 table: 'live_requests',
                 filter: `event_id=eq.${eventId}`
             }, (payload) => {
+                console.log('[REALTIME] 📨 Received event:', payload.eventType, payload);
                 if (payload.eventType === 'INSERT') {
+                    console.log('[REALTIME] 🎵 New request received:', payload.new.song_title);
                     setRequests(prev => {
                         // Avoid duplicates
                         if (prev.find(r => r.id === payload.new.id)) return prev;
@@ -135,9 +137,22 @@ const LiveFeed = () => {
                     }));
                 }
             })
-            .subscribe();
+            .subscribe((status, err) => {
+                console.log('[REALTIME] 📡 Subscription status:', status);
+                if (err) console.error('[REALTIME] ❌ Error:', err);
+                if (status === 'SUBSCRIBED') {
+                    console.log('[REALTIME] ✅ Successfully connected to live_requests channel for event:', eventId);
+                }
+                if (status === 'CLOSED') {
+                    console.warn('[REALTIME] ⚠️ Channel closed - attempting reconnect...');
+                }
+                if (status === 'CHANNEL_ERROR') {
+                    console.error('[REALTIME] ❌ Channel error - check Supabase Realtime settings');
+                }
+            });
 
         return () => {
+            console.log('[REALTIME] 🔌 Cleaning up channel subscription');
             supabase.removeChannel(channel);
         };
     }, [eventId]);
