@@ -170,12 +170,13 @@ const DJDashboard = () => {
         e.preventDefault();
         setUpdating(true);
         try {
-            // Try updating with paypal_link column first
+            // Try updating with paypal_link and display_background_url columns
             const { error: err } = await supabase
                 .from('live_events')
                 .update({
                     settings: settingsModal.event.settings,
-                    paypal_link: settingsModal.event.paypal_link
+                    paypal_link: settingsModal.event.paypal_link,
+                    display_background_url: settingsModal.event.display_background_url || null
                 })
                 .eq('id', settingsModal.event.id);
 
@@ -744,6 +745,42 @@ const DJDashboard = () => {
                                                 />
                                             ))}
                                         </div>
+                                    </div>
+
+                                    {/* TV Display Background URL */}
+                                    <div className="pt-6 border-t border-white/5 space-y-3">
+                                        <div className="flex items-center justify-between px-1">
+                                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                                                {t('dashboard.settings.displayBackground', { defaultValue: 'TV Ekranı Arka Plan URL' })}
+                                            </label>
+                                            {settingsModal.event.display_background_url && (
+                                                <a
+                                                    href={settingsModal.event.display_background_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-[9px] font-black text-prime hover:underline uppercase tracking-[0.2em] flex items-center gap-1"
+                                                >
+                                                    <Monitor className="w-3 h-3" />
+                                                    {t('dashboard.settings.preview', { defaultValue: 'Önizle' })}
+                                                </a>
+                                            )}
+                                        </div>
+                                        <input
+                                            type="url"
+                                            placeholder={t('dashboard.settings.displayBackgroundPlaceholder', { defaultValue: 'https://i.imgur.com/xxxxx.jpg' })}
+                                            value={settingsModal.event.display_background_url || ''}
+                                            onChange={(e) => setSettingsModal({
+                                                ...settingsModal,
+                                                event: {
+                                                    ...settingsModal.event,
+                                                    display_background_url: e.target.value.trim() || null
+                                                }
+                                            })}
+                                            className="w-full bg-white/[0.03] border border-white/10 rounded-[20px] px-6 py-4 text-white focus:ring-4 focus:ring-prime/20 focus:border-prime/50 transition-all placeholder:text-slate-800 text-sm font-medium"
+                                        />
+                                        <p className="text-[10px] text-slate-600 font-medium italic px-2 leading-relaxed">
+                                            {t('dashboard.settings.displayBackgroundNote', { defaultValue: '* TV/Projeksiyon ekranında görünecek arka plan görseli. Imgur, Google Drive veya direkt resim linki kullanabilirsiniz.' })}
+                                        </p>
                                     </div>
 
                                     <div className="flex gap-4 pt-10 border-t border-white/5">

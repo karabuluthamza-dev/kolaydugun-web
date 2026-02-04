@@ -148,29 +148,44 @@ const PublicDisplay = () => {
     if (loading) return null;
 
     return (
-        <div className="h-screen w-full bg-black text-white overflow-hidden flex flex-col p-4 md:p-8 lg:p-12 relative select-none">
-            {/* Animated Background Elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <motion.div
-                    animate={{
-                        scale: [1, 1.2, 1],
-                        rotate: [0, 90, 0],
-                        opacity: [0.1, 0.2, 0.1]
-                    }}
-                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                    className="absolute -top-1/4 -left-1/4 w-full h-full bg-prime/20 rounded-full blur-[150px]"
-                />
-                <motion.div
-                    animate={{
-                        scale: [1.2, 1, 1.2],
-                        rotate: [0, -90, 0],
-                        opacity: [0.1, 0.2, 0.1]
-                    }}
-                    transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                    className="absolute -bottom-1/4 -right-1/4 w-full h-full bg-blue-600/20 rounded-full blur-[150px]"
-                />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)]" />
-            </div>
+        <div
+            className="h-screen w-full bg-black text-white overflow-hidden flex flex-col p-4 md:p-8 lg:p-12 relative select-none"
+            style={event?.display_background_url ? {
+                backgroundImage: `url(${event.display_background_url})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+            } : {}}
+        >
+            {/* Dark overlay for readability when custom background is set */}
+            {event?.display_background_url && (
+                <div className="absolute inset-0 bg-black/60 pointer-events-none" />
+            )}
+
+            {/* Animated Background Elements (only show if no custom background) */}
+            {!event?.display_background_url && (
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <motion.div
+                        animate={{
+                            scale: [1, 1.2, 1],
+                            rotate: [0, 90, 0],
+                            opacity: [0.1, 0.2, 0.1]
+                        }}
+                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                        className="absolute -top-1/4 -left-1/4 w-full h-full bg-prime/20 rounded-full blur-[150px]"
+                    />
+                    <motion.div
+                        animate={{
+                            scale: [1.2, 1, 1.2],
+                            rotate: [0, -90, 0],
+                            opacity: [0.1, 0.2, 0.1]
+                        }}
+                        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                        className="absolute -bottom-1/4 -right-1/4 w-full h-full bg-blue-600/20 rounded-full blur-[150px]"
+                    />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)]" />
+                </div>
+            )}
 
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 mb-4 md:mb-6 lg:mb-8 relative z-10 text-center md:text-left shrink-0">
