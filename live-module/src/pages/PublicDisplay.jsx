@@ -77,11 +77,11 @@ const PublicDisplay = () => {
     useEffect(() => {
         const pollInterval = setInterval(() => {
             fetchRequests();
-            if (activeBattle) fetchBattleVotes(activeBattle.id);
+            fetchActiveBattle(); // Also check for battle state changes
         }, 5000);
 
         return () => clearInterval(pollInterval);
-    }, [eventId, activeBattle]);
+    }, [eventId]);
 
     const fetchEvent = async () => {
         const { data } = await supabase

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Music, Check, X, Clock, Loader2, ChevronLeft, QrCode, MessageSquare, Volume2, VolumeX, ThumbsUp, Youtube, Flame, ExternalLink, Camera, Heart } from 'lucide-react';
+import { Music, Check, X, Clock, Loader2, ChevronLeft, ChevronDown, QrCode, MessageSquare, Volume2, VolumeX, ThumbsUp, Youtube, Flame, ExternalLink, Camera, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import QRCodeModal from '../components/QRCodeModal';
@@ -18,8 +18,10 @@ const LiveFeed = () => {
     const [showBattleModal, setShowBattleModal] = useState(false);
     const [activeBattle, setActiveBattle] = useState(null);
     const [battleVotes, setBattleVotes] = useState({ A: 0, B: 0 });
+    const [battlePresets, setBattlePresets] = useState([]);
     const [newBattle, setNewBattle] = useState({ title: t('liveFeed.battle.defaultTitle'), optionA: t('liveFeed.battle.defaultA'), optionB: t('liveFeed.battle.defaultB') });
     const [activeTab, setActiveTab] = useState('pending'); // For mobile tabs
+    const [showNewPresetForm, setShowNewPresetForm] = useState(false);
 
     // Notification Sound
     const playNotification = () => {
@@ -54,6 +56,92 @@ const LiveFeed = () => {
         setBattleVotes(counts);
     };
 
+    const fetchBattlePresets = async () => {
+        const { data } = await supabase
+            .from('live_battles')
+            .select('*')
+            .eq('event_id', eventId)
+            .order('created_at', { ascending: false });
+
+        setBattlePresets(data || []);
+        const active = data?.find(b => b.is_active);
+        if (active) {
+            setActiveBattle(active);
+            fetchBattleVotes(active.id);
+        }
+    };
+
+    const handleCreatePreset = async () => {
+        const { data, error } = await supabase
+            .from('live_battles')
+            .insert([{
+                event_id: eventId,
+                title: newBattle.title,
+                option_a_name: newBattle.optionA,
+                option_b_name: newBattle.optionB,
+                is_active: false
+            }])
+            .select()
+            .single();
+
+        if (error) alert(error.message);
+        else {
+            setBattlePresets(prev => [data, ...prev]);
+            setNewBattle({ title: t('liveFeed.battle.defaultTitle'), optionA: t('liveFeed.battle.defaultA'), optionB: t('liveFeed.battle.defaultB') });
+            setShowNewPresetForm(false);
+        }
+    };
+
+    const handleActivateBattle = async (battleId) => {
+        // First deactivate all battles for this event
+        await supabase
+            .from('live_battles')
+            .update({ is_active: false })
+            .eq('event_id', eventId);
+
+        // Then activate the selected one
+        const { data, error } = await supabase
+            .from('live_battles')
+            .update({ is_active: true })
+            .eq('id', battleId)
+            .select()
+            .single();
+
+        if (error) alert(error.message);
+        else {
+            setActiveBattle(data);
+            setBattlePresets(prev => prev.map(b => ({ ...b, is_active: b.id === battleId })));
+            fetchBattleVotes(battleId);
+        }
+    };
+
+    const handleDeactivateBattle = async () => {
+        if (!activeBattle) return;
+        await supabase
+            .from('live_battles')
+            .update({ is_active: false })
+            .eq('id', activeBattle.id);
+
+        setActiveBattle(null);
+        setBattleVotes({ A: 0, B: 0 });
+        setBattlePresets(prev => prev.map(b => ({ ...b, is_active: false })));
+    };
+
+    const handleDeletePreset = async (battleId) => {
+        if (!confirm(t('liveFeed.battle.confirmDelete', { defaultValue: 'Bu kapışmayı silmek istediğinize emin misiniz?' }))) return;
+
+        await supabase
+            .from('live_battles')
+            .delete()
+            .eq('id', battleId);
+
+        setBattlePresets(prev => prev.filter(b => b.id !== battleId));
+        if (activeBattle?.id === battleId) {
+            setActiveBattle(null);
+            setBattleVotes({ A: 0, B: 0 });
+        }
+    };
+
     const handleStartBattle = async () => {
         const { data, error } = await supabase
             .from('live_battles')
@@ -80,12 +168,13 @@ const LiveFeed = () => {
             .eq('id', activeBattle.id);
         setActiveBattle(null);
         setBattleVotes({ A: 0, B: 0 });
+        setBattlePresets(prev => prev.map(b => ({ ...b, is_active: false })));
     };
 
     useEffect(() => {
         fetchEvent();
         fetchRequests();
-        fetchActiveBattle();
+        fetchBattlePresets();
 
         // Subscribe to real-time updates
         const channel = supabase
@@ -679,55 +768,182 @@ const LiveFeed = () => {
                                     </motion.button>
                                 </div>
                             ) : (
-                                <div className="space-y-10 relative z-10">
-                                    <div className="space-y-8">
+                                <div className="space-y-8 relative z-10 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
+                                    {/* Saved Presets List */}
+                                    {battlePresets.length > 0 && (
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-4 block">{t('liveFeed.battle.titleLabel')}</label>
-                                            <input
-                                                type="text"
-                                                placeholder={t('liveFeed.battle.titlePlaceholder')}
-                                                value={newBattle.title}
-                                                onChange={(e) => setNewBattle({ ...newBattle, title: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/5 rounded-3xl px-8 py-5 text-white focus:ring-2 focus:ring-prime transition-all placeholder:text-white/10 text-lg font-bold"
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="space-y-4">
-                                                <label className="text-[10px] font-black text-orange-500/40 uppercase tracking-[0.3em] ml-4 block tracking-tighter">SEÇENEK A</label>
-                                                <input
-                                                    type="text"
-                                                    value={newBattle.optionA}
-                                                    onChange={(e) => setNewBattle({ ...newBattle, optionA: e.target.value })}
-                                                    className="w-full bg-orange-500/5 border border-orange-500/10 rounded-3xl px-8 py-5 text-white focus:ring-2 focus:ring-orange-500 transition-all text-sm font-bold"
-                                                />
+                                            <div className="flex items-center justify-between px-2">
+                                                <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">
+                                                    {t('liveFeed.battle.savedPresets', { defaultValue: 'Kayıtlı Kapışmalar' })}
+                                                </h3>
+                                                <span className="text-[9px] font-bold text-white/20 bg-white/5 px-3 py-1 rounded-full">
+                                                    {battlePresets.length}
+                                                </span>
                                             </div>
-                                            <div className="space-y-4">
-                                                <label className="text-[10px] font-black text-blue-500/40 uppercase tracking-[0.3em] ml-4 block tracking-tighter">SEÇENEK B</label>
-                                                <input
-                                                    type="text"
-                                                    value={newBattle.optionB}
-                                                    onChange={(e) => setNewBattle({ ...newBattle, optionB: e.target.value })}
-                                                    className="w-full bg-blue-500/5 border border-blue-500/10 rounded-3xl px-8 py-5 text-white focus:ring-2 focus:ring-blue-500 transition-all text-sm font-bold"
-                                                />
+                                            <div className="space-y-3">
+                                                {battlePresets.map((preset) => (
+                                                    <motion.div
+                                                        key={preset.id}
+                                                        initial={{ opacity: 0, y: 10 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        className={`p-5 rounded-2xl border transition-all ${preset.is_active
+                                                            ? 'bg-orange-500/10 border-orange-500/30 shadow-[0_0_20px_rgba(249,115,22,0.15)]'
+                                                            : 'bg-white/[0.03] border-white/5 hover:border-white/10'
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-start justify-between gap-4">
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center gap-2 mb-2">
+                                                                    <h4 className="text-sm font-bold text-white truncate">{preset.title}</h4>
+                                                                    {preset.is_active && (
+                                                                        <span className="px-2 py-0.5 bg-green-500/20 border border-green-500/30 rounded text-[8px] font-black text-green-400 uppercase tracking-wider animate-pulse">
+                                                                            {t('dashboard.eventCard.active')}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex items-center gap-3 text-[10px] font-medium">
+                                                                    <span className="text-orange-400/70">{preset.option_a_name}</span>
+                                                                    <span className="text-white/20">vs</span>
+                                                                    <span className="text-blue-400/70">{preset.option_b_name}</span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 flex-shrink-0">
+                                                                {preset.is_active ? (
+                                                                    <motion.button
+                                                                        whileHover={{ scale: 1.05 }}
+                                                                        whileTap={{ scale: 0.95 }}
+                                                                        onClick={() => handleDeactivateBattle()}
+                                                                        className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white/70 font-black text-[10px] uppercase tracking-wider rounded-xl transition-all"
+                                                                    >
+                                                                        {t('liveFeed.battle.deactivate', { defaultValue: 'Durdur' })}
+                                                                    </motion.button>
+                                                                ) : (
+                                                                    <motion.button
+                                                                        whileHover={{ scale: 1.05 }}
+                                                                        whileTap={{ scale: 0.95 }}
+                                                                        onClick={() => handleActivateBattle(preset.id)}
+                                                                        className="px-4 py-2.5 bg-orange-500 hover:bg-orange-400 text-black font-black text-[10px] uppercase tracking-wider rounded-xl shadow-lg shadow-orange-500/20 transition-all"
+                                                                    >
+                                                                        {t('liveFeed.battle.activate', { defaultValue: 'Aktif Et' })}
+                                                                    </motion.button>
+                                                                )}
+                                                                <motion.button
+                                                                    whileHover={{ scale: 1.1 }}
+                                                                    whileTap={{ scale: 0.9 }}
+                                                                    onClick={() => handleDeletePreset(preset.id)}
+                                                                    className="p-2.5 hover:bg-red-500/10 text-white/20 hover:text-red-500 rounded-xl transition-all"
+                                                                    title={t('common.delete')}
+                                                                >
+                                                                    <X className="w-4 h-4" />
+                                                                </motion.button>
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
                                             </div>
                                         </div>
+                                    )}
+
+                                    {/* Divider */}
+                                    {battlePresets.length > 0 && (
+                                        <div className="flex items-center gap-4 py-2">
+                                            <div className="h-px bg-white/5 flex-1" />
+                                            <span className="text-[9px] font-black text-white/15 uppercase tracking-widest">
+                                                {t('liveFeed.battle.or', { defaultValue: 'veya' })}
+                                            </span>
+                                            <div className="h-px bg-white/5 flex-1" />
+                                        </div>
+                                    )}
+
+                                    {/* Collapsible New Preset Form */}
+                                    <div className="space-y-4">
+                                        <motion.button
+                                            whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
+                                            onClick={() => setShowNewPresetForm(!showNewPresetForm)}
+                                            className="w-full flex items-center justify-between p-4 rounded-2xl border border-dashed border-white/10 hover:border-white/20 transition-all group"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-orange-500/10 transition-colors">
+                                                    <span className={`text-xl font-bold text-white/30 group-hover:text-orange-500 transition-all ${showNewPresetForm ? 'rotate-45' : ''}`}>+</span>
+                                                </div>
+                                                <span className="text-[11px] font-black text-white/40 uppercase tracking-widest group-hover:text-white/60 transition-colors">
+                                                    {t('liveFeed.battle.createNew', { defaultValue: 'Yeni Kapışma Oluştur' })}
+                                                </span>
+                                            </div>
+                                            <ChevronDown className={`w-4 h-4 text-white/20 transition-transform ${showNewPresetForm ? 'rotate-180' : ''}`} />
+                                        </motion.button>
+
+                                        <AnimatePresence>
+                                            {showNewPresetForm && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, height: 0 }}
+                                                    animate={{ opacity: 1, height: 'auto' }}
+                                                    exit={{ opacity: 0, height: 0 }}
+                                                    className="overflow-hidden"
+                                                >
+                                                    <div className="space-y-6 p-6 bg-white/[0.02] rounded-2xl border border-white/5">
+                                                        <div className="space-y-3">
+                                                            <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] ml-2 block">{t('liveFeed.battle.titleLabel')}</label>
+                                                            <input
+                                                                type="text"
+                                                                placeholder={t('liveFeed.battle.titlePlaceholder')}
+                                                                value={newBattle.title}
+                                                                onChange={(e) => setNewBattle({ ...newBattle, title: e.target.value })}
+                                                                className="w-full bg-white/5 border border-white/5 rounded-2xl px-6 py-4 text-white focus:ring-2 focus:ring-prime transition-all placeholder:text-white/10 text-sm font-bold"
+                                                            />
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <div className="space-y-3">
+                                                                <label className="text-[10px] font-black text-orange-500/50 uppercase tracking-[0.2em] ml-2 block">A</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={newBattle.optionA}
+                                                                    onChange={(e) => setNewBattle({ ...newBattle, optionA: e.target.value })}
+                                                                    className="w-full bg-orange-500/5 border border-orange-500/10 rounded-2xl px-6 py-4 text-white focus:ring-2 focus:ring-orange-500 transition-all text-sm font-bold"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-3">
+                                                                <label className="text-[10px] font-black text-blue-500/50 uppercase tracking-[0.2em] ml-2 block">B</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={newBattle.optionB}
+                                                                    onChange={(e) => setNewBattle({ ...newBattle, optionB: e.target.value })}
+                                                                    className="w-full bg-blue-500/5 border border-blue-500/10 rounded-2xl px-6 py-4 text-white focus:ring-2 focus:ring-blue-500 transition-all text-sm font-bold"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-3 pt-2">
+                                                            <motion.button
+                                                                whileHover={{ scale: 1.02 }}
+                                                                whileTap={{ scale: 0.98 }}
+                                                                onClick={handleCreatePreset}
+                                                                className="flex-1 bg-white/10 hover:bg-white/15 text-white font-black py-4 rounded-2xl transition-all uppercase tracking-wider text-[10px]"
+                                                            >
+                                                                {t('liveFeed.battle.savePreset', { defaultValue: 'Kaydet' })}
+                                                            </motion.button>
+                                                            <motion.button
+                                                                whileHover={{ scale: 1.02, y: -2 }}
+                                                                whileTap={{ scale: 0.98 }}
+                                                                onClick={handleStartBattle}
+                                                                className="flex-[2] bg-orange-500 hover:bg-orange-400 text-black font-black py-4 rounded-2xl shadow-lg shadow-orange-500/20 transition-all uppercase tracking-wider text-[10px]"
+                                                            >
+                                                                {t('liveFeed.battle.startNow', { defaultValue: 'Hemen Başlat' })}
+                                                            </motion.button>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
 
-                                    <div className="flex gap-4 pt-4">
+                                    {/* Close Button */}
+                                    <div className="pt-4">
                                         <motion.button
                                             whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
                                             onClick={() => setShowBattleModal(false)}
-                                            className="flex-1 px-8 py-6 bg-white/5 text-white/40 font-black rounded-3xl border border-white/5 transition-all text-[11px] tracking-widest"
+                                            className="w-full px-8 py-5 bg-white/5 text-white/40 font-black rounded-2xl border border-white/5 transition-all text-[10px] tracking-widest hover:text-white/60"
                                         >
-                                            {t('common.cancel')}
-                                        </motion.button>
-                                        <motion.button
-                                            whileHover={{ scale: 1.02, y: -2 }}
-                                            whileTap={{ scale: 0.98 }}
-                                            onClick={handleStartBattle}
-                                            className="flex-[2] bg-orange-500 hover:bg-orange-400 text-black font-black py-6 rounded-3xl shadow-[0_20px_40px_rgba(249,115,22,0.3)] transition-all uppercase tracking-widest text-[11px]"
-                                        >
-                                            {t('liveFeed.battle.startBattle')}
+                                            {t('common.close', { defaultValue: 'Kapat' })}
                                         </motion.button>
                                     </div>
                                 </div>
