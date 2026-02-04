@@ -258,7 +258,7 @@ const PublicDisplay = () => {
                             <div className="flex items-center gap-2">
                                 <Music className="w-4 h-4 md:w-5 md:h-5 text-prime" />
                                 <span className="text-xs md:text-sm font-bold text-white/60">
-                                    {t('publicDisplay.totalRequests', { count: totalCount }) || `${totalCount} istek bekliyor`}
+                                    🎵 {totalCount} istek bekliyor
                                 </span>
                             </div>
                             {requests.length > visibleCount && (
@@ -267,8 +267,8 @@ const PublicDisplay = () => {
                                         <div
                                             key={i}
                                             className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full transition-all ${i >= carouselIndex && i < carouselIndex + visibleCount
-                                                    ? 'bg-prime'
-                                                    : 'bg-white/20'
+                                                ? 'bg-prime'
+                                                : 'bg-white/20'
                                                 }`}
                                         />
                                     ))}
@@ -314,10 +314,10 @@ const PublicDisplay = () => {
                                     >
                                         {/* Position Badge */}
                                         <div className={`absolute -left-2 md:-left-3 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center font-black text-sm md:text-lg lg:text-xl shadow-lg ${req.is_vip
-                                                ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-black'
-                                                : isFirst
-                                                    ? 'bg-prime text-white'
-                                                    : 'bg-white/10 text-white/60'
+                                            ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-black'
+                                            : isFirst
+                                                ? 'bg-prime text-white'
+                                                : 'bg-white/10 text-white/60'
                                             }`}>
                                             {req.is_vip ? '⭐' : `#${actualPosition}`}
                                         </div>
