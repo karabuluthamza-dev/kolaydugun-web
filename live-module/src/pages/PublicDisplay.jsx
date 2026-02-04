@@ -10,10 +10,12 @@ const PublicDisplay = () => {
     const { eventId } = useParams();
     const [event, setEvent] = useState(null);
     const [requests, setRequests] = useState([]);
+    const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [activeBattle, setActiveBattle] = useState(null);
     const [battleVotes, setBattleVotes] = useState({ A: 0, B: 0 });
+    const [carouselIndex, setCarouselIndex] = useState(0);
 
     useEffect(() => {
         fetchEvent();
@@ -83,6 +85,24 @@ const PublicDisplay = () => {
         return () => clearInterval(pollInterval);
     }, [eventId]);
 
+    // Auto-scroll carousel every 4 seconds
+    const visibleCount = activeBattle ? 3 : 4;
+    useEffect(() => {
+        if (requests.length <= visibleCount) {
+            setCarouselIndex(0);
+            return;
+        }
+
+        const carouselInterval = setInterval(() => {
+            setCarouselIndex(prev => {
+                const maxIndex = requests.length - visibleCount;
+                return prev >= maxIndex ? 0 : prev + 1;
+            });
+        }, 4000);
+
+        return () => clearInterval(carouselInterval);
+    }, [requests.length, visibleCount]);
+
     const fetchEvent = async () => {
         const { data } = await supabase
             .from('live_events')
@@ -121,6 +141,15 @@ const PublicDisplay = () => {
     };
 
     const fetchRequests = async () => {
+        // Get total count first
+        const { count } = await supabase
+            .from('live_requests')
+            .select('*', { count: 'exact', head: true })
+            .eq('event_id', eventId)
+            .eq('status', 'pending');
+        setTotalCount(count || 0);
+
+        // Fetch requests (limit to 50 for carousel)
         const { data } = await supabase
             .from('live_requests')
             .select('*')
@@ -128,7 +157,7 @@ const PublicDisplay = () => {
             .eq('status', 'pending')
             .order('upvote_count', { ascending: false })
             .order('created_at', { ascending: false })
-            .limit(5);
+            .limit(50);
         setRequests(data || []);
         setLoading(false);
     };
@@ -222,7 +251,32 @@ const PublicDisplay = () => {
             {/* Main Content Area */}
             <div className={`flex-1 flex flex-col md:flex-row gap-6 md:gap-8 transition-all duration-1000 w-full relative z-10 ${activeBattle ? 'max-w-[140rem]' : 'max-w-6xl'} mx-auto overflow-hidden mt-2 pt-6`}>
                 {/* Left Side: Requests (Now half-width if battle is active) */}
-                <div className={`flex flex-col gap-4 md:gap-6 lg:gap-8 transition-all duration-1000 ${activeBattle ? 'w-full md:w-1/2' : 'w-full'}`}>
+                <div className={`flex flex-col gap-3 md:gap-4 lg:gap-5 transition-all duration-1000 ${activeBattle ? 'w-full md:w-1/2' : 'w-full'}`}>
+                    {/* Total Request Count Header */}
+                    {totalCount > 0 && (
+                        <div className="flex items-center justify-between px-2">
+                            <div className="flex items-center gap-2">
+                                <Music className="w-4 h-4 md:w-5 md:h-5 text-prime" />
+                                <span className="text-xs md:text-sm font-bold text-white/60">
+                                    {t('publicDisplay.totalRequests', { count: totalCount }) || `${totalCount} istek bekliyor`}
+                                </span>
+                            </div>
+                            {requests.length > visibleCount && (
+                                <div className="flex items-center gap-1.5">
+                                    {Array.from({ length: Math.min(requests.length, 8) }).map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full transition-all ${i >= carouselIndex && i < carouselIndex + visibleCount
+                                                    ? 'bg-prime'
+                                                    : 'bg-white/20'
+                                                }`}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     <AnimatePresence mode="popLayout">
                         {requests.length === 0 ? (
                             <motion.div
@@ -235,61 +289,78 @@ const PublicDisplay = () => {
                                 <h3 className="text-lg md:text-2xl lg:text-4xl font-black uppercase tracking-[0.2em]">{t('publicDisplay.waitingForRequests')}</h3>
                             </motion.div>
                         ) : (
-                            requests.slice(0, activeBattle ? 2 : 5).map((req, index) => (
-                                <motion.div
-                                    key={req.id}
-                                    layout
-                                    initial={{ opacity: 0, x: -100, scale: 0.8 }}
-                                    animate={{
-                                        opacity: index === 0 ? 1 : 0.4,
-                                        x: 0,
-                                        scale: index === 0 ? 1 : (window.innerWidth < 768 ? 1 : 0.98)
-                                    }}
-                                    exit={{ opacity: 0, scale: 0.8 }}
-                                    transition={{ duration: 0.8, ease: "easeOut" }}
-                                    className={`relative p-3.5 md:p-6 lg:p-8 rounded-xl md:rounded-[2.5rem] lg:rounded-[3rem] border-2 md:border-4 transition-all shrink-0 ${req.is_vip
-                                        ? 'bg-slate-900 border-amber-400 shadow-[0_0_80px_rgba(251,191,36,0.2)]'
-                                        : index === 0
-                                            ? 'bg-slate-900 border-prime shadow-[0_0_80px_rgba(225,29,72,0.2)]'
-                                            : 'bg-white/5 border-transparent'
-                                        }`}
-                                >
-                                    {(req.is_vip || index === 0) && (
-                                        <div className={`absolute -top-3 md:-top-4 lg:-top-5 left-5 md:left-10 lg:left-12 px-3 md:px-6 lg:px-8 py-1 md:py-1.5 rounded-full font-black text-[9px] md:text-xs uppercase tracking-[0.2em] z-20 shadow-lg ${req.is_vip ? 'bg-amber-400 text-black' : 'bg-prime text-white'}`}>
-                                            {req.is_vip ? t('guest.vipTitle') : t('publicDisplay.nextUp')}
-                                        </div>
-                                    )}
+                            requests.slice(carouselIndex, carouselIndex + visibleCount).map((req, displayIndex) => {
+                                const actualPosition = carouselIndex + displayIndex + 1;
+                                const isFirst = actualPosition === 1;
 
-                                    <div className="flex items-center gap-4 md:gap-6 lg:gap-8">
-                                        <div className={`bg-prime/10 rounded-lg md:rounded-2xl flex items-center justify-center overflow-hidden border border-white/5 ${activeBattle ? 'w-12 h-12 md:w-16 lg:w-20' : 'w-16 h-16 md:w-28 lg:w-36'} shrink-0`}>
-                                            {req.image_url ? (
-                                                <img src={req.image_url} className="w-full h-full object-cover" alt="" />
-                                            ) : req.metadata?.artworkUrl100 ? (
-                                                <img src={req.metadata.artworkUrl100} className="w-full h-full object-cover" alt="" />
-                                            ) : (
-                                                <Music2 className={activeBattle ? 'w-5 h-5 md:w-8 lg:w-10 text-prime' : 'w-8 h-8 md:w-16 lg:w-20 text-prime'} />
-                                            )}
+                                return (
+                                    <motion.div
+                                        key={req.id}
+                                        layout
+                                        initial={{ opacity: 0, y: 50 }}
+                                        animate={{
+                                            opacity: isFirst ? 1 : 0.6,
+                                            y: 0,
+                                            scale: isFirst ? 1 : 0.98
+                                        }}
+                                        exit={{ opacity: 0, y: -50 }}
+                                        transition={{ duration: 0.5, ease: "easeOut" }}
+                                        className={`relative p-3 md:p-5 lg:p-6 rounded-xl md:rounded-[2rem] lg:rounded-[2.5rem] border-2 md:border-3 transition-all shrink-0 ${req.is_vip
+                                            ? 'bg-gradient-to-r from-amber-950/40 to-slate-900/80 border-amber-500/50 shadow-[0_0_40px_rgba(251,191,36,0.15)]'
+                                            : isFirst
+                                                ? 'bg-slate-900 border-prime shadow-[0_0_60px_rgba(225,29,72,0.2)]'
+                                                : 'bg-white/5 border-white/10'
+                                            }`}
+                                    >
+                                        {/* Position Badge */}
+                                        <div className={`absolute -left-2 md:-left-3 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center font-black text-sm md:text-lg lg:text-xl shadow-lg ${req.is_vip
+                                                ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-black'
+                                                : isFirst
+                                                    ? 'bg-prime text-white'
+                                                    : 'bg-white/10 text-white/60'
+                                            }`}>
+                                            {req.is_vip ? '⭐' : `#${actualPosition}`}
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h2 className={`font-black tracking-tighter uppercase line-clamp-2 md:leading-[1.1] ${activeBattle ? 'text-lg md:text-[clamp(1.1rem,2vw,1.8rem)]' : 'text-xl md:text-[clamp(1.4rem,3.5vw,3.2rem)]'}`}>
-                                                {req.song_title}
-                                            </h2>
-                                            <p className={`font-bold opacity-40 uppercase tracking-widest truncate mt-0.5 ${activeBattle ? 'text-[9px] md:text-sm' : 'text-[10px] md:text-xl'}`}>
-                                                {req.artist_name || req.metadata?.artistName || t('liveFeed.guestLabel')}
-                                            </p>
+
+                                        {/* VIP or Next Up Label */}
+                                        {(req.is_vip || isFirst) && (
+                                            <div className={`absolute -top-2.5 md:-top-3 left-10 md:left-14 lg:left-16 px-2.5 md:px-4 lg:px-5 py-0.5 md:py-1 rounded-full font-black text-[8px] md:text-[10px] uppercase tracking-[0.15em] z-20 shadow-lg ${req.is_vip ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-black' : 'bg-prime text-white'
+                                                }`}>
+                                                {req.is_vip ? '⭐ Öncelikli' : t('publicDisplay.nextUp')}
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center gap-3 md:gap-5 lg:gap-6 ml-4 md:ml-6">
+                                            <div className={`bg-prime/10 rounded-lg md:rounded-xl flex items-center justify-center overflow-hidden border border-white/5 ${activeBattle ? 'w-10 h-10 md:w-14 lg:w-16' : 'w-12 h-12 md:w-20 lg:w-24'} shrink-0`}>
+                                                {req.image_url ? (
+                                                    <img src={req.image_url} className="w-full h-full object-cover" alt="" />
+                                                ) : req.metadata?.artworkUrl100 ? (
+                                                    <img src={req.metadata.artworkUrl100} className="w-full h-full object-cover" alt="" />
+                                                ) : (
+                                                    <Music2 className={activeBattle ? 'w-4 h-4 md:w-6 lg:w-8 text-prime' : 'w-6 h-6 md:w-10 lg:w-12 text-prime'} />
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h2 className={`font-black tracking-tighter uppercase line-clamp-1 md:leading-[1.1] ${activeBattle ? 'text-base md:text-[clamp(1rem,1.8vw,1.5rem)]' : 'text-lg md:text-[clamp(1.2rem,3vw,2.5rem)]'}`}>
+                                                    {req.song_title}
+                                                </h2>
+                                                <p className={`font-bold opacity-40 uppercase tracking-widest truncate mt-0.5 ${activeBattle ? 'text-[8px] md:text-xs' : 'text-[9px] md:text-base'}`}>
+                                                    {req.artist_name || req.metadata?.artistName || t('liveFeed.guestLabel')}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                                                {req.upvote_count > 0 && (
+                                                    <div className="flex flex-col items-center gap-0.5">
+                                                        <ThumbsUp className={`text-prime fill-current ${activeBattle ? 'w-3 h-3 md:w-5' : 'w-4 h-4 md:w-7'}`} />
+                                                        <span className="font-black text-[9px] md:text-sm lg:text-base">{req.upvote_count}</span>
+                                                    </div>
+                                                )}
+                                                {req.mood && <span className={activeBattle ? 'text-lg md:text-3xl lg:text-4xl' : 'text-xl md:text-4xl lg:text-5xl'}>{req.mood}</span>}
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2.5 md:gap-6 shrink-0">
-                                            {req.upvote_count > 0 && (
-                                                <div className="flex flex-col items-center gap-0.5">
-                                                    <ThumbsUp className={`text-prime fill-current ${activeBattle ? 'w-4 h-4 md:w-6' : 'w-5 h-5 md:w-10'}`} />
-                                                    <span className="font-black text-[10px] md:text-lg lg:text-xl">{req.upvote_count}</span>
-                                                </div>
-                                            )}
-                                            {req.mood && <span className={activeBattle ? 'text-xl md:text-4xl lg:text-5xl' : 'text-2xl md:text-6xl lg:text-7xl'}>{req.mood}</span>}
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))
+                                    </motion.div>
+                                );
+                            })
                         )}
                     </AnimatePresence>
                 </div>
