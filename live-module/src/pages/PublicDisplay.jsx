@@ -73,6 +73,16 @@ const PublicDisplay = () => {
         };
     }, [eventId]);
 
+    // Polling fallback - refresh data every 5 seconds
+    useEffect(() => {
+        const pollInterval = setInterval(() => {
+            fetchRequests();
+            if (activeBattle) fetchBattleVotes(activeBattle.id);
+        }, 5000);
+
+        return () => clearInterval(pollInterval);
+    }, [eventId, activeBattle]);
+
     const fetchEvent = async () => {
         const { data } = await supabase
             .from('live_events')

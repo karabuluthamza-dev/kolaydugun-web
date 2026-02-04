@@ -157,6 +157,41 @@ const LiveFeed = () => {
         };
     }, [eventId]);
 
+    // Polling fallback - check for new requests every 5 seconds
+    useEffect(() => {
+        let previousCount = 0;
+
+        const pollInterval = setInterval(async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('live_requests')
+                    .select('*')
+                    .eq('event_id', eventId)
+                    .order('is_vip', { ascending: false })
+                    .order('upvote_count', { ascending: false })
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                // Check if there are new requests
+                const pendingCount = data.filter(r => r.status === 'pending').length;
+                if (previousCount > 0 && pendingCount > previousCount) {
+                    console.log('[POLLING] 🎵 New request detected!');
+                    playNotification();
+                    if ('vibrate' in navigator) navigator.vibrate(200);
+                }
+                previousCount = pendingCount;
+
+                setRequests(data);
+                setLoading(false);
+            } catch (err) {
+                console.error('[POLLING] Error:', err);
+            }
+        }, 5000); // Every 5 seconds
+
+        return () => clearInterval(pollInterval);
+    }, [eventId, soundEnabled]);
+
     const fetchEvent = async () => {
         const { data, error: err } = await supabase
             .from('live_events')
