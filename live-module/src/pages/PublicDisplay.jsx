@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Music, Music2, MessageSquare, QrCode, ThumbsUp, Flame, Maximize, Minimize } from 'lucide-react';
+import { Music, Music2, MessageSquare, QrCode, ThumbsUp, Flame, Maximize, Minimize, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
@@ -16,6 +16,7 @@ const PublicDisplay = () => {
     const [activeBattle, setActiveBattle] = useState(null);
     const [battleVotes, setBattleVotes] = useState({ A: 0, B: 0 });
     const [carouselIndex, setCarouselIndex] = useState(0);
+    const [currentTime, setCurrentTime] = useState(new Date());
 
     useEffect(() => {
         fetchEvent();
@@ -84,6 +85,14 @@ const PublicDisplay = () => {
 
         return () => clearInterval(pollInterval);
     }, [eventId]);
+
+    // Update clock every second
+    useEffect(() => {
+        const clockInterval = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+        return () => clearInterval(clockInterval);
+    }, []);
 
     // Auto-scroll carousel every 4 seconds
     const visibleCount = activeBattle ? 3 : 4;
@@ -226,7 +235,19 @@ const PublicDisplay = () => {
                         {t('publicDisplay.title')}
                     </p>
                 </div>
-                <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 w-full md:w-auto">
+                    {/* Live Clock */}
+                    <div className="flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 px-3 md:px-4 py-2 md:py-3 rounded-xl md:rounded-2xl">
+                        <Clock className="w-4 h-4 md:w-5 md:h-5 text-prime" />
+                        <div className="text-center">
+                            <p className="text-lg md:text-xl lg:text-2xl font-mono font-bold tracking-tight">
+                                {currentTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                            <p className="text-[8px] md:text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                                {currentTime.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', weekday: 'short' })}
+                            </p>
+                        </div>
+                    </div>
                     <button
                         onClick={toggleFullScreen}
                         className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all group hidden lg:block"
@@ -381,9 +402,16 @@ const PublicDisplay = () => {
 
                                 <div className="relative z-10 flex flex-col justify-between">
                                     <div className="mb-1 md:mb-2">
-                                        <div className="inline-flex items-center gap-1.5 bg-orange-500 text-black px-2.5 md:px-4 py-0.5 md:py-1.5 rounded-full font-black text-[7px] md:text-[10px] uppercase tracking-[0.2em] mb-1.5 md:mb-3">
-                                            <Flame className="w-2.5 h-2.5 md:w-3.5 md:h-3.5 fill-current" />
-                                            LIVE BATTLE
+                                        <div className="flex items-center justify-between">
+                                            <div className="inline-flex items-center gap-1.5 bg-orange-500 text-black px-2.5 md:px-4 py-0.5 md:py-1.5 rounded-full font-black text-[7px] md:text-[10px] uppercase tracking-[0.2em] mb-1.5 md:mb-3">
+                                                <Flame className="w-2.5 h-2.5 md:w-3.5 md:h-3.5 fill-current" />
+                                                LIVE BATTLE
+                                            </div>
+                                            <div className="text-right mb-1.5 md:mb-3">
+                                                <span className="text-[10px] md:text-sm font-bold text-white/60">
+                                                    🗳️ {battleVotes.A + battleVotes.B} oy
+                                                </span>
+                                            </div>
                                         </div>
                                         <h2 className="text-lg md:text-[clamp(1rem,2.5vw,2rem)] lg:text-3xl font-black leading-[1.1] uppercase tracking-tighter bg-gradient-to-br from-white to-white/40 bg-clip-text text-transparent line-clamp-2">
                                             {activeBattle.title}
@@ -399,9 +427,10 @@ const PublicDisplay = () => {
                                                     key={battleVotes.A}
                                                     initial={{ scale: 1.5, color: '#f97316' }}
                                                     animate={{ scale: 1, color: '#f97316' }}
-                                                    className="text-lg md:text-2xl lg:text-3xl font-black shrink-0"
+                                                    className="text-lg md:text-2xl lg:text-3xl font-black shrink-0 flex items-baseline gap-1"
                                                 >
                                                     {Math.round((battleVotes.A / (battleVotes.A + battleVotes.B || 1)) * 100)}%
+                                                    <span className="text-[10px] md:text-sm text-white/40">({battleVotes.A})</span>
                                                 </motion.span>
                                             </div>
                                             <div className="h-5 md:h-8 lg:h-10 bg-white/5 rounded-md md:rounded-lg overflow-hidden border-2 border-white/5 p-0.5 shadow-inner">
@@ -424,9 +453,10 @@ const PublicDisplay = () => {
                                                     key={battleVotes.B}
                                                     initial={{ scale: 1.5, color: '#3b82f6' }}
                                                     animate={{ scale: 1, color: '#3b82f6' }}
-                                                    className="text-lg md:text-2xl lg:text-3xl font-black shrink-0"
+                                                    className="text-lg md:text-2xl lg:text-3xl font-black shrink-0 flex items-baseline gap-1"
                                                 >
                                                     {Math.round((battleVotes.B / (battleVotes.A + battleVotes.B || 1)) * 100)}%
+                                                    <span className="text-[10px] md:text-sm text-white/40">({battleVotes.B})</span>
                                                 </motion.span>
                                             </div>
                                             <div className="h-5 md:h-8 lg:h-10 bg-white/5 rounded-md md:rounded-lg overflow-hidden border-2 border-white/5 p-0.5 shadow-inner">

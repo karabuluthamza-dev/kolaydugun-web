@@ -431,5 +431,16 @@ export const tr = {
             "claimDesc": "Bu profesyonel tanıtım sayfası ve gelen tüm teklifler size ait olabilir. Hemen profilinizi sahiplenin ve Elite Partner avantajlarından yararlanın.",
             "testDashboard": "Yönetim Panelini Test Et"
         }
+    },
+    "publicDisplay": {
+        "title": "CANLI İSTEK AKIŞI",
+        "scanToRequest": "TARAYIP ŞARKI İSTEYİN",
+        "waitingForRequests": "İSTEKLER BEKLENİYOR...",
+        "nextUp": "SIRADAKİ",
+        "totalRequests": "🎵 {{count}} istek bekliyor",
+        "actions": {
+            "fullScreen": "Tam Ekran",
+            "exitFullScreen": "Tam Ekrandan Çık"
+        }
     }
 };

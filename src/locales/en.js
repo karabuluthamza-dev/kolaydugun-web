@@ -426,5 +426,16 @@ export const en = {
             "claimDesc": "This professional showcase page and all inquiries could be yours. Claim your profile now to enjoy Elite Partner benefits.",
             "testDashboard": "Test Management Panel"
         }
+    },
+    "publicDisplay": {
+        "title": "LIVE REQUEST FEED",
+        "scanToRequest": "SCAN TO REQUEST",
+        "waitingForRequests": "WAITING FOR REQUESTS...",
+        "nextUp": "NEXT UP",
+        "totalRequests": "🎵 {{count}} requests pending",
+        "actions": {
+            "fullScreen": "Full Screen",
+            "exitFullScreen": "Exit Full Screen"
+        }
     }
 };
