@@ -95,7 +95,7 @@ const PublicDisplay = () => {
     }, []);
 
     // Auto-scroll carousel every 4 seconds
-    const visibleCount = activeBattle ? 3 : 4;
+    const visibleCount = activeBattle ? 5 : 6;
     useEffect(() => {
         if (requests.length <= visibleCount) {
             setCarouselIndex(0);
@@ -165,7 +165,7 @@ const PublicDisplay = () => {
             .eq('event_id', eventId)
             .eq('status', 'pending')
             .order('upvote_count', { ascending: false })
-            .order('created_at', { ascending: false })
+            .order('created_at', { ascending: true })
             .limit(50);
         setRequests(data || []);
         setLoading(false);
@@ -237,13 +237,13 @@ const PublicDisplay = () => {
                 </div>
                 <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 w-full md:w-auto">
                     {/* Live Clock */}
-                    <div className="flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 px-3 md:px-4 py-2 md:py-3 rounded-xl md:rounded-2xl">
-                        <Clock className="w-4 h-4 md:w-5 md:h-5 text-prime" />
+                    <div className="flex items-center gap-3 md:gap-4 bg-white/5 border border-white/10 px-4 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl">
+                        <Clock className="w-6 h-6 md:w-8 md:h-8 text-prime" />
                         <div className="text-center">
-                            <p className="text-lg md:text-xl lg:text-2xl font-mono font-bold tracking-tight">
+                            <p className="text-2xl md:text-3xl lg:text-4xl font-mono font-bold tracking-tight">
                                 {currentTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                             </p>
-                            <p className="text-[8px] md:text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                            <p className="text-xs md:text-sm font-bold text-white/40 uppercase tracking-widest">
                                 {currentTime.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', weekday: 'short' })}
                             </p>
                         </div>
