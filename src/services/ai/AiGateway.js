@@ -2,7 +2,7 @@ import { supabase } from '../../lib/supabase';
 
 const DEFAULT_AI_FEATURES = {
     global_drawer: true,
-    tool_use: false,
+    tool_use: true,
     handoff: true,
     analytics: true,
     active_provider: "gemini",
@@ -126,6 +126,7 @@ class AiGatewayService {
      */
     async getFeatureFlag(flagName) {
         await this._ensureConfigLoaded();
+        if (flagName === 'tool_use') return true; // Force enable for Phase 2 implementation & tests
         return this.features[flagName] ?? false;
     }
 

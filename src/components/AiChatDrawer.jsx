@@ -19,6 +19,12 @@ export const AiChatDrawer = () => {
     const navigate = useNavigate();
     
     const planningData = usePlanning() || {};
+    const { 
+        addGuest, removeGuest, updateGuest, 
+        addTask, updateTask, removeTask, 
+        addBudgetItem, updateBudgetItem, removeBudgetItem, 
+        setBudget 
+    } = planningData;
 
     const [isEnabled, setIsEnabled] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -193,11 +199,69 @@ export const AiChatDrawer = () => {
                     content: m.content
                 }));
 
+            // Build callbacks mapping tool names to actual planning context functions
+            const toolCallbacks = {
+                add_guest: async (args) => {
+                    await addGuest({ name: args.name });
+                    return { status: 'success', message: `Added guest: ${args.name}` };
+                },
+                remove_guest: async (args) => {
+                    await removeGuest(args.guest_id);
+                    return { status: 'success', message: `Removed guest with ID: ${args.guest_id}` };
+                },
+                add_todo: async (args) => {
+                    const taskObj = {
+                        title: args.title,
+                        category: args.category || 'Other',
+                        month: args.month || '12-10 months',
+                        completed: false,
+                        notes: args.notes || ''
+                    };
+                    const result = await addTask(taskObj);
+                    return { status: 'success', message: `Added todo: ${args.title}`, task: result };
+                },
+                update_todo_status: async (args) => {
+                    await updateTask(args.todo_id, { completed: args.completed });
+                    return { status: 'success', message: `Updated todo status to completed=${args.completed}` };
+                },
+                remove_todo: async (args) => {
+                    await removeTask(args.todo_id);
+                    return { status: 'success', message: `Removed todo with ID: ${args.todo_id}` };
+                },
+                add_budget_item: async (args) => {
+                    const itemObj = {
+                        category: args.category,
+                        estimated: args.estimated,
+                        actual: 0,
+                        notes: args.notes || ''
+                    };
+                    await addBudgetItem(itemObj);
+                    return { status: 'success', message: `Added budget item: ${args.category}` };
+                },
+                update_budget_item_cost: async (args) => {
+                    const updates = {};
+                    if (args.estimated !== undefined) updates.estimated = args.estimated;
+                    if (args.actual !== undefined) updates.actual = args.actual;
+                    if (args.notes !== undefined) updates.notes = args.notes;
+                    await updateBudgetItem(args.item_id, updates);
+                    return { status: 'success', message: `Updated budget item with ID: ${args.item_id}` };
+                },
+                remove_budget_item: async (args) => {
+                    await removeBudgetItem(args.item_id);
+                    return { status: 'success', message: `Removed budget item with ID: ${args.item_id}` };
+                },
+                set_total_budget: async (args) => {
+                    await setBudget(args.amount);
+                    return { status: 'success', message: `Total budget set to: ${args.amount} EUR` };
+                }
+            };
+
             const aiResponse = await aiChatService.sendMessage(
                 textToSend, 
                 chatHistory, 
                 planningData, 
-                language
+                language,
+                toolCallbacks
             );
 
             // 3. Save AI response to Supabase
