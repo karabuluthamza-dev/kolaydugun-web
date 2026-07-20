@@ -12,6 +12,7 @@ import MobileBottomNav from './components/MobileBottomNav';
 import SmartAppBanner from './components/SmartAppBanner';
 import GlobalSchema from './components/GlobalSchema';
 import { trackError } from './utils/analytics';
+import { AiChatDrawer } from './components/AiChatDrawer';
 // AOS - Animate on Scroll
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -351,6 +352,7 @@ function App() {
           </Suspense>
         </main>
         <Footer />
+        <AiChatDrawer />
       </div>
     </>
   );

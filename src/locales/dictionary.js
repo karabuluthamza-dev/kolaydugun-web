@@ -14010,5 +14010,134 @@ dictionary.vip = {
         claimTitle: { en: "Is This Your Page?", de: "Ist das Ihre Seite?", tr: "Bu Sayfa Sizin mi?" },
         claimDesc: { en: "This professional showcase page and all inquiries could be yours. Claim your profile now to enjoy Elite Partner benefits.", de: "Diese professionelle Präsentationsseite und alle Anfragen könnten Ihnen gehören. Beanspruchen Sie jetzt Ihr Profil.", tr: "Bu profesyonel tanıtım sayfası ve gelen tüm teklifler size ait olabilir. Hemen profilinizi sahiplenin ve Elite Partner avantajlarından yararlanın." },
         testDashboard: { en: "Test Management Panel", de: "Management-Panel testen", tr: "Yönetim Panelini Test Et" }
+    },
+    handoff: {
+        greeting: {
+            en: "Hello, I am {{name}}. I need support with my wedding planning.",
+            de: "Hallo, ich bin {{name}}. Ich brauche Unterstützung bei meiner Hochzeitsplanung.",
+            tr: "Merhaba, ben {{name}}. Düğün planlamam için desteğe ihtiyacım var."
+        },
+        fallbackName: {
+            en: "KolayDüğün user",
+            de: "KolayDüğün Kunde",
+            tr: "KolayDüğün kullanıcısı"
+        },
+        details: {
+            en: "Planning Details:",
+            de: "Meine Planungsdetails:",
+            tr: "Planlama Detaylarım:"
+        },
+        city: {
+            en: "City",
+            de: "Stadt",
+            tr: "Şehir"
+        },
+        date: {
+            en: "Date",
+            de: "Datum",
+            tr: "Tarih"
+        },
+        guests: {
+            en: "Guests",
+            de: "Gästeanzahl",
+            tr: "Davetli Sayısı"
+        },
+        budget: {
+            en: "Remaining Budget",
+            de: "Budget",
+            tr: "Bütçe"
+        },
+        category: {
+            en: "Interest Area",
+            de: "Bereich",
+            tr: "İlgi Alanı"
+        },
+        lastQuery: {
+            en: "Last Discussed Topic",
+            de: "Letztes besprochenes Thema",
+            tr: "Son Konuştuğumuz Konu"
+        }
+    },
+    aiChat: {
+        triggerTooltip: {
+            en: "AI Wedding Assistant",
+            de: "KI-Hochzeitsplaner",
+            tr: "Yapay Zekâ Düğün Asistanı"
+        },
+        title: {
+            en: "AI Wedding Planner",
+            de: "KI-Hochzeitsplaner",
+            tr: "Yapay Zekâ Düğün Asistanı"
+        },
+        placeholder: {
+            en: "Type your message here...",
+            de: "Schreiben Sie Ihre Nachricht...",
+            tr: "Mesajınızı buraya yazın..."
+        },
+        newChat: {
+            en: "New Chat",
+            de: "Neuer Chat",
+            tr: "Yeni Sohbet"
+        },
+        deleteChat: {
+            en: "Delete Chat",
+            de: "Chat löschen",
+            tr: "Sohbeti Sil"
+        },
+        guestWelcomeTitle: {
+            en: "Meet Your AI Wedding Planner!",
+            de: "Lernen Sie Ihren KI-Hochzeitsplaner kennen!",
+            tr: "Yapay Zekâ Düğün Asistanınızla Tanışın!"
+        },
+        guestWelcomeDesc: {
+            en: "Plan your dream wedding effortlessly! Our AI assistant can help you manage your budget, organize guests, keep track of tasks, and find the best vendors. Log in to save your chat history and planning progress.",
+            de: "Planen Sie Ihre Traumhochzeit mühelos! Unser KI-Assistent hilft Ihnen, das Budget zu verwalten, Gäste zu organisieren, Aufgaben zu verfolgen und passende Dienstleister zu finden. Melden Sie sich an, um den Verlauf zu speichern.",
+            tr: "Hayalinizdeki düğünü zahmetsizce planlayın! Yapay zekâ asistanımız bütçenizi yönetmeye, davetlileri organize etmeye, yapılacak işleri takip etmeye ve en iyi firmaları bulmaya yardımcı olur. Sohbet geçmişinizi kaydetmek için giriş yapın."
+        },
+        loginBtn: {
+            en: "Log In",
+            de: "Einloggen",
+            tr: "Giriş Yap"
+        },
+        registerBtn: {
+            en: "Register Now",
+            de: "Jetzt registrieren",
+            tr: "Şimdi Üye Ol"
+        },
+        handoffTooltip: {
+            en: "Contact Human Support via WhatsApp",
+            de: "Human-Support per WhatsApp kontaktieren",
+            tr: "WhatsApp ile Canlı Desteğe Bağlan"
+        },
+        aiTyping: {
+            en: "Assistant is typing...",
+            de: "Assistent schreibt...",
+            tr: "Asistan yazıyor..."
+        },
+        noSessions: {
+            en: "No active chat sessions. Start a new one!",
+            de: "Keine aktiven Chats. Starten Sie einen neuen!",
+            tr: "Aktif sohbetiniz bulunmuyor. Yeni bir sohbet başlatın!"
+        },
+        welcomeMessage: {
+            en: "Hello! I am your AI Wedding Assistant. I have accessed your wedding planning dashboard. How can I help you optimize your budget, manage guests, or organize tasks today?",
+            de: "Hallo! Ich bin Ihr KI-Hochzeitsplaner. Ich habe Zugriff auf Ihr Planungs-Dashboard erhalten. Wie kann ich Ihnen heute helfen, Ihr Budget zu optimieren, Gäste zu verwalten oder Aufgaben zu strukturieren?",
+            tr: "Merhaba! Ben Yapay Zekâ Düğün Asistanınız. Düğün planlama panelinize bağlandım. Bugün bütçenizi optimize etmeye, davetlileri yönetmeye veya işlerinizi organize etmeye nasıl yardımcı olabilirim?"
+        },
+        failedMessage: {
+            en: "Failed to send. Click to retry.",
+            de: "Senden fehlgeschlagen. Zum Wiederholen klicken.",
+            tr: "Gönderilemedi. Yeniden denemek için tıklayın."
+        },
+        retryBtn: {
+            en: "Retry",
+            de: "Wiederholen",
+            tr: "Yeniden Dene"
+        },
+        sending: {
+            en: "Sending...",
+            de: "Wird gesendet...",
+            tr: "Gönderiliyor..."
+        }
     }
 };

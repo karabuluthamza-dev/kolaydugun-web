@@ -1,87 +1,14 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { AiGateway } from "./ai/AiGateway";
 
 /**
- * AI Service for intelligent data processing using Google Gemini
+ * AI Service for intelligent data processing using the global AI Gateway.
+ * Backwards compatible with legacy consumers.
  */
 
-// Get API Key from various sources
-const getApiKey = () => {
-    return localStorage.getItem('admin_gemini_api_key')?.trim() ||
-        import.meta.env.VITE_GEMINI_API_KEY?.trim();
-};
-
-/**
- * Shared helper to attempt generation across multiple models
- */
-const generateWithFallback = async (prompt, genAI) => {
-    let candidateModels = [];
-
-    // 1. Fetch available models dynamically
-    try {
-        const apiKey = getApiKey();
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-        if (response.ok) {
-            const data = await response.json();
-            if (data.models) {
-                const allModels = data.models
-                    .filter(m => m.supportedGenerationMethods?.includes("generateContent"))
-                    .map(m => m.name.replace("models/", ""));
-
-                const priorityOrder = [
-                    "gemini-1.5-flash",
-                    "gemini-1.5-flash-001",
-                    "gemini-1.5-flash-8b",
-                    "gemini-2.0-flash-exp",
-                    "gemini-1.5-pro",
-                    "gemini-pro",
-                    "gemini-1.0-pro"
-                ];
-
-                priorityOrder.forEach(pModel => {
-                    if (allModels.includes(pModel)) candidateModels.push(pModel);
-                });
-                allModels.forEach(model => {
-                    if (!candidateModels.includes(model)) candidateModels.push(model);
-                });
-            }
-        }
-    } catch (e) {
-        console.warn("AI Service fallback to defaults:", e);
-    }
-
-    if (candidateModels.length === 0) {
-        candidateModels = ["gemini-1.5-flash", "gemini-pro", "gemini-1.0-pro"];
-    }
-
-    let lastError = null;
-    for (const modelName of candidateModels) {
-        try {
-            console.log(`🤖 AI Trying: ${modelName}`);
-            const model = genAI.getGenerativeModel({ model: modelName });
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text().trim();
-            if (text) return text;
-        } catch (error) {
-            console.warn(`⚠️ ${modelName} fail:`, error.message);
-            lastError = error;
-        }
-    }
-
-    throw new Error(`AI generation failed after ${candidateModels.length} attempts. Last error: ${lastError?.message}`);
-};
-
-/**
- * Suggests the best matching city from the available list based on raw input
- */
 /**
  * Suggests the best matching city from the available list based on raw input
  */
 export const suggestCity = async (rawCity, availableCities, countryHint = null, zipCode = null) => {
-    const apiKey = getApiKey();
-    if (!apiKey) throw new Error("Gemini API Key missing.");
-
-    const genAI = new GoogleGenerativeAI(apiKey);
     const context = countryHint ? `Context: Country is ${countryHint}.` : '';
     const zipContext = zipCode ? `ZIP Code: ${zipCode}.` : '';
 
@@ -102,7 +29,7 @@ export const suggestCity = async (rawCity, availableCities, countryHint = null, 
     5. Return ONLY the exact city name from the list or "null". No explanations.
     `;
 
-    const result = await generateWithFallback(prompt, genAI);
+    const result = await AiGateway.generateContent(prompt);
     const text = result.replace(/^"|"$/g, '');
     return text === "null" ? null : text;
 };
@@ -111,10 +38,6 @@ export const suggestCity = async (rawCity, availableCities, countryHint = null, 
  * Generates SEO-friendly, professional description for a vendor
  */
 export const enrichVendorContent = async (vendorName, category, rawData) => {
-    const apiKey = getApiKey();
-    if (!apiKey) throw new Error("API Key missing");
-
-    const genAI = new GoogleGenerativeAI(apiKey);
     const prompt = `
         You are a professional copywriter for the German wedding industry.
         Write a short, attractive, SEO-friendly description (approx. 50-80 words) for a wedding vendor.
@@ -130,17 +53,13 @@ export const enrichVendorContent = async (vendorName, category, rawData) => {
         4. Return ONLY the text, no quotes or explanations.
     `;
 
-    return await generateWithFallback(prompt, genAI);
+    return await AiGateway.generateContent(prompt);
 };
 
 /**
  * Suggests the best matching category from our valid list based on raw input
  */
 export const suggestCategory = async (rawInput, availableCategories) => {
-    const apiKey = getApiKey();
-    if (!apiKey) throw new Error("Gemini API Key missing.");
-
-    const genAI = new GoogleGenerativeAI(apiKey);
     const prompt = `
     You are an intelligent category mapping assistant for a wedding platform.
     OBJECTIVE: Map a raw category/business description string to the MOST APPROPRIATE category from our platform.
@@ -152,7 +71,8 @@ export const suggestCategory = async (rawInput, availableCategories) => {
     OUTPUT FORMAT: Return ONLY the exact category name or "null". No explanations.
     `;
 
-    const result = await generateWithFallback(prompt, genAI);
+    const result = await AiGateway.generateContent(prompt);
     const text = result.replace(/^"|"$/g, '');
     return text === "null" ? null : text;
 };
+
