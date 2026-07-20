@@ -14141,3 +14141,23 @@ dictionary.vip = {
         }
     }
 };
+
+// aiChat cevirileri — ust seviyeye eklendi, t('aiChat.title') seklinde erisim icin
+dictionary.aiChat = {
+    triggerTooltip: { en: 'AI Wedding Assistant', de: 'KI-Hochzeitsplaner', tr: 'Yapay Zeka Dugun Asistani' },
+    title: { en: 'AI Wedding Planner', de: 'KI-Hochzeitsplaner', tr: 'Yapay Zeka Dugun Asistani' },
+    placeholder: { en: 'Type your message here...', de: 'Schreiben Sie Ihre Nachricht...', tr: 'Mesajinizi buraya yazin...' },
+    newChat: { en: 'New Chat', de: 'Neuer Chat', tr: 'Yeni Sohbet' },
+    deleteChat: { en: 'Delete Chat', de: 'Chat loschen', tr: 'Sohbeti Sil' },
+    guestWelcomeTitle: { en: 'Meet Your AI Wedding Planner!', de: 'Lernen Sie Ihren KI-Hochzeitsplaner kennen!', tr: 'Yapay Zeka Dugun Asistaniyla Tanisin!' },
+    guestWelcomeDesc: { en: 'Plan your dream wedding effortlessly!', de: 'Planen Sie Ihre Traumhochzeit muhelos!', tr: 'Hayalinizdeki dugunu kolayca planlayýn!' },
+    loginBtn: { en: 'Log In', de: 'Einloggen', tr: 'Giris Yap' },
+    registerBtn: { en: 'Register Now', de: 'Jetzt registrieren', tr: 'Simdi Uye Ol' },
+    handoffTooltip: { en: 'Contact Human Support via WhatsApp', de: 'Human-Support per WhatsApp kontaktieren', tr: 'WhatsApp ile Canli Destege Baglan' },
+    aiTyping: { en: 'Assistant is typing...', de: 'Assistent schreibt...', tr: 'Asistan yaziyor...' },
+    noSessions: { en: 'No active chat sessions. Start a new one!', de: 'Keine aktiven Chats. Starten Sie einen neuen!', tr: 'Aktif sohbetiniz bulunmuyor. Yeni bir sohbet baslatýn!' },
+    welcomeMessage: { en: 'Hello! I am your AI Wedding Assistant. How can I help you today?', de: 'Hallo! Ich bin Ihr KI-Hochzeitsplaner. Wie kann ich helfen?', tr: 'Merhaba! Ben Yapay Zeka Dugun Asistaniniz. Nasil yardimci olabilirim?' },
+    failedMessage: { en: 'Failed to send. Click to retry.', de: 'Senden fehlgeschlagen.', tr: 'Gonderilemedi. Tekrar deneyin.' },
+    retryBtn: { en: 'Retry', de: 'Wiederholen', tr: 'Yeniden Dene' },
+    sending: { en: 'Sending...', de: 'Wird gesendet...', tr: 'Gonderiliyor...' }
+};
