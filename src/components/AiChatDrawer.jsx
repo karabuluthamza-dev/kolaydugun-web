@@ -497,15 +497,15 @@ export const AiChatDrawer = () => {
                     >
                         <span className="teaser-dot animate-pulse"></span>
                         <span className="teaser-text">
-                            {t('aiChat.triggerBadge', language === 'tr' ? 'WhatsApp & Asistan' : language === 'de' ? 'WhatsApp & KI' : 'WhatsApp & AI')}
+                            {t('aiChat.triggerBadge', language === 'tr' ? 'WhatsApp İletişim' : language === 'de' ? 'WhatsApp Support' : 'WhatsApp Contact')}
                         </span>
                     </div>
 
                     <button 
                         className="ai-chat-trigger-bubble" 
                         onClick={() => setIsOpen(true)}
-                        title={t('aiChat.triggerTooltip', language === 'tr' ? 'KolayDüğün İletişim & Asistan' : language === 'en' ? 'KolayDüğün Support & Assistant' : 'KolayDüğün Support & KI')}
-                        aria-label="WhatsApp ve AI Asistan"
+                        title={t('aiChat.triggerTooltip', language === 'tr' ? 'KolayDüğün WhatsApp İletişim' : language === 'en' ? 'KolayDüğün WhatsApp Support' : 'KolayDüğün WhatsApp Support')}
+                        aria-label="WhatsApp İletişim"
                     >
                         <MessageSquare size={24} className="text-white" />
                         <span className="ai-online-status-dot"></span>
@@ -522,33 +522,15 @@ export const AiChatDrawer = () => {
                     <div className="ai-chat-drawer-header">
                         <div className="flex items-center gap-2.5">
                             <div className="ai-chat-avatar-icon">
-                                <Sparkles size={18} className="text-white animate-pulse" />
+                                <Phone size={18} className="text-white animate-pulse" />
                             </div>
                             <div>
-                                <h3>{t('aiChat.headerTitle', language === 'tr' ? 'KolayDüğün WhatsApp & Asistan' : language === 'en' ? 'KolayDüğün WhatsApp & Assistant' : 'KolayDüğün WhatsApp & KI-Assistent')}</h3>
+                                <h3>{t('aiChat.headerTitle', language === 'tr' ? 'KolayDüğün WhatsApp İletişim' : language === 'en' ? 'KolayDüğün WhatsApp Support' : 'KolayDüğün WhatsApp Support')}</h3>
                                 <span className="ai-chat-status-text">{t('aiChat.onlineStatus', 'online')} (+49 162 8726192)</span>
                             </div>
                         </div>
                         <button className="ai-chat-close-btn" onClick={() => setIsOpen(false)}>
                             <X size={20} />
-                        </button>
-                    </div>
-
-                    {/* Mode Navigation Tabs */}
-                    <div className="ai-chat-nav-tabs">
-                        <button 
-                            className={`nav-tab-btn ${activeTab === 'form' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('form')}
-                        >
-                            <Phone size={16} />
-                            <span>{txtTabForm}</span>
-                        </button>
-                        <button 
-                            className={`nav-tab-btn ${activeTab === 'chat' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('chat')}
-                        >
-                            <Sparkles size={16} />
-                            <span>{txtTabChat}</span>
                         </button>
                     </div>
 
