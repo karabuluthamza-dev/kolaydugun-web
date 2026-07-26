@@ -155,6 +155,22 @@ const Hero = ({ title, subtitle, backgroundImage, onlineConfig, trustBadges, her
                 <div className="hero-counter-wrapper">
                     <FakeOnlineCounter config={onlineConfig} />
                 </div>
+                {/* Value Proposition High-Converting Banner */}
+                <div className="hero-value-prop-card">
+                    <div className="value-prop-badge">
+                        <span className="badge-icon">⚡</span>
+                        <span>{language === 'tr' ? '1 DAKİKADA FİYAT TEKLİFİ' : language === 'de' ? 'ANGEBOT IN 1 MINUTE' : 'QUOTES IN 1 MINUTE'}</span>
+                    </div>
+                    <p className="value-prop-highlight">
+                        <strong>{language === 'tr' ? "Almanya'da Düğün Planlamak Artık Çok Kolay!" : language === 'de' ? 'Hochzeit in Deutschland einfach planen!' : 'Planning a wedding in Germany made simple!'}</strong>{' '}
+                        {language === 'tr' 
+                            ? '1 Dakikada Formu Doldurun, Şehrinizdeki En İyi 5 Salon ve Tedarikçiden Anında Fiyat Teklifi Alın.' 
+                            : language === 'de' 
+                            ? 'Formular in 1 Minute ausfüllen & sofort Angebote von den besten Locations & Dienstleistern in Ihrer Stadt erhalten.' 
+                            : 'Fill out the form in 1 minute & get instant quotes from the top venues & vendors in your city.'}
+                    </p>
+                </div>
+
                 <h1 className="hero-title">
                     {title || t('hero.title')}
                 </h1>
