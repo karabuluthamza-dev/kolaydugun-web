@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { usePlanning } from '../context/PlanningContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const GuestList = () => {
     const { guests, addGuest, removeGuest } = usePlanning();
+    const { t } = useLanguage();
     const [newGuest, setNewGuest] = useState("");
 
     const handleAddGuest = (e) => {
@@ -12,12 +14,18 @@ const GuestList = () => {
         setNewGuest("");
     };
 
+    const getRsvpLabel = (status) => {
+        if (status === 'Confirmed') return t('guestsManager.confirmed') || 'Confirmed';
+        if (status === 'Declined') return t('guestsManager.declined') || 'Declined';
+        return t('guestsManager.pending') || 'Pending';
+    };
+
     return (
         <div className="section container" style={{ marginTop: '80px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h2>Guest List</h2>
+                <h2>{t('guestsManager.title') || 'Davetli Listesi'}</h2>
                 <div style={{ fontSize: '1.2rem', fontWeight: '500' }}>
-                    Total Guests: <span style={{ color: 'var(--color-primary)' }}>{guests.length}</span>
+                    {t('guestsManager.totalGuests') || 'Toplam Davetli'}: <span style={{ color: 'var(--color-primary)' }}>{guests.length}</span>
                 </div>
             </div>
 
@@ -26,10 +34,10 @@ const GuestList = () => {
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead style={{ background: '#f9f9f9', borderBottom: '1px solid #eee' }}>
                             <tr>
-                                <th style={{ padding: '1rem', textAlign: 'left' }}>Name</th>
-                                <th style={{ padding: '1rem', textAlign: 'left' }}>RSVP</th>
-                                <th style={{ padding: '1rem', textAlign: 'left' }}>Meal</th>
-                                <th style={{ padding: '1rem', textAlign: 'right' }}>Action</th>
+                                <th style={{ padding: '1rem', textAlign: 'left' }}>{t('guestsManager.name') || 'Ad Soyad'}</th>
+                                <th style={{ padding: '1rem', textAlign: 'left' }}>{t('guestsManager.rsvp') || 'LCV (RSVP)'}</th>
+                                <th style={{ padding: '1rem', textAlign: 'left' }}>{t('guestsManager.meal') || 'Yemek Tercihi'}</th>
+                                <th style={{ padding: '1rem', textAlign: 'right' }}>{t('guestsManager.action') || 'İşlem'}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -44,7 +52,7 @@ const GuestList = () => {
                                             background: guest.rsvp === 'Confirmed' ? '#e6f4ea' : guest.rsvp === 'Declined' ? '#fce8e6' : '#fff7e6',
                                             color: guest.rsvp === 'Confirmed' ? '#1e8e3e' : guest.rsvp === 'Declined' ? '#d93025' : '#f1c232'
                                         }}>
-                                            {guest.rsvp}
+                                            {getRsvpLabel(guest.rsvp)}
                                         </span>
                                     </td>
                                     <td style={{ padding: '1rem' }}>{guest.meal}</td>
@@ -53,7 +61,7 @@ const GuestList = () => {
                                             onClick={() => removeGuest(guest.id)}
                                             style={{ color: '#d93025', background: 'none', cursor: 'pointer' }}
                                         >
-                                            Remove
+                                            {t('guestsManager.remove') || 'Kaldır'}
                                         </button>
                                     </td>
                                 </tr>
@@ -63,16 +71,16 @@ const GuestList = () => {
                 </div>
 
                 <div style={{ height: 'fit-content', background: 'white', padding: '1.5rem', borderRadius: 'var(--border-radius)', boxShadow: 'var(--shadow-sm)' }}>
-                    <h3 style={{ marginBottom: '1rem' }}>Add Guest</h3>
+                    <h3 style={{ marginBottom: '1rem' }}>{t('guestsManager.addGuest') || 'Davetli Ekle'}</h3>
                     <form onSubmit={handleAddGuest}>
                         <input
                             type="text"
-                            placeholder="Guest Name"
+                            placeholder={t('guestsManager.guestNamePlaceholder') || 'Davetli Adı Soyadı'}
                             value={newGuest}
                             onChange={(e) => setNewGuest(e.target.value)}
                             style={{ width: '100%', padding: '10px', marginBottom: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}
                         />
-                        <button className="btn btn-primary" style={{ width: '100%' }}>Add Guest</button>
+                        <button className="btn btn-primary" style={{ width: '100%' }}>{t('guestsManager.addGuest') || 'Davetli Ekle'}</button>
                     </form>
                 </div>
             </div>

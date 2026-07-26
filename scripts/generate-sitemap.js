@@ -59,21 +59,6 @@ async function generateSitemap() {
     const sitemaps = [];
 
     // 2. Generate Static Page Sitemap
-    const seoLandingPages = [
-        '/locations/berlin',
-        '/locations/hamburg',
-        '/locations/muenchen',
-        '/locations/koeln',
-        '/locations/frankfurt',
-        '/locations/stuttgart',
-        '/locations/duesseldorf',
-        '/locations/deutschland/dugun-salonlari',
-        '/locations/deutschland/dugun-fotografcilari',
-        '/locations/deutschland/djs',
-        '/locations/deutschland/bridal-fashion',
-        '/locations/deutschland/wedding-planners'
-    ];
-
     const staticSitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${STATIC_PAGES.map(page => `  <url>
@@ -81,15 +66,54 @@ ${STATIC_PAGES.map(page => `  <url>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
   </url>`).join('\n')}
-${seoLandingPages.map(page => `  <url>
-    <loc>${SITE_URL}${page}</loc>
+</urlset>`;
+
+    fs.writeFileSync(path.join(publicDir, 'sitemap-static.xml'), staticSitemap);
+    sitemaps.push('sitemap-static.xml');
+
+    // 2.5 Generate SEO Location Landing Pages Sitemap
+    const majorCities = [
+        'berlin', 'hamburg', 'muenchen', 'koeln', 'frankfurt', 'stuttgart', 
+        'duesseldorf', 'dortmund', 'essen', 'bremen', 'hannover', 'leipzig', 
+        'dresden', 'nuerneberg', 'duisburg', 'bochum', 'wuppertal', 'bielefeld', 
+        'bonn', 'muenster', 'karlsruhe', 'mannheim', 'wiesbaden', 'augsburg', 
+        'aachen', 'kiel', 'mainz', 'ulm', 'wien', 'zuerich'
+    ];
+
+    const categorySlugs = [
+        'dugun-salonlari', 'dugun-fotografcilari', 'djs', 'bridal-fashion', 
+        'hair-makeup', 'groom-suits', 'wedding-cakes', 'wedding-planners', 
+        'wedding-cars', 'catering-party', 'flowers-decoration', 'wedding-rings', 
+        'wedding-videography', 'photobox', 'musicians', 'entertainment'
+    ];
+
+    const locationUrls = [];
+    
+    // Country-wide category URLs
+    categorySlugs.forEach(cat => {
+        locationUrls.push(`/locations/deutschland/${cat}`);
+    });
+
+    // City URLs and City x Category URLs
+    majorCities.forEach(city => {
+        locationUrls.push(`/locations/${city}`);
+        categorySlugs.forEach(cat => {
+            locationUrls.push(`/locations/${city}/${cat}`);
+        });
+    });
+
+    const locationsSitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${locationUrls.map(path => `  <url>
+    <loc>${SITE_URL}${path}</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>`).join('\n')}
 </urlset>`;
 
-    fs.writeFileSync(path.join(publicDir, 'sitemap-static.xml'), staticSitemap);
-    sitemaps.push('sitemap-static.xml');
+    fs.writeFileSync(path.join(publicDir, 'sitemap-locations.xml'), locationsSitemap);
+    sitemaps.push('sitemap-locations.xml');
+    console.log(`✅ Generated sitemap-locations.xml (${locationUrls.length} SEO landing URLs)`);
 
     // 3. Generate Vendor Sitemaps (Partitioned)
     const totalVendorSitemaps = Math.ceil(vendors.length / VENDORS_PER_SITEMAP);

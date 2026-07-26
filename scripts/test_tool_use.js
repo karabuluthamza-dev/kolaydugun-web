@@ -98,6 +98,38 @@ async function runToolUseTest() {
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 800 });
 
+        // Capture browser console logs (especially [GeminiProvider] errors)
+        page.on('console', async msg => {
+            const type = msg.type();
+            const text = msg.text();
+            if (type === 'error' || text.includes('GeminiProvider') || text.includes('AiChat') || text.includes('❌') || text.includes('⚠️')) {
+                try {
+                    const args = msg.args();
+                    const details = [];
+                    for (const arg of args) {
+                        const val = await arg.evaluate(el => {
+                            if (el instanceof Error) {
+                                return el.name + ': ' + el.message + '\n' + el.stack;
+                            }
+                            if (el && typeof el === 'object') {
+                                try {
+                                    return JSON.stringify(el);
+                                } catch (e) {
+                                    return String(el);
+                                }
+                            }
+                            return String(el);
+                        }).catch(() => arg.toString());
+                        details.push(val);
+                    }
+                    console.log(`  [Browser ${type.toUpperCase()}] ${details.join(' ').substring(0, 1000)}`);
+                } catch (e) {
+                    console.log(`  [Browser ${type.toUpperCase()}] ${text.substring(0, 200)}`);
+                }
+            }
+        });
+        page.on('pageerror', err => console.log(`  [Browser PAGE ERROR] ${err.message}`));
+
         // Load app and inject session
         console.log('\n🌐 Loading app homepage...');
         await page.goto('http://localhost:5173/', { waitUntil: 'networkidle2' });
@@ -134,18 +166,48 @@ async function runToolUseTest() {
         console.log('✅ Authenticated user view visible!');
 
         await page.waitForSelector('.ai-chat-input-wrapper textarea', { timeout: 5000 });
+        await new Promise(r => setTimeout(r, 500)); // Let React settle after drawer open
 
         // Send tool-use command
         const guestName = 'Ahmet Soylu';
         const commandMessage = `Lütfen davetli listeme '${guestName}' isimli bir konuk ekle.`;
         console.log(`\n💬 Sending command: "${commandMessage}"`);
-        await page.type('.ai-chat-input-wrapper textarea', commandMessage);
+
+        // React controlled textarea requires nativeInputValueSetter to trigger onChange
+        await page.evaluate((msg) => {
+            const textarea = document.querySelector('.ai-chat-input-wrapper textarea');
+            if (!textarea) throw new Error('Textarea not found');
+
+            // Use React's nativeInputValueSetter to properly trigger onChange
+            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+                window.HTMLTextAreaElement.prototype, 'value'
+            ).set;
+            nativeInputValueSetter.call(textarea, msg);
+
+            // Dispatch input event so React picks up the change
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            textarea.dispatchEvent(new Event('change', { bubbles: true }));
+        }, commandMessage);
+
+        await new Promise(r => setTimeout(r, 300)); // Let React state update
+
+        // Verify value was set
+        const textareaValue = await page.$eval('.ai-chat-input-wrapper textarea', el => el.value);
+        console.log(`   Textarea value: "${textareaValue.substring(0, 50)}..."`);
+
+        if (!textareaValue.trim()) {
+            throw new Error('Failed to set textarea value via React nativeInputValueSetter');
+        }
+
+        // Click send (button should now be enabled since inputText is set)
         await page.click('.btn-send-message');
+        console.log('   ✅ Send button clicked!');
 
         // Wait for typing indicator
-        console.log('⏳ Waiting for typing indicator...');
-        await page.waitForSelector('.ai-typing-bubble', { timeout: 10000 });
+        console.log('⏳ Waiting for typing indicator (up to 8s)...');
+        await page.waitForSelector('.ai-typing-bubble', { timeout: 8000 });
         console.log('✅ AI is processing (tool call in progress)...');
+
 
         // Wait for AI to finish (tool call + confirmation text)
         console.log('⏳ Waiting for AI response (up to 35s for tool call + text)...');

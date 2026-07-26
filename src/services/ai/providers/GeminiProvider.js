@@ -90,12 +90,20 @@ export class GeminiProvider extends AiAdapter {
 
         // Format history for Gemini API
         // Gemini expects history in roles: 'user' and 'model' (not 'assistant')
-        const formattedHistory = history
+        let formattedHistory = history
             .filter(msg => msg.role !== 'system') // systemInstruction is passed separately above
             .map(msg => ({
                 role: msg.role === 'assistant' ? 'model' : 'user',
                 parts: [{ text: msg.content }]
             }));
+
+        // Gemini requires the first message in the history to be from the 'user'
+        const firstUserIndex = formattedHistory.findIndex(msg => msg.role === 'user');
+        if (firstUserIndex > 0) {
+            formattedHistory = formattedHistory.slice(firstUserIndex);
+        } else if (firstUserIndex === -1) {
+            formattedHistory = [];
+        }
 
         try {
             const chat = model.startChat({

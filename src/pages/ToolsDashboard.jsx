@@ -66,6 +66,14 @@ const ToolsDashboard = () => {
                 />
                 <ToolCard
                     t={t}
+                    title={`👥 ${t('planningTools.guests.title') || 'Davetli Listesi'}`}
+                    desc={t('planningTools.guests.desc') || 'Davetlilerinizi listeleyin, LCV (RSVP) durumlarını ve yemek tercihlerini takip edin.'}
+                    icon="👥"
+                    link="/tools/guests"
+                    progress={0}
+                />
+                <ToolCard
+                    t={t}
                     title={`🪑 ${t('planningTools.seating.title') || 'Oturma Planı'}`}
                     desc={t('planningTools.seating.desc') || 'Misafirlerinizi masalara yerleştirin, oturma düzenini kolayca oluşturun.'}
                     icon="🪑"

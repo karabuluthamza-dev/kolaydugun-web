@@ -35,26 +35,45 @@ class AiGatewayService {
      * @returns {Promise<import('./AiAdapter').AiAdapter>}
      */
     async _resolveProvider(name) {
-        if (this._providers[name]) return this._providers[name];
-
-        let ProviderClass;
-        switch (name) {
-            case 'gemini': {
-                const mod = await import('./providers/GeminiProvider');
-                ProviderClass = mod.GeminiProvider;
-                break;
-            }
-            case 'openai': {
-                const mod = await import('./providers/OpenAiProvider');
-                ProviderClass = mod.OpenAiProvider;
-                break;
-            }
-            default:
-                throw new Error(`[AiGateway] Unknown provider: ${name}`);
+        // If VITE_USE_MOCK_AI is set, force the Mock AI Provider
+        if (import.meta.env.VITE_USE_MOCK_AI === 'true' || import.meta.env.VITE_USE_MOCK_AI === true) {
+            console.log("🤖 [AiGateway] Using Mock AI Provider for local testing/development");
+            const mod = await import('./providers/MockAiProvider');
+            return new mod.MockAiProvider();
         }
 
-        this._providers[name] = new ProviderClass();
-        return this._providers[name];
+        if (this._providers[name]) return this._providers[name];
+
+        try {
+            let ProviderClass;
+            switch (name) {
+                case 'gemini': {
+                    const mod = await import('./providers/GeminiProvider');
+                    ProviderClass = mod.GeminiProvider;
+                    break;
+                }
+                case 'openai': {
+                    const mod = await import('./providers/OpenAiProvider');
+                    ProviderClass = mod.OpenAiProvider;
+                    break;
+                }
+                default:
+                    throw new Error(`[AiGateway] Unknown provider: ${name}`);
+            }
+
+            const providerInstance = new ProviderClass();
+            if (name === 'gemini' && !providerInstance.apiKey) {
+                console.warn("⚠️ [AiGateway] Gemini API Key is missing. Falling back to Mock AI Provider.");
+                const mod = await import('./providers/MockAiProvider');
+                return new mod.MockAiProvider();
+            }
+            this._providers[name] = providerInstance;
+            return this._providers[name];
+        } catch (err) {
+            console.warn(`⚠️ [AiGateway] Provider '${name}' initialization failed (${err.message}). Falling back to Mock AI Provider.`);
+            const mod = await import('./providers/MockAiProvider');
+            return new mod.MockAiProvider();
+        }
     }
 
     // ─── Config Lazy Loading with TTL Cache ───────────────────────
@@ -126,7 +145,7 @@ class AiGatewayService {
      */
     async getFeatureFlag(flagName) {
         await this._ensureConfigLoaded();
-        if (flagName === 'tool_use') return true; // Force enable for Phase 2 implementation & tests
+        if (flagName === 'tool_use' || flagName === 'global_drawer') return true; // Force enable global drawer & tool use
         return this.features[flagName] ?? false;
     }
 

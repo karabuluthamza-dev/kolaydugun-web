@@ -13,6 +13,7 @@ import SmartAppBanner from './components/SmartAppBanner';
 import GlobalSchema from './components/GlobalSchema';
 import { trackError } from './utils/analytics';
 import { AiChatDrawer } from './components/AiChatDrawer';
+import { AiChatErrorBoundary } from './components/AiChatErrorBoundary';
 // AOS - Animate on Scroll
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -50,6 +51,7 @@ const Weather = lazy(() => import('./pages/Weather'));
 const LeadForm = lazy(() => import('./pages/LeadForm'));
 const WeddingWebsiteSetup = lazy(() => import('./pages/WeddingWebsiteSetup'));
 const SeatingChart = lazy(() => import('./pages/SeatingChart'));
+const GuestList = lazy(() => import('./pages/GuestList'));
 const PrintableSeatingChart = lazy(() => import('./components/seating/PrintableSeatingChart'));
 const PublicWedding = lazy(() => import('./pages/PublicWedding'));
 const DynamicPage = lazy(() => import('./pages/DynamicPage'));
@@ -277,6 +279,7 @@ function App() {
                 <Route path="website" element={<WeddingWebsiteSetup />} />
                 <Route path="timeline" element={<Timeline />} />
                 <Route path="budget" element={<BudgetPlanner />} />
+                <Route path="guests" element={<GuestList />} />
                 <Route path="seating" element={<SeatingChart />} />
                 <Route path="weather" element={<Weather />} />
               </Route>
@@ -352,8 +355,10 @@ function App() {
           </Suspense>
         </main>
         <Footer />
-        <AiChatDrawer />
       </div>
+      <AiChatErrorBoundary>
+        <AiChatDrawer />
+      </AiChatErrorBoundary>
     </>
   );
 }

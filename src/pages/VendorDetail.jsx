@@ -447,12 +447,15 @@ const VendorDetail = () => {
             "@context": "https://schema.org",
             "@type": getSchemaType(vendor.category),
             "name": vendor.name,
-            "image": Array.isArray(vendor.images) && vendor.images.length > 0 ? vendor.images : [vendor.image],
-            "description": vendor.description,
+            "image": Array.isArray(vendor.images) && vendor.images.length > 0 ? vendor.images : [vendor.image || categoryDefault],
+            "description": vendor.description || `${vendor.name} - ${vendor.city} ${vendor.category}`,
+            "telephone": vendor.phone || vendor.social_media?.phone || undefined,
             "address": {
                 "@type": "PostalAddress",
                 "addressLocality": vendor.city,
-                "addressCountry": "DE"
+                "addressRegion": vendor.state || undefined,
+                "postalCode": vendor.zip_code || undefined,
+                "addressCountry": vendor.country || "DE"
             },
             "geo": (vendor.latitude && vendor.longitude) ? {
                 "@type": "GeoCoordinates",
@@ -462,8 +465,10 @@ const VendorDetail = () => {
             "priceRange": vendor.price_range || "€€",
             "aggregateRating": {
                 "@type": "AggregateRating",
-                "ratingValue": vendor.rating || 5,
-                "reviewCount": vendor.reviews || 1
+                "ratingValue": Number(vendor.rating) > 0 ? Number(vendor.rating) : 5,
+                "bestRating": "5",
+                "worstRating": "1",
+                "reviewCount": Number(vendor.reviews) > 0 ? Number(vendor.reviews) : 1
             },
             "url": `https://kolaydugun.de/vendors/${vendor.slug || id}`
         },
