@@ -1,36 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
-import './FloatingCTA.css';
+import React from 'react';
 
-const FloatingCTA = ({ settings }) => {
-    const { t } = useLanguage();
-    const navigate = useNavigate();
-    const [isVisible, setIsVisible] = useState(false);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            // Show button after scrolling 500px
-            setIsVisible(window.scrollY > 500);
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
-    // Don't show if disabled in settings
-    if (!settings?.show_floating) return null;
-
-    return (
-        <button
-            className={`floating-cta ${isVisible ? 'visible' : ''}`}
-            onClick={() => navigate('/contact')}
-            aria-label={t('hero.getFreeQuote') || 'Get Free Quote'}
-        >
-            <span className="floating-cta-icon">💌</span>
-            <span className="floating-cta-text">{t('hero.getFreeQuote') || 'Ücretsiz Teklif'}</span>
-        </button>
-    );
+// FloatingCTA is disabled in favor of the single unified WhatsApp & AI Assistant floating widget on the bottom-right.
+const FloatingCTA = () => {
+    return null;
 };
 
 export default FloatingCTA;
