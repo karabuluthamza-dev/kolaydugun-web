@@ -155,20 +155,27 @@ const Hero = ({ title, subtitle, backgroundImage, onlineConfig, trustBadges, her
                 <div className="hero-counter-wrapper">
                     <FakeOnlineCounter config={onlineConfig} />
                 </div>
-                {/* Value Proposition High-Converting Banner */}
-                <div className="hero-value-prop-card">
-                    <div className="value-prop-badge">
-                        <span className="badge-icon">⚡</span>
-                        <span>{language === 'tr' ? '1 DAKİKADA FİYAT TEKLİFİ' : language === 'de' ? 'ANGEBOT IN 1 MINUTE' : 'QUOTES IN 1 MINUTE'}</span>
-                    </div>
-                    <p className="value-prop-highlight">
-                        <strong>{language === 'tr' ? "Almanya'da Düğün Planlamak Artık Çok Kolay!" : language === 'de' ? 'Hochzeit in Deutschland einfach planen!' : 'Planning a wedding in Germany made simple!'}</strong>{' '}
+                {/* Interactive WhatsApp Direct Banner */}
+                <div 
+                    className="hero-whatsapp-direct-banner"
+                    onClick={() => window.dispatchEvent(new CustomEvent('open-whatsapp-drawer'))}
+                    role="button"
+                    tabIndex={0}
+                    title="WhatsApp Fiyat Teklifi Formunu Aç"
+                >
+                    <span className="wa-banner-badge">
+                        <span className="wa-icon">💬</span>
+                        <span>{language === 'tr' ? "WhatsApp'tan Teklif Al" : language === 'de' ? 'Anfrage via WhatsApp' : 'WhatsApp Inquiry'}</span>
+                    </span>
+                    <span className="wa-banner-text">
+                        <strong>{language === 'tr' ? "Almanya'da Düğün Planlamak Çok Kolay!" : language === 'de' ? 'Hochzeit in Deutschland einfach planen!' : 'Wedding planning made simple!'}</strong>{' '}
                         {language === 'tr' 
                             ? '1 Dakikada Formu Doldurun, Şehrinizdeki En İyi 5 Salon ve Tedarikçiden Anında Fiyat Teklifi Alın.' 
                             : language === 'de' 
-                            ? 'Formular in 1 Minute ausfüllen & sofort Angebote von den besten Locations & Dienstleistern in Ihrer Stadt erhalten.' 
-                            : 'Fill out the form in 1 minute & get instant quotes from the top venues & vendors in your city.'}
-                    </p>
+                            ? 'In 1 Minute Formular ausfüllen & sofort Angebote von den besten Locations erhalten.' 
+                            : 'Fill form in 1 min & get quotes from top venues.'}
+                    </span>
+                    <span className="wa-banner-arrow">→</span>
                 </div>
 
                 <h1 className="hero-title">

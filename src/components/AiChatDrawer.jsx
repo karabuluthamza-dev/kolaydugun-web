@@ -62,6 +62,16 @@ export const AiChatDrawer = () => {
     const lastScrollY = useRef(0);
     const [isTeaserExpanded, setIsTeaserExpanded] = useState(true);
 
+    // Listen for global open-whatsapp-drawer event
+    useEffect(() => {
+        const handleOpenDrawer = () => {
+            setIsOpen(true);
+            setActiveTab('form');
+        };
+        window.addEventListener('open-whatsapp-drawer', handleOpenDrawer);
+        return () => window.removeEventListener('open-whatsapp-drawer', handleOpenDrawer);
+    }, []);
+
     // Smart Scroll awareness for floating teaser badge
     useEffect(() => {
         const handleScroll = () => {
